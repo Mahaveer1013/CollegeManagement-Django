@@ -13,7 +13,7 @@ from .models import *
 
 def staff_home(request):
     staff = get_object_or_404(Staff, admin=request.user)
-    total_students = Student.objects.filter(course=staff.course).count()
+    total_students = Student.objects.filter(department=staff.department).count()
     total_leave = LeaveReportStaff.objects.filter(staff=staff).count()
     subjects = Subject.objects.filter(staff=staff)
     total_subject = subjects.count()
@@ -26,7 +26,7 @@ def staff_home(request):
         subject_list.append(subject.name)
         attendance_list.append(attendance_count)
     context = {
-        'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.course) + ')',
+        'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.department) + ')',
         'total_students': total_students,
         'total_attendance': total_attendance,
         'total_leave': total_leave,
@@ -50,6 +50,12 @@ def staff_take_attendance(request):
     return render(request, 'staff_template/staff_take_attendance.html', context)
 
 
+def add_assignment(request):
+    pass
+
+def view_assignment(request):
+    pass
+
 @csrf_exempt
 def get_students(request):
     subject_id = request.POST.get('subject')
@@ -58,7 +64,7 @@ def get_students(request):
         subject = get_object_or_404(Subject, id=subject_id)
         session = get_object_or_404(Session, id=session_id)
         students = Student.objects.filter(
-            course_id=subject.course.id, session=session)
+            department_id=subject.department.id, session=session)
         student_data = []
         for student in students:
             data = {
@@ -166,6 +172,17 @@ def staff_apply_leave(request):
         else:
             messages.error(request, "Form has errors!")
     return render(request, "staff_template/staff_apply_leave.html", context)
+
+
+def upload_assignment_questions(request):
+    form = AssignmentQuestionsForm(request.POST, request.FILES)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('success')
+    else:
+        form = AssignmentQuestionsForm()
+    return render(request, 'upload_assignment.html', {'form': form})
 
 
 def staff_feedback(request):

@@ -29,8 +29,8 @@ SECRET_KEY = 'f2zx8*lb*em*-*b+!&1lpp&$_9q9kmkar+l3x90do@s(+sr&x7'  # Consider us
 DEBUG = True
 
 # ALLOWED_HOSTS = ['smswithdjango.herokuapp.com']
-ALLOWED_HOSTS = ['127.0.0.1']  # Not recommended but useful in dev mode
-
+# ALLOWED_HOSTS = ['127.0.0.1','localhost','192.168.137.184']  # Not recommended but useful in dev mode
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -44,21 +44,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # My Apps
-    'main_app.apps.MainAppConfig'
+    # 'main_app.apps.MainAppConfig',
+    'main_app'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     # Third Part Middleware
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    
     # My Middleware
     'main_app.middleware.LoginCheckMiddleWare',
 ]

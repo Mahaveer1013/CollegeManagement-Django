@@ -1,5 +1,6 @@
 from django import forms
 from django.forms.widgets import DateInput, TextInput
+from django.forms import ModelChoiceField
 
 from .models import *
 
@@ -46,13 +47,15 @@ class CustomUserForm(FormSettings):
                 id=self.instance.pk).admin.email.lower()
             if dbEmail != formEmail:  # There has been changes
                 if CustomUser.objects.filter(email=formEmail).exists():
-                    raise forms.ValidationError("The given email is already registered")
+                    raise forms.ValidationError(
+                        "The given email is already registered")
 
         return formEmail
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
+        fields = ['first_name', 'last_name', 'email',
+                  'gender',  'password', 'profile_pic', 'address']
 
 
 class StudentForm(CustomUserForm):
@@ -62,7 +65,7 @@ class StudentForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'session']
+            ['department','register_number', 'roll_number']
 
 
 class AdminForm(CustomUserForm):
@@ -74,6 +77,136 @@ class AdminForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields
 
 
+
+class TimeTableForm(forms.ModelForm):
+    class Meta:
+        model = TimeTable
+        fields = [
+            'department', 'Class',
+            'monday_1', 'monday_2', 'monday_3', 'monday_4', 'monday_5', 'monday_6', 'monday_7', 'monday_8',
+            'tuesday_1', 'tuesday_2', 'tuesday_3', 'tuesday_4', 'tuesday_5', 'tuesday_6', 'tuesday_7', 'tuesday_8',
+            'wednesday_1', 'wednesday_2', 'wednesday_3', 'wednesday_4', 'wednesday_5', 'wednesday_6', 'wednesday_7', 'wednesday_8',
+            'thursday_1', 'thursday_2', 'thursday_3', 'thursday_4', 'thursday_5', 'thursday_6', 'thursday_7', 'thursday_8',
+            'friday_1', 'friday_2', 'friday_3', 'friday_4', 'friday_5', 'friday_6', 'friday_7', 'friday_8',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(TimeTableForm, self).__init__(*args, **kwargs)
+        self.fields['department'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Class'].widget.attrs.update({'class': 'form-control'})
+
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+        periods = range(1, 9)
+
+        for day in days:
+            for period in periods:
+                field_name = f'{day}_{period}'
+                self.fields[field_name].widget.attrs.update({'class': 'form-control'})
+
+
+# class TimeTableForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super(TimeTableForm, self).__init__(*args, **kwargs)
+#     class Meta:
+#         model = TimeTable
+#         fields = ['department', 'Class', 'day', 'period', 'staff']
+#         widgets = {
+#             'department': forms.Select(attrs={'class': 'form-control'}),
+#             'Class': forms.Select(attrs={'class': 'form-control'}),
+#             'day': forms.Select(attrs={'class': 'form-control'}),
+#             'period': forms.Select(attrs={'class': 'form-control'}),
+#             'staff': forms.Select(attrs={'class': 'form-control'}),
+#         }
+
+# class TimeTableForm(FormSettings):
+#     monday_1 = forms.ChoiceField(required=False)
+#     monday_2 = forms.ChoiceField(required=False)
+#     monday_3 = forms.ChoiceField(required=False)
+#     monday_4 = forms.ChoiceField(required=False)
+#     monday_5 = forms.ChoiceField(required=False)
+#     monday_6 = forms.ChoiceField(required=False)
+#     monday_7 = forms.ChoiceField(required=False)
+#     monday_8 = forms.ChoiceField(required=False)
+
+#     tuesday_1 = forms.ChoiceField(required=False)
+#     tuesday_2 = forms.ChoiceField(required=False)
+#     tuesday_3 = forms.ChoiceField(required=False)
+#     tuesday_4 = forms.ChoiceField(required=False)
+#     tuesday_5 = forms.ChoiceField(required=False)
+#     tuesday_6 = forms.ChoiceField(required=False)
+#     tuesday_7 = forms.ChoiceField(required=False)
+#     tuesday_8 = forms.ChoiceField(required=False)
+
+#     wednesday_1 = forms.ChoiceField(required=False)
+#     wednesday_2 = forms.ChoiceField(required=False)
+#     wednesday_3 = forms.ChoiceField(required=False)
+#     wednesday_4 = forms.ChoiceField(required=False)
+#     wednesday_5 = forms.ChoiceField(required=False)
+#     wednesday_6 = forms.ChoiceField(required=False)
+#     wednesday_7 = forms.ChoiceField(required=False)
+#     wednesday_8 = forms.ChoiceField(required=False)
+
+#     thursday_1 = forms.ChoiceField(required=False)
+#     thursday_2 = forms.ChoiceField(required=False)
+#     thursday_3 = forms.ChoiceField(required=False)
+#     thursday_4 = forms.ChoiceField(required=False)
+#     thursday_5 = forms.ChoiceField(required=False)
+#     thursday_6 = forms.ChoiceField(required=False)
+#     thursday_7 = forms.ChoiceField(required=False)
+#     thursday_8 = forms.ChoiceField(required=False)
+
+#     friday_1 = forms.ChoiceField(required=False)
+#     friday_2 = forms.ChoiceField(required=False)
+#     friday_3 = forms.ChoiceField(required=False)
+#     friday_4 = forms.ChoiceField(required=False)
+#     friday_5 = forms.ChoiceField(required=False)
+#     friday_6 = forms.ChoiceField(required=False)
+#     friday_7 = forms.ChoiceField(required=False)
+#     friday_8 = forms.ChoiceField(required=False)
+
+#     class Meta:
+#         model = TimeTable
+#         fields = ['department', 'Class']
+
+#     def __init__(self, *args, **kwargs):
+#         super(TimeTableForm, self).__init__(*args, **kwargs)
+#         subjects = Subject.objects.all()
+#         subject_choices = [(subject.id, subject.name) for subject in subjects]
+#         subject_choices.insert(0, ('', 'Select Subject'))  # Add an empty option for default
+
+#         # Setting choices for each period of each day
+#         for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']:
+#             for period in range(1, 9):
+#                 self.fields[f'{day}_{period}'].choices = subject_choices
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+#         timetable = {}
+
+#         for day in days:
+#             timetable[day] = []
+#             for period in range(1, 9):
+#                 period_data = cleaned_data.get(f'{day}_{period}')
+#                 if period_data:
+#                     timetable[day].append(int(period_data))
+#                 else:
+#                     timetable[day].append(None)
+#         cleaned_data['timetable'] = timetable
+#         return cleaned_data
+
+#     def save(self, commit=True):
+#         instance = super(TimeTableForm, self).save(commit=False)
+#         instance.monday = self.cleaned_data['timetable']['monday']
+#         instance.tuesday = self.cleaned_data['timetable']['tuesday']
+#         instance.wednesday = self.cleaned_data['timetable']['wednesday']
+#         instance.thursday = self.cleaned_data['timetable']['thursday']
+#         instance.friday = self.cleaned_data['timetable']['friday']
+
+#         if commit:
+#             instance.save()
+#         return instance
+
 class StaffForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(StaffForm, self).__init__(*args, **kwargs)
@@ -81,16 +214,32 @@ class StaffForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Staff
         fields = CustomUserForm.Meta.fields + \
-            ['course' ]
+            ['department']
 
 
-class CourseForm(FormSettings):
+class DepartmentForm(FormSettings):
     def __init__(self, *args, **kwargs):
-        super(CourseForm, self).__init__(*args, **kwargs)
+        super(DepartmentForm, self).__init__(*args, **kwargs)
 
     class Meta:
+        model = Department
         fields = ['name']
-        model = Course
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class ClassForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ClassForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Class
+        fields = ['department', 'year', 'section']
+        widgets = {
+            'department': forms.Select(attrs={'class': 'form-control'}),
+            'year': forms.Select(attrs={'class': 'form-control'}),
+            'section': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Section'}),
+        }
 
 
 class SubjectForm(FormSettings):
@@ -100,19 +249,58 @@ class SubjectForm(FormSettings):
 
     class Meta:
         model = Subject
-        fields = ['name', 'staff', 'course']
+        fields = ['subject_code','name', 'staff', 'department']
 
 
-class SessionForm(FormSettings):
+# class SessionForm(FormSettings):
+#     def __init__(self, *args, **kwargs):
+#         super(SessionForm, self).__init__(*args, **kwargs)
+
+#     class Meta:
+#         model = Session
+#         fields = '__all__'
+#         widgets = {
+#             'start_year': DateInput(attrs={'type': 'date'}),
+#             'end_year': DateInput(attrs={'type': 'date'}),
+#         }
+
+
+class AttendanceForm(FormSettings):
     def __init__(self, *args, **kwargs):
-        super(SessionForm, self).__init__(*args, **kwargs)
+        super(AttendanceForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Session
+        model = Attendance
         fields = '__all__'
         widgets = {
             'start_year': DateInput(attrs={'type': 'date'}),
             'end_year': DateInput(attrs={'type': 'date'}),
+        }
+
+
+class AssignmentQuestionsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AssignmentQuestionsForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AssignmentQuestions
+        fields = ['Class','deadline_data', 'pdf']
+        widgets = {
+            'Class': forms.Select(attrs={'class': 'form-control'}),
+            'deadline_data': forms.DateInput(attrs={'type': 'date'}),
+            'pdf': forms.FileInput(attrs={'type': 'file'})
+        }
+
+
+class AssignmentAnswersForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AssignmentAnswersForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AssignmentAnswers
+        fields = ['pdf']
+        widgets = {
+            'pdf': forms.FileInput(attrs={'type': 'file'})
         }
 
 
@@ -166,7 +354,7 @@ class StudentEditForm(CustomUserForm):
 
     class Meta(CustomUserForm.Meta):
         model = Student
-        fields = CustomUserForm.Meta.fields 
+        fields = CustomUserForm.Meta.fields
 
 
 class StaffEditForm(CustomUserForm):
@@ -178,14 +366,11 @@ class StaffEditForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields
 
 
-class EditResultForm(FormSettings):
-    session_list = Session.objects.all()
-    session_year = forms.ModelChoiceField(
-        label="Session Year", queryset=session_list, required=True)
+# class EditResultForm(FormSettings):
+#     def __init__(self, *args, **kwargs):
+#         super(StaffEditForm, self).__init__(*args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super(EditResultForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = StudentResult
-        fields = ['session_year', 'subject', 'student', 'test', 'exam']
+#     class Meta(CustomUserForm.Meta):
+#         model = Staff
+#         fields = CustomUserForm.Meta.fields
+    # this is worng

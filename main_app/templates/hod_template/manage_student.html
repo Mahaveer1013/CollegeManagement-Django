@@ -21,7 +21,7 @@
                                     <th>Full Name</th>
                                     <th>Email</th>
                                     <th>Gender</th>
-                                    <th>Course</th>
+                                    <th>Department</th>
                                     <th>Avatar</th>
                                     <th>Actions</th>
                                 </tr>
@@ -33,7 +33,7 @@
                                     <td>{{student.last_name}}, {{student.first_name}}</td>
                                     <td>{{student.email}}</td>
                                     <td>{{student.gender}}</td>
-                                    <td>{{student.student.course.name}}</td>
+                                    <td>{{student.student.department.name}}</td>
                                     <td>
                                         {% if student.profile_pic == ""  %}
                                         No Image
@@ -43,9 +43,8 @@
                                         {% endif %}
                                     </td>
                                     
-                                    <td><a href="{% url 'edit_student' student.student.id %}" class="btn btn-info">Edit</a> -
-                                        <a href="{% url 'delete_student' student.student.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
-
+                                    <td><a href="{% url 'edit_student' student.id %}" class="btn btn-info">Edit</a> -
+                                        <a href="{% url 'delete_student' student.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

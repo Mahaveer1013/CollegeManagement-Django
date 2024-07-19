@@ -1,7 +1,6 @@
 import json
 import math
 from datetime import datetime
-
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
@@ -16,7 +15,7 @@ from .models import *
 
 def student_home(request):
     student = get_object_or_404(Student, admin=request.user)
-    total_subject = Subject.objects.filter(course=student.course).count()
+    total_subject = Subject.objects.filter(department=student.department).count()
     total_attendance = AttendanceReport.objects.filter(student=student).count()
     total_present = AttendanceReport.objects.filter(student=student, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
@@ -27,7 +26,7 @@ def student_home(request):
     subject_name = []
     data_present = []
     data_absent = []
-    subjects = Subject.objects.filter(course=student.course)
+    subjects = Subject.objects.filter(department=student.department)
     for subject in subjects:
         attendance = Attendance.objects.filter(subject=subject)
         present_count = AttendanceReport.objects.filter(
@@ -56,9 +55,9 @@ def student_home(request):
 def student_view_attendance(request):
     student = get_object_or_404(Student, admin=request.user)
     if request.method != 'POST':
-        course = get_object_or_404(Course, id=student.course.id)
+        department = get_object_or_404(Department, id=student.department.id)
         context = {
-            'subjects': Subject.objects.filter(course=course),
+            'subjects': Subject.objects.filter(department=department),
             'page_title': 'View Attendance'
         }
         return render(request, 'student_template/student_view_attendance.html', context)

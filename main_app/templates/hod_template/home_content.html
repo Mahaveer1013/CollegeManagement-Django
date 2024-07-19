@@ -41,14 +41,14 @@
                 <!-- small box -->
                 <div class="small-box bg-purple">
                     <div class="inner">
-                        <h3>{{total_course}}</h3>
+                        <h3>{{total_department}}</h3>
 
-                        <p>Total Course</p>
+                        <p>Total Department</p>
                     </div>
                     <div class="icon">
                       <i class="nav-icon fas fa-th-list"></i>
                     </div>
-                    <a href="{% url 'manage_course' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{% url 'manage_department' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -148,7 +148,7 @@
             <!-- PIE CHART -->
             <div class="card card-dark">
               <div class="card-header">
-                <h3 class="card-title">Total Students in Each Course</h3>
+                <h3 class="card-title">Total Students in Each Department</h3>
 
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -344,15 +344,15 @@
       })
       
 
-      // Total Students in Each Course
+      // Total Students in Each Department
       //var donutChartCanvas = $('#pieChart2').get(0).getContext('2d')
-      var course_name_list = {{ course_name_list|safe }}
-      var student_count_list_in_course = {{ student_count_list_in_course }}
+      var department_name_list = {{ department_name_list|safe }}
+      var student_count_list_in_department = {{ student_count_list_in_department }}
       var pieData2 = {
-        labels: course_name_list,
+        labels: department_name_list,
         datasets: [
           {
-            data: student_count_list_in_course,
+            data: student_count_list_in_department,
             backgroundColor : ['#cc0404', '#00a65a', '#f39c12', '#00A4BD', '#045c8f', '#894e9c', '#9e4603', '#71bfb2'],
           }
         ]

@@ -20,7 +20,7 @@
                                     <th>#</th>
                                     <th>Subject</th>
                                     <th>Staff</th>
-                                    <th>Course</th>
+                                    <th>Department</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -30,7 +30,7 @@
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{subject.name}}</td>
                                     <td>{{subject.staff.admin}}</td>
-                                    <td>{{subject.course.name}}</td>
+                                    <td>{{subject.department.name}}</td>
                                     <td>
                                         <a href="{% url 'edit_subject' subject.id %}" class="btn btn-info">Edit</a> -
                                         <a href="{% url 'delete_subject' subject.id %}" onclick="return confirm('Are you sure you want to delete this ?')" class="btn btn-danger">Delete</a> 
