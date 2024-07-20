@@ -1,10 +1,13 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import UserManager
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_migrate
+from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.db.models.signals import post_migrate
 from django.contrib.auth import get_user_model
+
 
 def create_default_superuser(sender, **kwargs):
     User = get_user_model()
@@ -12,7 +15,9 @@ def create_default_superuser(sender, **kwargs):
         User.objects.create_superuser(email="admin@gmail.com", password="1013")
         print("Default superuser created with email: admin@gmail.com and password: 1013")
 
+
 post_migrate.connect(create_default_superuser)
+
 
 class CustomUserManager(UserManager):
     def _create_user(self, email, password, **extra_fields):
@@ -37,9 +42,8 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractUser):
-    USER_TYPE = (("1", "HOD"), ("2", "Staff"), ("3", "Student"))
+    USER_TYPE = ((1, "HOD"), (2, "Staff"), (3, "Student"))
     GENDER = [("M", "Male"), ("F", "Female")]
-    username = None  # Removed username, using email instead
     email = models.EmailField(unique=True)
     user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
     gender = models.CharField(max_length=1, choices=GENDER)
@@ -53,11 +57,22 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.first_name + self.last_name
 
 
 class Admin(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+    # def save(self, *args, **kwargs):
+    #     if not self.admin_id:
+    #         self.admin = CustomUser.objects.create(
+    #             email=self.admin.email,
+    #             password=make_password(self.admin.password),
+    #             user_type=1,
+    #             is_staff=True,
+    #             is_superuser=True
+    #         )
+    #     super().save(*args, **kwargs)
 
 
 class Department(models.Model):
@@ -69,7 +84,7 @@ class Department(models.Model):
         return self.name
 
 
-class ClassList(models.Model):
+class Class(models.Model):
     SEM_CHOICES = (
         ('1', '1st'),
         ('2', '2nd'),
@@ -81,37 +96,63 @@ class ClassList(models.Model):
         ('8', '8th'),
     )
 
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
+    department = models.ForeignKey(
+        Department, on_delete=models.DO_NOTHING, null=True, blank=False)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     section = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.department} - {self.get_semester_display()} sem - Section {self.section}"
+        return f"{self.department} - {self.get_sem_display()} sem - Section {self.section}"
 
 
 class Student(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    Class = models.ForeignKey(Class, on_delete=models.DO_NOTHING, null=True)
     register_number = models.CharField(max_length=100, unique=True)
     roll_number = models.CharField(max_length=100, unique=True)
-    dob = models.DateField(null=True, default=None)
+
+    # def save(self, *args, **kwargs):
+    #     if not self.admin_id:
+    #         self.admin = CustomUser.objects.create(
+    #             email=self.admin.email,
+    #             password=make_password(self.admin.password),
+    #             user_type=3,
+    #             is_staff=True,
+    #             is_superuser=True
+    #         )
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.admin.first_name} {self.admin.last_name}"
+        return self.admin.first_name + self.admin.last_name
 
 
 class Staff(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(
+        Department, on_delete=models.DO_NOTHING, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
+    # def save(self, *args, **kwargs):
+    #     if not self.admin_id:
+    #         self.admin = CustomUser.objects.create(
+    #             email=self.admin.email,
+    #             password=make_password(self.admin.password),
+    #             user_type=1,
+    #             is_staff=True,
+    #             is_superuser=True
+    #         )
+    #     super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.admin.first_name} {self.admin.last_name}"
+        return self.admin.first_name + self.admin.last_name
 
 
 class Subject(models.Model):
     name = models.CharField(max_length=120)
-    subject_code = models.CharField(max_length=10, unique=True)
+    subject_code = models.CharField(max_length=10, unique=True, default=None)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -119,48 +160,9 @@ class Subject(models.Model):
         return self.name
 
 
-class QpKeyword(models.Model):
-    BLOOM_CHOICES = (
-        ('1', 'Creating'),
-        ('2', 'Evaluate'),
-        ('3', 'Analyzing'),
-        ('4', 'Applying'),
-        ('5', 'Understanding'),
-        ('6', 'Remember'),
-    )
-    word = models.CharField(max_length=120)
-    bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
-
-
-class QuestionPaper(models.Model):
-    SEM_CHOICES = (
-        ('1', '1st'),
-        ('2', '2nd'),
-        ('3', '3rd'),
-        ('4', '4th'),
-        ('5', '5th'),
-        ('6', '6th'),
-        ('7', '7th'),
-        ('8', '8th'),
-    )
-    EXAM_TYPE = (
-        ('1', 'Internal Assesment 1'),
-        ('2', 'Internal Assesment 2'),
-        ('3', 'Semester Examination')
-    )
-    subject_code = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
-    added_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    semester = models.CharField(max_length=1, choices=SEM_CHOICES)
-    exam_date = models.DateField()
-    exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
 class TimeTable(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
+    Class = models.ForeignKey(Class, on_delete=models.CASCADE)
     monday_1 = models.ForeignKey(
         Subject, on_delete=models.DO_NOTHING, related_name='monday_1')
     monday_2 = models.ForeignKey(
@@ -245,14 +247,15 @@ class TimeTable(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.department} - {self.class_name} - {self.day} - {self.get_period_display()}"
+        return f"{self.department} - {self.Class} - {self.day} - {self.get_period_display()}"
 
 
 class Attendance(models.Model):
+    # session = models.ForeignKey(Session, on_delete=models.DO_NOTHING)
     subject = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
     date = models.DateField()
-    period = models.IntegerField(default=0)
+    period = models.IntegerField(default=None)
     status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -267,11 +270,11 @@ class AttendanceReport(models.Model):
 
 
 class AssignmentQuestions(models.Model):
-    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
+    uploaded_by = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
+    Class = models.ForeignKey(Class, on_delete=models.CASCADE)
     pdf = models.FileField(
-        upload_to='assignments/questions', null=True, blank=True)
-    deadline_date = models.DateTimeField()
+        upload_to='assignments/answers/', null=True, blank=True)
+    deadline_data = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -280,9 +283,10 @@ class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
         AssignmentQuestions, on_delete=models.DO_NOTHING)
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
-    pdf = models.FileField(upload_to='assignments/answers', null=True, blank=True)
+    pdf = models.FileField(upload_to='assignments/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class LeaveReportStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -360,3 +364,17 @@ def save_user_profile(sender, instance, **kwargs):
         instance.staff.save()
     if instance.user_type == 3:
         instance.student.save()
+
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        if instance.user_type == "1":
+            Admin.objects.create(admin=instance)
+        elif instance.user_type == "2":
+            if Student.objects.filter(admin=instance).exists():
+                raise ValidationError("This user is already a student.")
+            Staff.objects.create(admin=instance)
+        elif instance.user_type == "3":
+            if Staff.objects.filter(admin=instance).exists():
+                raise ValidationError("This user is already a staff member.")
+            Student.objects.create(admin=instance)

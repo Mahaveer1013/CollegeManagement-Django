@@ -51,7 +51,32 @@ def staff_take_attendance(request):
 
 
 def add_assignment(request):
-    pass
+    print('this is my data \n',get_object_or_404(Staff, admin=request.user))
+    if request.method == 'POST':
+        if student_form.is_valid():
+            deadline_date = student_form.cleaned_data.get('deadline_date')
+            class_name = student_form.cleaned_data.get('class_name')
+            pdf = request.FILES['pdf']
+            fs = FileSystemStorage()
+            filename = fs.save(pdf.name, pdf)
+            pdf_url = fs.url(filename)
+            try:
+                user = CustomUser()
+                user.uploaded_by=request.user
+                user.deadline_date=deadline_date
+                user.class_name=class_name
+                user.pdf=pdf_url
+                user.save()
+                messages.success(request, "Successfully Added")
+                return redirect(reverse('add_student'))
+            except Exception as e:
+                messages.error(request, "Could Not Add: " + str(e))
+        else:
+            messages.error(request, "Could Not Add: ")
+    student_form = AssignmentQuestionsForm(request.POST or None, request.FILES or None)
+    context = {'form': student_form, 'page_title': 'Add Student'}
+    return render(request, 'hod_template/add_student_template.html', context)
+
 
 def view_assignment(request):
     pass

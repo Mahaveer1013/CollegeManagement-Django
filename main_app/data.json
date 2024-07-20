@@ -1,0 +1,154 @@
+[
+  {
+      "model": "main_app.customuser",
+      "pk": 2,
+      "fields": {
+          "email": "student@gmail.com",
+          "user_type": "3",
+          "gender": "M",
+          "profile_pic": "path/to/profile_pic.jpg",
+          "address": "123 Admin Street",
+          "fcm_token": "default_token",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z",
+          "password": "pbkdf2_sha256$216000$rNF8ddjqvaMi$KrJ+6p368pKlwW38eqK3Z97ZlFmdFleZtdWjCwhyOWo="
+      }
+  },
+  {
+      "model": "main_app.customuser",
+      "pk": 3,
+      "fields": {
+          "email": "staff@gmail.com",
+          "user_type": "2",
+          "gender": "M",
+          "profile_pic": "path/to/profile_pic.jpg",
+          "address": "123 Admin Street",
+          "fcm_token": "default_token",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z",
+          "password": "pbkdf2_sha256$216000$rNF8ddjqvaMi$KrJ+6p368pKlwW38eqK3Z97ZlFmdFleZtdWjCwhyOWo="
+      }
+  },
+  {
+      "model": "main_app.department",
+      "pk": 1,
+      "fields": {
+          "name": "Computer Science",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.department",
+      "pk": 2,
+      "fields": {
+          "name": "Information Technology",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.department",
+      "pk": 3,
+      "fields": {
+          "name": "Artificial Intelligence",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.department",
+      "pk": 4,
+      "fields": {
+          "name": "Electronics",
+          "created_at": "2024-07-20T00:00:00Z",
+          "updated_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.classlist",
+      "pk": 1,
+      "fields": {
+          "department": 1,
+          "semester": "1",
+          "section": "A"
+      }
+  },
+  {
+      "model": "main_app.classlist",
+      "pk": 2,
+      "fields": {
+          "department": 1,
+          "semester": "1",
+          "section": "B"
+      }
+  },
+  {
+      "model": "main_app.classlist",
+      "pk": 3,
+      "fields": {
+          "department": 1,
+          "semester": "1",
+          "section": "C"
+      }
+  },
+  {
+      "model": "main_app.classlist",
+      "pk": 4,
+      "fields": {
+          "department": 1,
+          "semester": "1",
+          "section": "D"
+      }
+  },
+  {
+      "model": "main_app.student",
+      "pk": 1,
+      "fields": {
+          "admin": 2,
+          "department": 1,
+          "dob": "2024-07-20",
+          "class_name": 1,
+          "register_number": "REG123456",
+          "roll_number": "ROLL123456"
+      }
+  },
+  {
+      "model": "main_app.staff",
+      "pk": 1,
+      "fields": {
+          "admin": 3,
+          "department": 1
+      }
+  },
+  {
+      "model": "main_app.subject",
+      "pk": 1,
+      "fields": {
+          "name": "Algorithms",
+          "subject_code": "CS101",
+          "updated_at": "2024-07-20T00:00:00Z",
+          "created_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.subject",
+      "pk": 2,
+      "fields": {
+          "name": "Data Structures",
+          "subject_code": "CS102",
+          "updated_at": "2024-07-20T00:00:00Z",
+          "created_at": "2024-07-20T00:00:00Z"
+      }
+  },
+  {
+      "model": "main_app.subject",
+      "pk": 3,
+      "fields": {
+          "name": "Java Programming",
+          "subject_code": "CS103",
+          "updated_at": "2024-07-20T00:00:00Z",
+          "created_at": "2024-07-20T00:00:00Z"
+      }
+  }
+]

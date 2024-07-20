@@ -13,6 +13,8 @@ from django.views.generic import UpdateView
 from .forms import *
 from .models import *
 
+# from .admin_forms import *
+
 
 def admin_home(request):
     total_staff = Staff.objects.all().count()
@@ -193,9 +195,6 @@ def add_student(request):
     context = {'form': student_form, 'page_title': 'Add Student'}
     if request.method == 'POST':
         if student_form.is_valid():
-            print('add stu check\n\n\n')
-            print(student_form.cleaned_data.get('register_number'))
-            print(student_form.cleaned_data.get('roll_number'))
             first_name = student_form.cleaned_data.get('first_name')
             last_name = student_form.cleaned_data.get('last_name')
             address = student_form.cleaned_data.get('address')
@@ -793,61 +792,47 @@ def send_staff_notification(request):
     except Exception as e:
         return HttpResponse("False")
 
+import csv
+from django.http import HttpResponse
+from django.shortcuts import render
 
+def download_student_template(request):
+    # Create the HTTP response object with CSV content type
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="student_template.csv"'
 
-# def add_session(request):
-#     form = SessionForm(request.POST or None)
-#     context = {'form': form, 'page_title': 'Add Session'}
-#     if request.method == 'POST':
-#         if form.is_valid():
-#             try:
-#                 form.save()
-#                 messages.success(request, "Session Created")
-#                 return redirect(reverse('add_session'))
-#             except Exception as e:
-#                 messages.error(request, 'Could Not Add ' + str(e))
-#         else:
-#             messages.error(request, 'Fill Form Properly ')
-#     return render(request, "hod_template/add_session_template.html", context)
+    # Create a CSV writer object
+    writer = csv.writer(response)
+    
+    # Write the header row
+    writer.writerow([
+        'email', 
+        'password', 
+        'gender', 
+        'address', 
+        'department', 
+        'class', 
+        'register_number', 
+        'roll_number'
+    ])
+    
+    return response
 
+def download_staff_template(request):
+    # Create the HTTP response object with CSV content type
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="staff_template.csv"'
 
-# def manage_session(request):
-#     sessions = Session.objects.all()
-#     context = {'sessions': sessions, 'page_title': 'Manage Sessions'}
-#     return render(request, "hod_template/manage_session.html", context)
-
-
-# def edit_session(request, session_id):
-#     instance = get_object_or_404(Session, id=session_id)
-#     form = SessionForm(request.POST or None, instance=instance)
-#     context = {'form': form, 'session_id': session_id,
-#                'page_title': 'Edit Session'}
-#     if request.method == 'POST':
-#         if form.is_valid():
-#             try:
-#                 form.save()
-#                 messages.success(request, "Session Updated")
-#                 return redirect(reverse('edit_session', args=[session_id]))
-#             except Exception as e:
-#                 messages.error(
-#                     request, "Session Could Not Be Updated " + str(e))
-#                 return render(request, "hod_template/edit_session_template.html", context)
-#         else:
-#             messages.error(request, "Invalid Form Submitted ")
-#             return render(request, "hod_template/edit_session_template.html", context)
-
-#     else:
-#         return render(request, "hod_template/edit_session_template.html", context)
-
-
-
-# def delete_session(request, session_id):
-#     session = get_object_or_404(Session, id=session_id)
-#     try:
-#         session.delete()
-#         messages.success(request, "Session deleted successfully!")
-#     except Exception:
-#         messages.error(
-#             request, "There are students assigned to this session. Please move them to another session.")
-#     return redirect(reverse('manage_session'))
-
+    # Create a CSV writer object
+    writer = csv.writer(response)
+    
+    # Write the header row
+    writer.writerow([
+        'email', 
+        'password', 
+        'gender', 
+        'address', 
+        'department'
+    ])
+    
+    return response

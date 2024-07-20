@@ -1,6 +1,9 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}
+{{page_title}}
+<a href="{% url 'download_student_template' %}">Download Student CSV Template</a>
+{% endblock page_title %}
 {% block content %}
 <section class="content">
     <div class="container-fluid">
@@ -17,7 +20,7 @@
                     <div class="icon">
                       <i class="nav-icon fas fa-user-graduate"></i>
                     </div>
-                    <a href="{% url 'manage_student' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/main_app/student/" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
 
                 </div>
             </div>
@@ -33,7 +36,7 @@
                     <div class="icon">
                       <i class="nav-icon fas fa-users"></i>
                     </div>
-                    <a href="{% url 'manage_staff' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/main_app/staff/" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -48,7 +51,7 @@
                     <div class="icon">
                       <i class="nav-icon fas fa-th-list"></i>
                     </div>
-                    <a href="{% url 'manage_department' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/main_app/department/" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -63,7 +66,7 @@
                     <div class="icon">
                       <i class="nav-icon fas fa-book"></i>
                     </div>
-                    <a href="{% url 'manage_subject' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/main_app/subject/" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->

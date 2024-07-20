@@ -25,7 +25,8 @@
                 <!-- general form elements -->
                 <div class="card card-dark">
                     <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
+                        <h3 class="card-title">{{page_title}}</h3>  
+                        <a href="{% url 'download_student_template' %}">Download Student CSV Template</a>
                     </div>
 
                     {% include "main_app/form_template.html" with messages=messages  form=form button_text="Add Student"%}

@@ -26,14 +26,17 @@
 
 {% block custom_js %}
   <script>
-      $(document).ready(function(){
-            var ifNotfied = false;
-          $("#id_password").on("change", function(){
-              if (!ifNotfied){
-                ifNotfied = true;
-                alert("After a successful profile update:\n\nYour session would be terminated\nYou would be required to login again")
-              }
-          })
-      })
+      document.addEventListener('DOMContentLoaded', function() {
+    var ifNotified = false;
+    var passwordField = document.getElementById('id_password');
+
+    passwordField.addEventListener('click', function() {
+        if (!ifNotified) {
+            ifNotified = true;
+            alert("After a successful profile update:\n\nYour session would be terminated\nYou would be required to login again");
+        }
+    });
+});
+
   </script>
 {% endblock custom_js %}

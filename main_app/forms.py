@@ -58,49 +58,51 @@ class CustomUserForm(FormSettings):
                   'gender',  'password', 'profile_pic', 'address']
 
 
-class StudentForm(CustomUserForm):
-    def __init__(self, *args, **kwargs):
-        super(StudentForm, self).__init__(*args, **kwargs)
+# class StudentForm(CustomUserForm):
+#     def __init__(self, *args, **kwargs):
+#         super(StudentForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
-        model = Student
-        fields = CustomUserForm.Meta.fields + \
-            ['department','register_number', 'roll_number']
+#     class Meta(CustomUserForm.Meta):
+#         model = Student
+#         fields = CustomUserForm.Meta.fields + \
+#             ['department','register_number', 'roll_number']
 
 
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(AdminForm, self).__init__(*args, **kwargs)
+        self.fields['password'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': False})
+        self.fields['password'].initial = ''  # Ensure no initial value
 
     class Meta(CustomUserForm.Meta):
         model = Admin
         fields = CustomUserForm.Meta.fields
 
 
-class TimeTableForm(forms.ModelForm):
-    class Meta:
-        model = TimeTable
-        fields = [
-            'department', 'Class',
-            'monday_1', 'monday_2', 'monday_3', 'monday_4', 'monday_5', 'monday_6', 'monday_7', 'monday_8',
-            'tuesday_1', 'tuesday_2', 'tuesday_3', 'tuesday_4', 'tuesday_5', 'tuesday_6', 'tuesday_7', 'tuesday_8',
-            'wednesday_1', 'wednesday_2', 'wednesday_3', 'wednesday_4', 'wednesday_5', 'wednesday_6', 'wednesday_7', 'wednesday_8',
-            'thursday_1', 'thursday_2', 'thursday_3', 'thursday_4', 'thursday_5', 'thursday_6', 'thursday_7', 'thursday_8',
-            'friday_1', 'friday_2', 'friday_3', 'friday_4', 'friday_5', 'friday_6', 'friday_7', 'friday_8',
-        ]
+# class TimeTableForm(forms.ModelForm):
+#     class Meta:
+#         model = TimeTable
+#         fields = [
+#             'department', 'class_name',
+#             'monday_1', 'monday_2', 'monday_3', 'monday_4', 'monday_5', 'monday_6', 'monday_7', 'monday_8',
+#             'tuesday_1', 'tuesday_2', 'tuesday_3', 'tuesday_4', 'tuesday_5', 'tuesday_6', 'tuesday_7', 'tuesday_8',
+#             'wednesday_1', 'wednesday_2', 'wednesday_3', 'wednesday_4', 'wednesday_5', 'wednesday_6', 'wednesday_7', 'wednesday_8',
+#             'thursday_1', 'thursday_2', 'thursday_3', 'thursday_4', 'thursday_5', 'thursday_6', 'thursday_7', 'thursday_8',
+#             'friday_1', 'friday_2', 'friday_3', 'friday_4', 'friday_5', 'friday_6', 'friday_7', 'friday_8',
+#         ]
 
-    def __init__(self, *args, **kwargs):
-        super(TimeTableForm, self).__init__(*args, **kwargs)
-        self.fields['department'].widget.attrs.update({'class': 'form-control'})
-        self.fields['Class'].widget.attrs.update({'class': 'form-control'})
+#     def __init__(self, *args, **kwargs):
+#         super(TimeTableForm, self).__init__(*args, **kwargs)
+#         self.fields['department'].widget.attrs.update({'class': 'form-control'})
+#         self.fields['class_name'].widget.attrs.update({'class': 'form-control'})
 
-        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-        periods = range(1, 9)
+#         days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+#         periods = range(1, 9)
 
-        for day in days:
-            for period in periods:
-                field_name = f'{day}_{period}'
-                self.fields[field_name].widget.attrs.update({'class': 'form-control'})
+#         for day in days:
+#             for period in periods:
+#                 field_name = f'{day}_{period}'
+#                 self.fields[field_name].widget.attrs.update({'class': 'form-control'})
 
 
 # class TimeTableForm(forms.ModelForm):
@@ -206,47 +208,47 @@ class TimeTableForm(forms.ModelForm):
 #             instance.save()
 #         return instance
 
-class StaffForm(CustomUserForm):
-    def __init__(self, *args, **kwargs):
-        super(StaffForm, self).__init__(*args, **kwargs)
+# class StaffForm(CustomUserForm):
+#     def __init__(self, *args, **kwargs):
+#         super(StaffForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
-        model = Staff
-        fields = CustomUserForm.Meta.fields + \
-            ['department']
+#     class Meta(CustomUserForm.Meta):
+#         model = Staff
+#         fields = CustomUserForm.Meta.fields + \
+#             ['department']
 
-class DepartmentForm(FormSettings):
-    def __init__(self, *args, **kwargs):
-        super(DepartmentForm, self).__init__(*args, **kwargs)
+# class DepartmentForm(FormSettings):
+#     def __init__(self, *args, **kwargs):
+#         super(DepartmentForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = Department
-        fields = ['name']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-        }
+#     class Meta:
+#         model = Department
+#         fields = ['name']
+#         widgets = {
+#             'name': forms.TextInput(attrs={'class': 'form-control'}),
+#         }
 
-class ClassForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ClassForm, self).__init__(*args, **kwargs)
+# class ClassListForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super(ClassListForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = Class
-        fields = ['department', 'semester', 'section']
-        widgets = {
-            'department': forms.Select(attrs={'class': 'form-control'}),
-            'semester': forms.Select(attrs={'class': 'form-control'}),
-            'section': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Section'}),
-        }
+#     class Meta:
+#         model = ClassList
+#         fields = ['department', 'semester', 'section']
+#         widgets = {
+#             'department': forms.Select(attrs={'class': 'form-control'}),
+#             'semester': forms.Select(attrs={'class': 'form-control'}),
+#             'section': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Section'}),
+#         }
 
-class SubjectForm(FormSettings):
+# class SubjectForm(FormSettings):
 
-    def __init__(self, *args, **kwargs):
-        super(SubjectForm, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         super(SubjectForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = Subject
-        fields = ['subject_code','name', 'staff', 'department']
+#     class Meta:
+#         model = Subject
+#         fields = ['subject_code','name', 'staff', 'department']
 
 
 # class SessionForm(FormSettings):
@@ -281,11 +283,11 @@ class AssignmentQuestionsForm(forms.ModelForm):
 
     class Meta:
         model = AssignmentQuestions
-        fields = ['Class','deadline_data', 'pdf']
+        fields = ['class_name','deadline_date', 'pdf']
         widgets = {
-            'Class': forms.Select(attrs={'class': 'form-control'}),
-            'deadline_data': forms.DateInput(attrs={'type': 'date'}),
-            'pdf': forms.FileInput(attrs={'type': 'file'})
+            'class_name': forms.Select(attrs={'class': 'form-control'}),
+            'deadline_date': forms.DateInput(attrs={'class': 'form-control'}),
+            'pdf': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 
@@ -297,7 +299,7 @@ class AssignmentAnswersForm(forms.ModelForm):
         model = AssignmentAnswers
         fields = ['pdf']
         widgets = {
-            'pdf': forms.FileInput(attrs={'type': 'file'})
+            'pdf': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 
@@ -345,20 +347,21 @@ class FeedbackStudentForm(FormSettings):
         fields = ['feedback']
 
 
-class StudentEditForm(CustomUserForm):
-    def __init__(self, *args, **kwargs):
-        super(StudentEditForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
-        model = Student
-        fields = CustomUserForm.Meta.fields
+# class StudentEditForm(CustomUserForm):
+#     def __init__(self, *args, **kwargs):
+#         super(StudentEditForm, self).__init__(*args, **kwargs)
+
+#     class Meta(CustomUserForm.Meta):
+#         model = Student
+#         fields = CustomUserForm.Meta.fields
 
 
-class StaffEditForm(CustomUserForm):
-    def __init__(self, *args, **kwargs):
-        super(StaffEditForm, self).__init__(*args, **kwargs)
+# class StaffEditForm(CustomUserForm):
+#     def __init__(self, *args, **kwargs):
+#         super(StaffEditForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
-        model = Staff
-        fields = CustomUserForm.Meta.fields
+#     class Meta(CustomUserForm.Meta):
+#         model = Staff
+#         fields = CustomUserForm.Meta.fields
 

@@ -1,26 +1,21 @@
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import UserManager
-from django.dispatch import receiver
-from django.db.models.signals import post_save, post_migrate
+from django.contrib.auth.models import BaseUserManager, AbstractUser
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save, post_migrate
+from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-def create_default_superuser(sender, **kwargs):
-    User = get_user_model()
-    if not User.objects.filter(email="admin@gmail.com").exists():
-        User.objects.create_superuser(email="admin@gmail.com", password="1013")
-        print("Default superuser created with email: admin@gmail.com and password: 1013")
+# Custom User Manager
 
-post_migrate.connect(create_default_superuser)
 
-class CustomUserManager(UserManager):
+class CustomUserManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         email = self.normalize_email(email)
-        user = CustomUser(email=email, **extra_fields)
-        user.password = make_password(password)
-        user.save(using=self._db)
-        return user
+        admin = self.model(email=email, **extra_fields)
+        admin.set_password(password)  # Use set_password to hash the password
+        admin.save(using=self._db)
+        return admin
 
     def create_user(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", False)
@@ -30,34 +25,36 @@ class CustomUserManager(UserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-
         assert extra_fields["is_staff"]
         assert extra_fields["is_superuser"]
         return self._create_user(email, password, **extra_fields)
 
+# Custom User Model
+
 
 class CustomUser(AbstractUser):
-    USER_TYPE = (("1", "HOD"), ("2", "Staff"), ("3", "Student"))
+    USER_TYPE = ((1, "HOD"), (2, "Staff"), (3, "Student"))
     GENDER = [("M", "Male"), ("F", "Female")]
-    username = None  # Removed username, using email instead
+
     email = models.EmailField(unique=True)
-    user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
+    user_type = models.IntegerField(choices=USER_TYPE, default=3)
     gender = models.CharField(max_length=1, choices=GENDER)
-    profile_pic = models.ImageField()
+    profile_pic = models.ImageField(
+        upload_to='profile_pics/', null=True, blank=True)
     address = models.TextField()
-    fcm_token = models.TextField(default="")  # For firebase notifications
+    fcm_token = models.TextField(default="")  # For Firebase notifications
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
     objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
-
-class Admin(models.Model):
-    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+# Department Model
 
 
 class Department(models.Model):
@@ -67,8 +64,7 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
-
-
+    
 class ClassList(models.Model):
     SEM_CHOICES = (
         ('1', '1st'),
@@ -87,75 +83,51 @@ class ClassList(models.Model):
 
     def __str__(self):
         return f"{self.department} - {self.get_semester_display()} sem - Section {self.section}"
+# class_name Model
+
+
+
+
+# Admin Model
+
+
+class Admin(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+# Student Model
 
 
 class Student(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
+    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE,default=None)
     register_number = models.CharField(max_length=100, unique=True)
     roll_number = models.CharField(max_length=100, unique=True)
-    dob = models.DateField(null=True, default=None)
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
 
 
+# Staff Model
 class Staff(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
+
+# Subject Model
 
 
 class Subject(models.Model):
     name = models.CharField(max_length=120)
     subject_code = models.CharField(max_length=10, unique=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
-
-
-class QpKeyword(models.Model):
-    BLOOM_CHOICES = (
-        ('1', 'Creating'),
-        ('2', 'Evaluate'),
-        ('3', 'Analyzing'),
-        ('4', 'Applying'),
-        ('5', 'Understanding'),
-        ('6', 'Remember'),
-    )
-    word = models.CharField(max_length=120)
-    bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
-
-
-class QuestionPaper(models.Model):
-    SEM_CHOICES = (
-        ('1', '1st'),
-        ('2', '2nd'),
-        ('3', '3rd'),
-        ('4', '4th'),
-        ('5', '5th'),
-        ('6', '6th'),
-        ('7', '7th'),
-        ('8', '8th'),
-    )
-    EXAM_TYPE = (
-        ('1', 'Internal Assesment 1'),
-        ('2', 'Internal Assesment 2'),
-        ('3', 'Semester Examination')
-    )
-    subject_code = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
-    added_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    semester = models.CharField(max_length=1, choices=SEM_CHOICES)
-    exam_date = models.DateField()
-    exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class TimeTable(models.Model):
@@ -247,6 +219,11 @@ class TimeTable(models.Model):
     def __str__(self):
         return f"{self.department} - {self.class_name} - {self.day} - {self.get_period_display()}"
 
+    def __str__(self):
+        return f"{self.department} - {self.class_name} - Timetable"
+
+# Attendance Model
+
 
 class Attendance(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
@@ -257,6 +234,8 @@ class Attendance(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# AttendanceReport Model
+
 
 class AttendanceReport(models.Model):
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
@@ -265,24 +244,31 @@ class AttendanceReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# AssignmentQuestions Model
+
 
 class AssignmentQuestions(models.Model):
-    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    uploaded_by = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
     class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
     pdf = models.FileField(
-        upload_to='assignments/questions', null=True, blank=True)
+        upload_to='assignments/answers/', null=True, blank=True)
     deadline_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# AssignmentAnswers Model
 
 
 class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
         AssignmentQuestions, on_delete=models.DO_NOTHING)
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
-    pdf = models.FileField(upload_to='assignments/answers', null=True, blank=True)
+    pdf = models.FileField(upload_to='assignments/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# LeaveReportStudent Model
+
 
 class LeaveReportStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -291,6 +277,8 @@ class LeaveReportStudent(models.Model):
     status = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# LeaveReportStaff Model
 
 
 class LeaveReportStaff(models.Model):
@@ -301,6 +289,8 @@ class LeaveReportStaff(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# FeedbackStudent Model
+
 
 class FeedbackStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -308,6 +298,8 @@ class FeedbackStudent(models.Model):
     reply = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# FeedbackStaff Model
 
 
 class FeedbackStaff(models.Model):
@@ -317,6 +309,8 @@ class FeedbackStaff(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# NotificationStaff Model
+
 
 class NotificationStaff(models.Model):
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
@@ -324,12 +318,16 @@ class NotificationStaff(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# NotificationStudent Model
+
 
 class NotificationStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# StudentResult Model
 
 
 class StudentResult(models.Model):
@@ -340,23 +338,30 @@ class StudentResult(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# Signal Handlers
+
+
+def create_default_superuser(sender, **kwargs):
+    User = get_user_model()
+    if not User.objects.filter(email="admin@gmail.com").exists():
+        User.objects.create_superuser(email="admin@gmail.com", password="1013")
+        print("Default superuser created with email: admin@gmail.com and password: 1013")
+
+
+post_migrate.connect(create_default_superuser)
+
 
 @receiver(post_save, sender=CustomUser)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
-        if instance.user_type == 1:
+        if instance.user_type == 1:  # HOD
             Admin.objects.create(admin=instance)
-        if instance.user_type == 2:
+        elif instance.user_type == 2:  # Staff
             Staff.objects.create(admin=instance)
-        if instance.user_type == 3:
+        elif instance.user_type == 3:  # Student
             Student.objects.create(admin=instance)
 
-
-@receiver(post_save, sender=CustomUser)
-def save_user_profile(sender, instance, **kwargs):
-    if instance.user_type == 1:
-        instance.admin.save()
     if instance.user_type == 2:
         instance.staff.save()
-    if instance.user_type == 3:
+    elif instance.user_type == 3:
         instance.student.save()
