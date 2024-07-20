@@ -40,7 +40,7 @@ def staff_home(request):
 def staff_take_attendance(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff_id=staff)
-    sessions = Session.objects.all()
+    # sessions = Session.objects.all()
     context = {
         'subjects': subjects,
         'sessions': sessions,

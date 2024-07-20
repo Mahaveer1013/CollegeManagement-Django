@@ -8,10 +8,11 @@ class UserModel(UserAdmin):
     ordering = ('email',)
 
 
-admin.site.register(CustomUser, UserModel)
+# admin.site.register(UserModel)
 admin.site.register(Staff)
 admin.site.register(Student)
 admin.site.register(Department)
 admin.site.register(Subject)
 admin.site.register(Class)
-
+admin.site.register(TimeTable)
+admin.site.register(CustomUser)

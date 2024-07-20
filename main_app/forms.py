@@ -77,7 +77,6 @@ class AdminForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields
 
 
-
 class TimeTableForm(forms.ModelForm):
     class Meta:
         model = TimeTable
@@ -216,7 +215,6 @@ class StaffForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields + \
             ['department']
 
-
 class DepartmentForm(FormSettings):
     def __init__(self, *args, **kwargs):
         super(DepartmentForm, self).__init__(*args, **kwargs)
@@ -234,13 +232,12 @@ class ClassForm(forms.ModelForm):
 
     class Meta:
         model = Class
-        fields = ['department', 'year', 'section']
+        fields = ['department', 'semester', 'section']
         widgets = {
             'department': forms.Select(attrs={'class': 'form-control'}),
-            'year': forms.Select(attrs={'class': 'form-control'}),
+            'semester': forms.Select(attrs={'class': 'form-control'}),
             'section': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Section'}),
         }
-
 
 class SubjectForm(FormSettings):
 
@@ -260,8 +257,8 @@ class SubjectForm(FormSettings):
 #         model = Session
 #         fields = '__all__'
 #         widgets = {
-#             'start_year': DateInput(attrs={'type': 'date'}),
-#             'end_year': DateInput(attrs={'type': 'date'}),
+#             'start_semester': DateInput(attrs={'type': 'date'}),
+#             'end_semester': DateInput(attrs={'type': 'date'}),
 #         }
 
 
@@ -273,8 +270,8 @@ class AttendanceForm(FormSettings):
         model = Attendance
         fields = '__all__'
         widgets = {
-            'start_year': DateInput(attrs={'type': 'date'}),
-            'end_year': DateInput(attrs={'type': 'date'}),
+            'start_semester': DateInput(attrs={'type': 'date'}),
+            'end_semester': DateInput(attrs={'type': 'date'}),
         }
 
 
@@ -365,12 +362,3 @@ class StaffEditForm(CustomUserForm):
         model = Staff
         fields = CustomUserForm.Meta.fields
 
-
-# class EditResultForm(FormSettings):
-#     def __init__(self, *args, **kwargs):
-#         super(StaffEditForm, self).__init__(*args, **kwargs)
-
-#     class Meta(CustomUserForm.Meta):
-#         model = Staff
-#         fields = CustomUserForm.Meta.fields
-    # this is worng
