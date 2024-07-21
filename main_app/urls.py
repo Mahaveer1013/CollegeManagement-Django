@@ -17,7 +17,7 @@ from django.urls import path
 
 # from main_app.EditResultView import EditResultView
 
-from . import hod_views, staff_views, student_views, views
+from . import hod_views, staff_views, student_views, views, admin_form_views
 
 urlpatterns = [
     path("", views.login_page, name='login_page'),
@@ -40,6 +40,7 @@ urlpatterns = [
     path("staff/view/leave/", hod_views.view_staff_leave, name="view_staff_leave",),
     path("attendance/view/", hod_views.admin_view_attendance, name="admin_view_attendance",),
     path("attendance/fetch/", hod_views.get_admin_attendance, name='get_admin_attendance'),
+    path('admin/get_classes_by_department/', hod_views.get_classes_by_department, name='get_classes_by_department'),
 #     path("student/add/", hod_views.add_student, name='add_student'),
 #     path("subject/add/", hod_views.add_subject, name='add_subject'),
 #     path("staff/manage/", hod_views.manage_staff, name='manage_staff'),
@@ -50,7 +51,8 @@ urlpatterns = [
 #     path("staff/delete/<int:staff_id>", hod_views.delete_staff, name='delete_staff'),
 #     path("department/delete/<int:department_id>", hod_views.delete_department, name='delete_department'),
 #     path("subject/delete/<int:subject_id>", hod_views.delete_subject, name='delete_subject'),
-
+    path('dep-to-class-autocomplete/', admin_form_views.DepToClass.as_view(), name='dep-to-class-autocomplete'),
+    path('class-to-sub-autocomplete/', admin_form_views.ClassToSub.as_view(), name='class-to-sub-autocomplete'),
 
 #     path("student/delete/<int:student_id>", hod_views.delete_student, name='delete_student'),
 #     path("student/edit/<int:student_id>", hod_views.edit_student, name='edit_student'),
@@ -96,5 +98,6 @@ urlpatterns = [
     path("student/fcmtoken/", student_views.student_fcmtoken, name='student_fcmtoken'),
     path("student/view/notification/", student_views.student_view_notification, name="student_view_notification"),
     path('student/view/result/', student_views.student_view_result, name='student_view_result'),
+    path('student/view/assignment/', student_views.student_view_assignment, name='student_view_assignment'),
 
 ]

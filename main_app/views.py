@@ -11,7 +11,6 @@ from .models import *
 
 # Create your views here.
 
-
 def login_page(request):
     if request.user.is_authenticated:
         if request.user.user_type == '1':
@@ -61,7 +60,6 @@ def doLogin(request, **kwargs):
         else:
             messages.error(request, "Invalid details")
             return redirect("/")
-
 
 
 def logout_user(request):

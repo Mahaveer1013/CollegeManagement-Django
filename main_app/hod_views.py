@@ -34,25 +34,21 @@ def admin_home(request):
     # Total Subjects and students in Each Department
     department_all = Department.objects.all()
     department_name_list = []
-    subject_count_list = []
+    # subject_count_list = []
     student_count_list_in_department = []
 
     for department in department_all:
-        subjects = Subject.objects.filter(department_id=department.id).count()
+        # subjects = Subject.objects.filter(department_id=department.id).count()
         students = Student.objects.filter(department_id=department.id).count()
         department_name_list.append(department.name)
-        subject_count_list.append(subjects)
+        # subject_count_list.append(subjects)
         student_count_list_in_department.append(students)
 
     subject_all = Subject.objects.all()
     subject_list = []
-    student_count_list_in_subject = []
+    student_count_list_in_subject = Subject.objects.count()
     for subject in subject_all:
-        department = Department.objects.get(id=subject.department.id)
-        student_count = Student.objects.filter(
-            department_id=department.id).count()
         subject_list.append(subject.name)
-        student_count_list_in_subject.append(student_count)
 
     # For Students
     student_attendance_present_list = []
@@ -90,6 +86,10 @@ def admin_home(request):
     }
     return render(request, 'hod_template/home_content.html', context)
 
+def get_classes_by_department(request):
+    department_id = request.GET.get('department_id')
+    classes = ClassList.objects.filter(department_id=department_id).values('id', 'semester', 'section')
+    return JsonResponse(list(classes), safe=False)
 
 def add_staff(request):
     form = StaffForm(request.POST or None, request.FILES or None)

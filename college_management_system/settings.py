@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'dal',
+    'dal_select2',
     # My Apps
     # 'main_app.apps.MainAppConfig',
     'main_app'
@@ -218,16 +219,16 @@ JAZZMIN_UI_TWEAKS = {
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": False,
-    "sidebar": "sidebar-light-info",
     # "sidebar": "sidebar-dark-info",
+    "sidebar": "sidebar-light-info",
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "flatly",
     # "theme": "cyborg",
+    "theme": "flatly",
     "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
@@ -238,3 +239,4 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success",
     }
 }
+

@@ -81,18 +81,29 @@ class ClassList(models.Model):
         ('8', '8th'),
     )
 
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     section = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.department} - {self.get_semester_display()} sem - Section {self.section}"
+        return f"{self.department} - {self.get_semester_display()} sem - {self.section} Section"
+
+
+class Subject(models.Model):
+    name = models.CharField(max_length=120)
+    # department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, default='fb ')
+    subject_code = models.CharField(max_length=10, unique=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Student(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
     register_number = models.CharField(max_length=100, unique=True)
     roll_number = models.CharField(max_length=100, unique=True)
     dob = models.DateField(null=True, default=None)
@@ -102,24 +113,132 @@ class Student(models.Model):
 
 
 class Staff(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
 
 
-class Subject(models.Model):
-    name = models.CharField(max_length=120)
-    subject_code = models.CharField(max_length=10, unique=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class Period(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
+    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.class_name} - {self.subject}"
 
 
-class QpKeyword(models.Model):
+class TimeTable(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
+    monday_1 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_1')
+    monday_2 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_2')
+    monday_3 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_3')
+    monday_4 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_4')
+    monday_5 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_5')
+    monday_6 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_6')
+    monday_7 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_7')
+    monday_8 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='monday_8')
+    tuesday_1 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_1')
+    tuesday_2 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_2')
+    tuesday_3 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_3')
+    tuesday_4 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_4')
+    tuesday_5 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_5')
+    tuesday_6 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_6')
+    tuesday_7 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_7')
+    tuesday_8 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='tuesday_8')
+    wednesday_1 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_1')
+    wednesday_2 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_2')
+    wednesday_3 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_3')
+    wednesday_4 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_4')
+    wednesday_5 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_5')
+    wednesday_6 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_6')
+    wednesday_7 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_7')
+    wednesday_8 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='wednesday_8')
+    thursday_1 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_1')
+    thursday_2 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_2')
+    thursday_3 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_3')
+    thursday_4 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_4')
+    thursday_5 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_5')
+    thursday_6 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_6')
+    thursday_7 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_7')
+    thursday_8 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='thursday_8')
+    friday_1 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_1')
+    friday_2 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_2')
+    friday_3 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_3')
+    friday_4 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_4')
+    friday_5 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_5')
+    friday_6 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_6')
+    friday_7 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_7')
+    friday_8 = models.ForeignKey(
+        Period, on_delete=models.CASCADE, related_name='friday_8')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.class_name} Timetable"
+
+
+class Attendance(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date = models.DateField()
+    period = models.IntegerField(default=0)
+    status = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class AttendanceReport(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    status = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class BloomKeyword(models.Model):
     BLOOM_CHOICES = (
         ('1', 'Creating'),
         ('2', 'Evaluate'),
@@ -148,133 +267,27 @@ class QuestionPaper(models.Model):
         ('2', 'Internal Assesment 2'),
         ('3', 'Semester Examination')
     )
-    subject_code = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     added_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     exam_date = models.DateField()
     exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-
-class TimeTable(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
-    monday_1 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_1')
-    monday_2 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_2')
-    monday_3 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_3')
-    monday_4 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_4')
-    monday_5 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_5')
-    monday_6 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_6')
-    monday_7 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_7')
-    monday_8 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='monday_8')
-    tuesday_1 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_1')
-    tuesday_2 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_2')
-    tuesday_3 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_3')
-    tuesday_4 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_4')
-    tuesday_5 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_5')
-    tuesday_6 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_6')
-    tuesday_7 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_7')
-    tuesday_8 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='tuesday_8')
-    wednesday_1 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_1')
-    wednesday_2 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_2')
-    wednesday_3 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_3')
-    wednesday_4 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_4')
-    wednesday_5 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_5')
-    wednesday_6 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_6')
-    wednesday_7 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_7')
-    wednesday_8 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='wednesday_8')
-    thursday_1 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_1')
-    thursday_2 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_2')
-    thursday_3 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_3')
-    thursday_4 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_4')
-    thursday_5 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_5')
-    thursday_6 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_6')
-    thursday_7 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_7')
-    thursday_8 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='thursday_8')
-    friday_1 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_1')
-    friday_2 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_2')
-    friday_3 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_3')
-    friday_4 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_4')
-    friday_5 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_5')
-    friday_6 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_6')
-    friday_7 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_7')
-    friday_8 = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, related_name='friday_8')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.department} - {self.class_name} - {self.day} - {self.get_period_display()}"
-
-
-class Attendance(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
-    student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
-    date = models.DateField()
-    period = models.IntegerField(default=0)
-    status = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class AttendanceReport(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
-    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
-    status = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class AssignmentQuestions(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
-    pdf = models.FileField(
-        upload_to='assignments/questions', null=True, blank=True)
+    pdf = models.FileField(upload_to='assignments/questions')
     deadline_date = models.DateTimeField()
+    subject = models.ForeignKey(Period, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    def __str__(self):
+        return f"{self.subject} - {self.uploaded_by}"
+    
 
 class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
@@ -283,6 +296,7 @@ class AssignmentAnswers(models.Model):
     pdf = models.FileField(upload_to='assignments/answers', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class LeaveReportStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)

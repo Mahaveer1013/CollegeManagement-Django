@@ -1,0 +1,41 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+       
+                <!-- /.card -->
+<div class="card card-dark">
+    <div class="card-header"><h3 class="card-title">{{page_title}}</h3>
+    </div>
+   <div class="table p-2">
+
+       <table class="table table-bordered">
+           <tr>
+               <th>ID</th>
+               <th>Subject</th>
+               <th>Deadline</th>
+               <th>Assignment</th>
+        </tr>
+        {% for assignment in assignments %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{ assignment.subject }}</td>
+            <td>{{ assignment.deadline_date }}</td>
+            <td>{{ assignment.pdf }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

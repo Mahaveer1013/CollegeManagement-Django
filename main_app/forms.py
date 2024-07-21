@@ -1,8 +1,57 @@
 from django import forms
 from django.forms.widgets import DateInput, TextInput
 from django.forms import ModelChoiceField
+from dal import autocomplete
 
 from .models import *
+
+class TimeTableForm(forms.ModelForm):
+    class Meta:
+        model = TimeTable
+        fields = '__all__'
+        widgets = {
+            'class_name': autocomplete.ModelSelect2(url='dep-to-class-autocomplete', forward=['department']),
+            'monday_1': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_2': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_3': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_4': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_5': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_6': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_7': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'monday_8': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_1': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_2': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_3': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_4': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_5': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_6': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_7': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'tuesday_8': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_1': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_2': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_3': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_4': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_5': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_6': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_7': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'wednesday_8': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_1': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_2': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_3': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_4': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_5': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_6': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_7': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'thursday_8': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_1': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_2': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_3': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_4': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_5': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_6': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_7': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+            'friday_8': autocomplete.ModelSelect2(url='class-to-sub-autocomplete', forward=['class_name']),
+        }
 
 
 class FormSettings(forms.ModelForm):
@@ -348,20 +397,27 @@ class FeedbackStudentForm(FormSettings):
 
 
 
-# class StudentEditForm(CustomUserForm):
-#     def __init__(self, *args, **kwargs):
-#         super(StudentEditForm, self).__init__(*args, **kwargs)
+class StudentEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(StudentEditForm, self).__init__(*args, **kwargs)
+        # Remove the email field from the form
+        if 'email' in self.fields:
+            del self.fields['email']
 
-#     class Meta(CustomUserForm.Meta):
-#         model = Student
-#         fields = CustomUserForm.Meta.fields
+    class Meta(CustomUserForm.Meta):
+        model = Student
+        fields = [field for field in CustomUserForm.Meta.fields if field != 'email']
 
 
-# class StaffEditForm(CustomUserForm):
-#     def __init__(self, *args, **kwargs):
-#         super(StaffEditForm, self).__init__(*args, **kwargs)
+class StaffEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(StaffEditForm, self).__init__(*args, **kwargs)
+        # Remove the email field from the form
+        if 'email' in self.fields:
+            del self.fields['email']
 
-#     class Meta(CustomUserForm.Meta):
-#         model = Staff
-#         fields = CustomUserForm.Meta.fields
+    class Meta(CustomUserForm.Meta):
+        model = Staff
+        fields = [field for field in CustomUserForm.Meta.fields if field != 'email']
+
 

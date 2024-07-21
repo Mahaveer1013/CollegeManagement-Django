@@ -15,7 +15,7 @@ from .models import *
 
 def student_home(request):
     student = get_object_or_404(Student, admin=request.user)
-    total_subject = Subject.objects.filter(department=student.department).count()
+    total_subject = Subject.objects.count()
     total_attendance = AttendanceReport.objects.filter(student=student).count()
     total_present = AttendanceReport.objects.filter(student=student, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
@@ -26,7 +26,7 @@ def student_home(request):
     subject_name = []
     data_present = []
     data_absent = []
-    subjects = Subject.objects.filter(department=student.department)
+    subjects = Subject.objects.all()
     for subject in subjects:
         attendance = Attendance.objects.filter(subject=subject)
         present_count = AttendanceReport.objects.filter(
@@ -172,6 +172,13 @@ def student_view_profile(request):
             messages.error(request, "Error Occured While Updating Profile " + str(e))
 
     return render(request, "student_template/student_view_profile.html", context)
+
+
+def student_view_assignment(request):
+    student = get_object_or_404(Student, admin=request.user)
+    my_assignments = AssignmentQuestions.objects.filter(class_name=student.class_name)
+    print(my_assignments)
+    return render(request, 'student_template/student_view_assignment.html', {'assignments': my_assignments, 'page_title': 'View Assignments'})
 
 
 @csrf_exempt
