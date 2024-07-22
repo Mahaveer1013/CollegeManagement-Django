@@ -36,8 +36,7 @@
                             <button type="button" id="fetch_students" class="btn btn-success">Fetch Students</button>
                         </form>
 
-                        <form id="attendance-form" method="post" action="{% url 'submit_attendance' %}"
-                            id="student_form" onsubmit="collectCheckboxes()">
+                        <form id="attendance-form" method="post" action="{% url 'submit_attendance' %}" onsubmit="collectCheckboxes()">
                             {% csrf_token %}
                             <div id="student_data" class="mt-4">
                                 <!-- Students will be populated here with checkboxes -->
@@ -57,21 +56,26 @@
 
 {% block custom_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function collectCheckboxes() {
-            const form = document.getElementById('student_form');
+    function collectCheckboxes() {
+        const form = document.getElementById('attendance-form');
+        if(form){
             const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked');
             const uncheckedInputs = form.querySelectorAll('input[type="checkbox"]:not(:checked)');
 
             const checkedValues = [];
             const uncheckedValues = [];
-
             checkedInputs.forEach(input => checkedValues.push(input.value));
             uncheckedInputs.forEach(input => uncheckedValues.push(input.value));
 
             document.getElementById('checked_students').value = checkedValues.join(',');
             document.getElementById('unchecked_students').value = uncheckedValues.join(',');
+            console.log(document.getElementById('checked_students').value,' checked');
+            console.log(document.getElementById('unchecked_students').value,' unchecked');
+        }else{
+            console.log('No form detected');
         }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('fetch_students').addEventListener('click', function () {
             var date = document.getElementById('date').value;
             var period = document.getElementById('period').value;
@@ -114,15 +118,15 @@
                                                 <input type="hidden" id="unchecked_students" name="unchecked_students" value="">`;
                             students.forEach(student => {
                                 studentDataHtml += `
-                                ${data.date}${data.period}
-                                <div class='col-lg-3'>
-                                    <div class='form-check custom-control custom-checkbox'>
-                                        <input type='checkbox' class='custom-control-input' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}'>
+                                <div class='col-lg-5'>
+                                    <div class='form-check custom-control custom-checkbox' style="display: flex;align-items: center;justify-content: start;">
+                                        <input type='checkbox' class='custom-control-input' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}' onchange='collectCheckboxes()'>
                                         <label for='checkbox${student.id}'  style="display:flex;text-wrap:nowrap;padding:10px" class='custom-control-label'>${student.name} - (${student.roll_number})</label>
                                     </div>
                                 </div>
                             `;
                             });
+                            
 
                             studentDataHtml += `
                         </div>
@@ -130,12 +134,13 @@
                             <button id='save_attendance' class='btn btn-success' type='submit'>Save Attendance</button>
                             </div>
                             `;
+                            // Add event listeners to checkboxes
+                            // addCheckboxEventListeners();
                         } else {
                             studentDataHtml += "<h3>No students found.</h3>";
                         }
 
                     } else if (data.message) {
-
                         studentDataHtml += "<h3>It's a Holiday<h3>";
                     }
                     document.getElementById('student_data').innerHTML = studentDataHtml;

@@ -3,7 +3,8 @@ import json
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponseRedirect, get_object_or_404,redirect, render)
+from django.shortcuts import (
+    HttpResponseRedirect, get_object_or_404, redirect, render)
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
@@ -14,7 +15,8 @@ from django.db.models import Q
 
 def staff_home(request):
     staff = get_object_or_404(Staff, admin=request.user)
-    total_students = Student.objects.filter(department=staff.department).count()
+    total_students = Student.objects.filter(
+        department=staff.department).count()
     total_leave = LeaveReportStaff.objects.filter(staff=staff).count()
     subjects = Subject.objects.filter(period__staff=staff).distinct()
     print(subjects, 'this is sthe stsaff\n\n\n')
@@ -34,7 +36,7 @@ def staff_home(request):
         'total_leave': total_leave,
         'total_subject': total_subject,
         'subject_list': subject_list,
-        'attendance_list': [1,2]
+        'attendance_list': [1, 2]
     }
     return render(request, 'staff_template/home_content.html', context)
 
@@ -49,6 +51,7 @@ def staff_take_attendance(request):
     }
 
     return render(request, 'staff_template/staff_take_attendance.html', context)
+
 
 @csrf_exempt  # Temporarily exempt from CSRF validation for debugging
 def fetch_students(request):
@@ -67,7 +70,7 @@ def fetch_students(request):
         try:
             selected_date = datetime.strptime(date, '%Y-%m-%d')
             weekday = selected_date.weekday()
-            print(weekday,'\n\n\n\n')
+            print(weekday, '\n\n\n\n')
         except ValueError:
             return JsonResponse({'error': 'Invalid date format.'}, status=400)
 
@@ -84,29 +87,29 @@ def fetch_students(request):
 
         # Build the period attribute based on the selected period
         # week_number = datetime.date(2024, 2, 26).isocalendar()[1]
-        if weekday!=5 and weekday!=6:
+        if weekday != 5 and weekday != 6:
             period_attr = f'{days_of_week.get(weekday, "unknown")}_{period}'
         else:
-            period_attr='Leave'
-        
+            period_attr = 'Leave'
 
         # Filter timetables for the selected date, period
         if period_attr != 'Leave':
-            timetables = TimeTable.objects.filter(**{f"{period_attr}__isnull": False})
+            timetables = TimeTable.objects.filter(
+                **{f"{period_attr}__isnull": False})
             class_ids = timetables.values_list('class_name_id', flat=True)
             # print('class_ids', class_ids)
             students = Student.objects.filter(class_name_id__in=class_ids)
-            if len(students)>0:
+            if len(students) > 0:
                 student_data = []
                 for student in students:
                     # print(student.admin.first_name)
                     student_data.append({
-                        'id':student.id,
-                        'name': student.admin.first_name+ ' '+ student.admin.last_name,
+                        'id': student.id,
+                        'name': student.admin.first_name + ' ' + student.admin.last_name,
                         'roll_number': student.roll_number
                     })
                 # print(student_data)
-                return JsonResponse({'students': student_data,'date':date, 'period':period})
+                return JsonResponse({'students': student_data, 'date': date, 'period': period})
             return JsonResponse({'error': 'No students Found'}, status=404)
         else:
             return JsonResponse({'message': 'Its a Holiday'})
@@ -117,35 +120,91 @@ def fetch_students(request):
 @csrf_exempt
 def submit_attendance(request):
     if request.method == 'POST':
-        date = request.POST.get('date')
+        date_str = request.POST.get('date')
         period = request.POST.get('period')
+        staff = get_object_or_404(Staff, admin=request.user)
         checked = request.POST.get('checked_students')
         unchecked = request.POST.get('unchecked_students')
-        student_ids = request.POST.getlist('student_data')
-        print('thlbcyudbsoduvbds\nm\n\n\n\n\n')
-        print(date,period)
-        print(checked)
-        print(unchecked)
+        print('from js checked n unchecked ',checked,unchecked)
 
+        if not date_str or not period:
+            return JsonResponse({'error': 'Date and period are required.'}, status=400)
+
+        try:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            period = int(period)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid date format or period.'}, status=400)
+
+        if not (1 <= period <= 8):
+            return JsonResponse({'error': 'Period must be between 1 and 8.'}, status=400)
+
+        day_of_week = date.strftime('%A').lower()
+
+        try:
+            periods = Period.objects.filter(staff=staff)
+            timetable = TimeTable.objects.filter(
+                department=staff.department,
+                class_name__in=[p.class_name for p in periods]
+            ).first()
+
+            period_field = f"{day_of_week}_{period}"
+            if hasattr(timetable,period_field):
+                period_instance=getattr(timetable,period_field)
+            else:
+                return JsonResponse({'error': f'Invalid period {period} for the given day.'}, status=400)
+
+            if period_instance.staff != staff:
+                return JsonResponse({'error': 'Staff member is not assigned to this period.'}, status=400)
+
+        except TimeTable.DoesNotExist:
+            return JsonResponse({'error': 'Timetable not found for the given staff member.'}, status=404)
+
+        # Get the subject for the period
+        subject = period_instance.subject
+
+        # Convert checked and unchecked from comma-separated strings to lists of integers
+        checked_ids = list(map(int, checked.split(','))) if checked else []
+        unchecked_ids = list(map(int, unchecked.split(','))) if unchecked else []
+        print('\n\n\n\n\nid',checked_ids,unchecked_ids)
         # Process the data to mark attendance
-        for student_id in student_ids:
-            student = Student.objects.get(id=student_id)
-            # You can adjust how you store attendance records based on your model
-            # For example, you might have an Attendance model to store this data
+        for student_id in checked_ids:
+            try:
+                student = Student.objects.get(id=student_id)
+            except Student.DoesNotExist:
+                continue  # Skip if the student does not exist
+
             attendance_record, created = Attendance.objects.get_or_create(
                 student=student,
                 date=date,
                 period=period,
-                defaults={'present': True}
+                defaults={'status': 1, 'subject': subject}
             )
             if not created:
-                attendance_record.present = True
+                attendance_record.status = 1
+                attendance_record.subject = subject
+                attendance_record.save()
+        
+        for student_id in unchecked_ids:
+            try:
+                student = Student.objects.get(id=student_id)
+            except Student.DoesNotExist:
+                continue  # Skip if the student does not exist
+
+            attendance_record, created = Attendance.objects.get_or_create(
+                student=student,
+                date=date,
+                period=period,
+                defaults={'status': 0, 'subject': subject}
+            )
+            if not created:
+                attendance_record.status = 0
+                attendance_record.subject = subject
                 attendance_record.save()
 
         return redirect('staff_take_attendance')  # Redirect to a success page or the same page
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
 
 def add_assignment(request):
     print('this is my data \n',get_object_or_404(Staff, admin=request.user))

@@ -7,16 +7,16 @@ from .admin_models import *
 from .forms import *
 from .admin_forms import *
 
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 
-class CustomPermission(Permission):
-    class Meta:
-        proxy = True
+# class CustomPermission(Permission):
+#     class Meta:
+#         proxy = True
 
-    def __str__(self):
-        return f"{self.name}"
+#     def __str__(self):
+#         return f"{self.name}"
 
-admin.site.register(CustomPermission)
+# admin.site.register(CustomPermission)
 
 
 @admin.register(TimeTable)

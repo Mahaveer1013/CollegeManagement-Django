@@ -135,10 +135,10 @@
       "model": "main_app.subject",
       "pk": 2,
       "fields": {
-          "name": "Data Structures",
-          "subject_code": "CS102",
-          "updated_at": "2024-07-20T00:00:00Z",
-          "created_at": "2024-07-20T00:00:00Z"
+          "name": "Data Structures", 
+          "subject_code": "CS102", 
+          "updated_at": "2024-07-20T00:00:00Z", 
+          "created_at": "2024-07-20T00:00:00Z" 
       }
   },
   {

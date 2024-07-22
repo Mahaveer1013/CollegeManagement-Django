@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, post_migrate
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 def create_default_superuser(sender, **kwargs):
     User = get_user_model()
@@ -222,20 +223,37 @@ class TimeTable(models.Model):
 
 
 class Attendance(models.Model):
+
+    STATUS_CHOICES = [
+        (0, 'Absent'),
+        (1, 'Present'),
+        (2, 'On Duty Internal'),
+        (3, 'On Duty External'),
+        (4, 'Pending')
+    ]
+
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='attendances')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField()
     period = models.PositiveIntegerField()  # Ensure this is a positive integer
-    status = models.BooleanField(default=False)  # True for present, False for absent
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=4)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    
     class Meta:
-        unique_together = ('subject', 'student', 'date', 'period')  # Ensure unique records
+        unique_together = ('student', 'date', 'period')  # Ensure unique records
         indexes = [
-            models.Index(fields=['subject', 'student', 'date']),  # Indexes for faster querying
+            models.Index(fields=['student', 'date']),  # Indexes for faster querying
         ]
+    
+    def clean(self):
+        super().clean()
+        if not (1 <= self.period <= 8):
+            raise ValidationError('Period must be between 1 and 8.')
 
     def __str__(self):
-        return f"{self.student} - {self.subject} - {self.date} - Period {self.period} - {'Present' if self.status else 'Absent'}"
+        return f"{self.student} - {self.subject} - {self.date} - Period {self.period} - {self.get_status_display()}"
 
 
 class AttendanceReport(models.Model):
