@@ -17,7 +17,8 @@ def student_home(request):
     student = get_object_or_404(Student, admin=request.user)
     total_subject = Subject.objects.count()
     total_attendance = AttendanceReport.objects.filter(student=student).count()
-    total_present = AttendanceReport.objects.filter(student=student, status=True).count()
+    total_present = AttendanceReport.objects.filter(
+        student=student, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
         percent_absent = percent_present = 0
     else:
@@ -169,16 +170,63 @@ def student_view_profile(request):
             else:
                 messages.error(request, "Invalid Data Provided")
         except Exception as e:
-            messages.error(request, "Error Occured While Updating Profile " + str(e))
+            messages.error(
+                request, "Error Occured While Updating Profile " + str(e))
 
     return render(request, "student_template/student_view_profile.html", context)
 
 
 def student_view_assignment(request):
     student = get_object_or_404(Student, admin=request.user)
-    my_assignments = AssignmentQuestions.objects.filter(class_name=student.class_name)
-    print(my_assignments)
-    return render(request, 'student_template/student_view_assignment.html', {'assignments': my_assignments, 'page_title': 'View Assignments'})
+    
+    if request.method == 'POST':
+        try:
+            assignment_id = request.POST.get('assignment_id')
+            assignment = get_object_or_404(AssignmentQuestions, id=assignment_id)
+            form = AssignmentAnswersForm(request.POST, request.FILES, prefix=str(assignment.id))
+            if form.is_valid():
+                pdf_file = form.cleaned_data['pdf']
+                AssignmentAnswers.objects.update_or_create(
+                    student=student,
+                    assignment_question=assignment,
+                    defaults={'pdf': pdf_file}
+                )
+                messages.success(request, f"Answer submitted for assignment {assignment.subject}.")
+            else:
+                messages.error(request, f"Error submitting answer for assignment {assignment.subject}.")
+        except Exception as e:
+            messages.error(request, "Error Occurred Uploading Answer " + str(e))
+    
+    assignments = AssignmentQuestions.objects.filter(class_name=student.class_name)
+    
+    # Initialize the context with assignments and forms
+    context = {
+        'assignments': assignments,
+        'forms': {},
+        'page_title': 'View Assignments',
+        'button_text': 'Submit',
+        'answer_urls': {}
+    }
+    
+    for assignment in assignments:
+        # Check if an answer already exists for this student and assignment
+        existing_answer = AssignmentAnswers.objects.filter(
+            student=student,
+            assignment_question=assignment
+        ).first()
+
+        # Create the form with the appropriate prefix
+        form = AssignmentAnswersForm(prefix=str(assignment.id))
+        
+        # Add the form and existing answer to the context
+        context['forms'][assignment.id] = form
+        if existing_answer and existing_answer.pdf:
+            context['answer_urls'][assignment.id] = existing_answer.pdf.url
+        else:
+            context['answer_urls'][assignment.id] = None
+
+    return render(request, 'student_template/student_view_assignment.html', context)
+
 
 
 @csrf_exempt

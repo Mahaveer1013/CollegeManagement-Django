@@ -7,3 +7,6 @@ psycopg2==2.8.6
 whitenoise==5.2.0
 Pillow
 requests
+
+django-admin-interface
+django-grappelli

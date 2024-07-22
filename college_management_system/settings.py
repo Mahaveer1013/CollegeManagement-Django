@@ -37,6 +37,17 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     # Django Apps
     'jazzmin',
+    
+    # 'django.contrib.sites',
+    # 'admin_interface',
+    # 'colorfield',
+
+    # 'grappelli',
+    
+    # 'jet',
+
+    # 'admin_tools',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

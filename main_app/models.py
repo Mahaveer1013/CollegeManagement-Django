@@ -115,6 +115,7 @@ class Student(models.Model):
 class Staff(models.Model):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
@@ -221,13 +222,20 @@ class TimeTable(models.Model):
 
 
 class Attendance(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='attendances')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField()
-    period = models.IntegerField(default=0)
-    status = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    period = models.PositiveIntegerField()  # Ensure this is a positive integer
+    status = models.BooleanField(default=False)  # True for present, False for absent
+
+    class Meta:
+        unique_together = ('subject', 'student', 'date', 'period')  # Ensure unique records
+        indexes = [
+            models.Index(fields=['subject', 'student', 'date']),  # Indexes for faster querying
+        ]
+
+    def __str__(self):
+        return f"{self.student} - {self.subject} - {self.date} - Period {self.period} - {'Present' if self.status else 'Absent'}"
 
 
 class AttendanceReport(models.Model):
@@ -291,8 +299,8 @@ class AssignmentQuestions(models.Model):
 
 class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
-        AssignmentQuestions, on_delete=models.DO_NOTHING)
-    student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+        AssignmentQuestions, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     pdf = models.FileField(upload_to='assignments/answers', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -374,3 +382,7 @@ def save_user_profile(sender, instance, **kwargs):
         instance.staff.save()
     if instance.user_type == 3:
         instance.student.save()
+
+
+
+

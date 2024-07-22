@@ -1,5 +1,6 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block page_title %}{{page_title}}{% endblock page_title %}
 
 {% block content %}
@@ -9,31 +10,63 @@
         <div class="row">
             <div class="col-md-12">
                 <!-- general form elements -->
-       
-                <!-- /.card -->
-<div class="card card-dark">
-    <div class="card-header"><h3 class="card-title">{{page_title}}</h3>
-    </div>
-   <div class="table p-2">
 
-       <table class="table table-bordered">
-           <tr>
-               <th>ID</th>
-               <th>Subject</th>
-               <th>Deadline</th>
-               <th>Assignment</th>
-        </tr>
-        {% for assignment in assignments %}
-        <tr>
-            <td>{{forloop.counter}}</td>
-            <td>{{ assignment.subject }}</td>
-            <td>{{ assignment.deadline_date }}</td>
-            <td>{{ assignment.pdf }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    </div>
+                <!-- /.card -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Download Question</th>
+                                <th>Upload Answer</th>
+                                <th>Submit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in assignments %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ assignment.subject }}</td>
+                                <td>{{ assignment.deadline_date }}</td>
+                                <td style="display: flex;justify-content: space-evenly;align-items: center;">
+                                    {% if assignment.pdf %}
+                                    <a href="{{ assignment.pdf.url }}" class="btn btn-primary" download>Download</a>
+                                    {% else %}
+                                    <span>No File</span>
+                                    {% endif %}
+                                    
+                                    {% with status=answer_urls|get_item:assignment.id %}
+                                    {% if status %} <a href="{{ status }}" class="btn btn-success" download>Submitted Answer</a> {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    <form method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                                        {% with form=forms|get_item:assignment.id %}
+                                        {{ form.pdf }}
+                                        {% endwith %}
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-success btn-block">
+                                        {% if button_text %}
+                                        {{ button_text }}
+                                        {% else %}
+                                        Submit
+                                        {% endif %}
+                                    </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

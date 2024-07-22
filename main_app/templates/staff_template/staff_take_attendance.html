@@ -1,6 +1,6 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
 {% block content %}
 
 <section class="content">
@@ -10,144 +10,142 @@
                 <!-- general form elements -->
                 <div class="card card-dark">
                     <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
+                        <h3 class="card-title">{{ page_title }}</h3>
                     </div>
-
                     <!-- /.card-header -->
                     <!-- form start -->
                     <div class="card-body">
+                        <form id="selection-form">
+                            {% csrf_token %}
 
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" name="date" class="form-control" id="date">
+                            </div>
 
+                            <div class="form-group">
+                                <label>Period</label>
+                                <select name="period" class="form-control" id="period">
+                                    <option value="">Select Period</option>
+                                    {% for period in periods %}
+                                    <option value="{{ period }}">Period {{ period }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <select name="subject" class="form-control" id='subject'>
-                                <option value="">----</option>
-                                {% for subject in subjects  %}
-                                <option value="{{subject.id}}">{{subject.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                            <button type="button" id="fetch_students" class="btn btn-success">Fetch Students</button>
+                        </form>
 
+                        <form id="attendance-form" method="post" action="{% url 'submit_attendance' %}"
+                            id="student_form" onsubmit="collectCheckboxes()">
+                            {% csrf_token %}
+                            <div id="student_data" class="mt-4">
+                                <!-- Students will be populated here with checkboxes -->
+                            </div>
 
-                        <div class="form-group">
-                            <label>Session Year</label>
-                            <select name="session" id='session' class="form-control">
-                                <option value="">----</option>
-                                {% for session in sessions  %}
-                                <option value="{{session.id}}">{{session}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% comment %}
-
-                        <div>
-                            <label>Attendance Date</label>
-                            <input type="date" class='form-control' name="attendance_date" id='attendance_date' id="">
-                        </div>
-                        {% endcomment %}
-
+                        </form>
                     </div>
                     <!-- /.card-body -->
-
-                    <div class="card-footer">
-                        <button type="button" id='fetch_student' class="btn btn-success btn-block">Fetch Students</button>
-                        <div class="form-group" id="student_data">
-
-                        </div>
-                    </div>
                 </div>
                 <!-- /.card -->
-
             </div>
         </div>
     </div>
 </section>
-{% endblock content %}
 
+{% endblock content %}
 
 {% block custom_js %}
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        function collectCheckboxes() {
+            const form = document.getElementById('student_form');
+            const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked');
+            const uncheckedInputs = form.querySelectorAll('input[type="checkbox"]:not(:checked)');
 
-       
-        $("#fetch_student").click(function () {
-            var subject = $("#subject").val()
-            var session = $("#session").val()
-            $("#student_data").html(null)
-if (subject.length  == 0 || session.length == 0){
-    alert("Please select session and subject");
-    return false;
-}
-            $.ajax({
-                url: "{% url 'get_students' %}",
-                type: 'POST',
-                data: {
-                    subject: subject,
-                    session: session
-                }
-            }).done(function (response) {
-                var json_data = JSON.parse(response)
-                if (json_data.length < 1) {
-                    alert("No data to display")
-                } else {
-                    var div_data = "<hr/><div class='form-group'></div><div class='form-group'> <label>Attendance Date</label><input type='date' class='form-control' name='attendance_date' id='attendance_date' ><div class='row'>"
+            const checkedValues = [];
+            const uncheckedValues = [];
 
-                    for (key in json_data) {
-                        div_data += "<div class='col-lg-3'><div class='form-check custom-control custom-checkbox'><input type='checkbox' class='custom-control-input' checked='checked' name='student_data[]' value=" + json_data[key]['id'] + " id='checkbox" + json_data[key]['id'] + "' /> <label for='checkbox" + json_data[key]['id'] + "' class='custom-control-label'>" + json_data[key]['name'] + "</label></div> </div>"
-                    }
-                    div_data += "</div></div>"
-                    div_data += "<div class='form-group'><button id='save_attendance' class='btn btn-success' type='button'>Save Attendance</button></div>"
-                    $("#student_data").html(div_data)
-                }
-            }).fail(function (response) {
-                alert("Error in fetching students")
+            checkedInputs.forEach(input => checkedValues.push(input.value));
+            uncheckedInputs.forEach(input => uncheckedValues.push(input.value));
+
+            document.getElementById('checked_students').value = checkedValues.join(',');
+            document.getElementById('unchecked_students').value = uncheckedValues.join(',');
+        }
+        document.getElementById('fetch_students').addEventListener('click', function () {
+            var date = document.getElementById('date').value;
+            var period = document.getElementById('period').value;
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            if (!date || !period) {
+                alert("Please select both date and period.");
+                return;
+            }
+
+            // Prepare the request data
+            var formData = new URLSearchParams();
+            formData.append('date', date);
+            formData.append('period', period);
+
+            // Send the request using fetch
+            fetch("{% url 'fetch_students' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData.toString()
             })
-
-
-            $(document).on('click', '#save_attendance', function () {
-                $(this).attr("disabled","disabled")
-                $(this).text("Saving Attendance Data...")
-                var student_data = $("input[name='student_data[]']").map(function () {
-                    if ($(this).is(":checked")){
-                    return {'id':$(this).val(), 'status': 1};
-    
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok.");
                     }
-                    return {'id':$(this).val(), 'status': 0};
-    
-                }).get()
-                var attendance_date = $('#attendance_date').val()
-                if (attendance_date.length < 10){
-                    alert("Select date")
-                    return false;
-                }
-                student_data = JSON.stringify(student_data)
-                $.ajax({
-                    url: "{% url 'save_attendance' %}",
-                    type: 'POST',
-                    data: {
-                        date: attendance_date,
-                        student_ids: student_data,
-                        subject: subject,
-                        session: session
-            
-                    }
-                }).done(function (response) {
-                    if (response == 'OK'){
-                        alert("Saved")
-                    }else{
-                        alert("Error. Please try again")
-                    }
-                    location.reload()
-                    
-                }).fail(function (response) {
-                    alert("Error in saving attendance")
+                    return response.json();
                 })
-    
-            })
+                .then(data => {
+                    if (data.students) {
+                        var students = data.students;
+                        var studentDataHtml = "<h3>Students:</h3>";
 
+                        if (students.length > 0) {
+                            studentDataHtml += `<input type='hidden' value='${data.date}' name='date' id='date' />`;
+                            studentDataHtml += `<input type='hidden' value='${data.period}' name='period' id='period' />
+                                                <input type="hidden" id="checked_students" name="checked_students" value="">
+                                                <input type="hidden" id="unchecked_students" name="unchecked_students" value="">`;
+                            students.forEach(student => {
+                                studentDataHtml += `
+                                ${data.date}${data.period}
+                                <div class='col-lg-3'>
+                                    <div class='form-check custom-control custom-checkbox'>
+                                        <input type='checkbox' class='custom-control-input' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}'>
+                                        <label for='checkbox${student.id}'  style="display:flex;text-wrap:nowrap;padding:10px" class='custom-control-label'>${student.name} - (${student.roll_number})</label>
+                                    </div>
+                                </div>
+                            `;
+                            });
 
-        })
-    })
+                            studentDataHtml += `
+                        </div>
+                        <div class='form-group'>
+                            <button id='save_attendance' class='btn btn-success' type='submit'>Save Attendance</button>
+                            </div>
+                            `;
+                        } else {
+                            studentDataHtml += "<h3>No students found.</h3>";
+                        }
+
+                    } else if (data.message) {
+
+                        studentDataHtml += "<h3>It's a Holiday<h3>";
+                    }
+                    document.getElementById('student_data').innerHTML = studentDataHtml;
+                })
+                .catch(error => {
+                    console.error("Error fetching student data:", error);
+                    alert("Error fetching student data.");
+                });
+        });
+    });
 </script>
+
 {% endblock custom_js %}

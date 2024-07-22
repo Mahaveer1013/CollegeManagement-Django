@@ -1,0 +1,62 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}View Assignments{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Assignments and Answers</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Assignment ID</th>
+                                    <th>Subject</th>
+                                    <th>Deadline</th>
+                                    <th>Uploaded Answers</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in assignments %}
+                                {% with assignment_id=assignment_answers|get_item:assignment.id %}
+
+                                <tr>
+                                    <td>{{ assignment.id }}</td>
+                                    <td>{{ assignment.subject }}</td>
+                                    <td>{{ assignment.deadline_date }}</td>
+                                    <td>
+                                        {% if assignment_answers.assignment_id %}
+                                        <ul>
+                                            {% for answer in assignment_answers.assignment_id %}
+                                            <li>
+                                                {% if answer.pdf %}
+                                                <a href="{{ answer.pdf.url }}" class="btn btn-info" target="_blank">View
+                                                    Answer</a>
+                                                {% else %}
+                                                <span>No Answer Uploaded</span>
+                                                {% endif %}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <span>No Answers Found</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

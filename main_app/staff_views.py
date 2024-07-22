@@ -6,9 +6,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import (HttpResponseRedirect, get_object_or_404,redirect, render)
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-
+from datetime import datetime
 from .forms import *
 from .models import *
+from django.db.models import Q
 
 
 def staff_home(request):
@@ -39,16 +40,111 @@ def staff_home(request):
 
 
 def staff_take_attendance(request):
-    staff = get_object_or_404(Staff, admin=request.user)
-    subjects = Subject.objects.filter(staff_id=staff)
-    # sessions = Session.objects.all()
+    periods = range(1, 9)
+
     context = {
-        'subjects': subjects,
-        'sessions': sessions,
-        'page_title': 'Take Attendance'
+        'page_title': 'Take Attendance',
+        'form': DateSelectionForm(),
+        'periods': periods
     }
 
     return render(request, 'staff_template/staff_take_attendance.html', context)
+
+@csrf_exempt  # Temporarily exempt from CSRF validation for debugging
+def fetch_students(request):
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        period = request.POST.get('period')
+
+        if not date or not period:
+            return JsonResponse({'error': 'Date and period are required.'}, status=400)
+
+        # Assuming `date` is a string, convert it to a datetime object if needed
+        # Process date and period to filter timetable and students
+
+        # Example to get weekday number from date string (assuming YYYY-MM-DD format)
+        from datetime import datetime
+        try:
+            selected_date = datetime.strptime(date, '%Y-%m-%d')
+            weekday = selected_date.weekday()
+            print(weekday,'\n\n\n\n')
+        except ValueError:
+            return JsonResponse({'error': 'Invalid date format.'}, status=400)
+
+        # Map weekday number to day names
+        days_of_week = {
+            0: 'monday',
+            1: 'tuesday',
+            2: 'wednesday',
+            3: 'thursday',
+            4: 'friday',
+            5: 'saturday',
+            6: 'sunday',
+        }
+
+        # Build the period attribute based on the selected period
+        # week_number = datetime.date(2024, 2, 26).isocalendar()[1]
+        if weekday!=5 and weekday!=6:
+            period_attr = f'{days_of_week.get(weekday, "unknown")}_{period}'
+        else:
+            period_attr='Leave'
+        
+
+        # Filter timetables for the selected date, period
+        if period_attr != 'Leave':
+            timetables = TimeTable.objects.filter(**{f"{period_attr}__isnull": False})
+            class_ids = timetables.values_list('class_name_id', flat=True)
+            # print('class_ids', class_ids)
+            students = Student.objects.filter(class_name_id__in=class_ids)
+            if len(students)>0:
+                student_data = []
+                for student in students:
+                    # print(student.admin.first_name)
+                    student_data.append({
+                        'id':student.id,
+                        'name': student.admin.first_name+ ' '+ student.admin.last_name,
+                        'roll_number': student.roll_number
+                    })
+                # print(student_data)
+                return JsonResponse({'students': student_data,'date':date, 'period':period})
+            return JsonResponse({'error': 'No students Found'}, status=404)
+        else:
+            return JsonResponse({'message': 'Its a Holiday'})
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def submit_attendance(request):
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        period = request.POST.get('period')
+        checked = request.POST.get('checked_students')
+        unchecked = request.POST.get('unchecked_students')
+        student_ids = request.POST.getlist('student_data')
+        print('thlbcyudbsoduvbds\nm\n\n\n\n\n')
+        print(date,period)
+        print(checked)
+        print(unchecked)
+
+        # Process the data to mark attendance
+        for student_id in student_ids:
+            student = Student.objects.get(id=student_id)
+            # You can adjust how you store attendance records based on your model
+            # For example, you might have an Attendance model to store this data
+            attendance_record, created = Attendance.objects.get_or_create(
+                student=student,
+                date=date,
+                period=period,
+                defaults={'present': True}
+            )
+            if not created:
+                attendance_record.present = True
+                attendance_record.save()
+
+        return redirect('staff_take_attendance')  # Redirect to a success page or the same page
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 def add_assignment(request):
@@ -78,9 +174,6 @@ def add_assignment(request):
     context = {'form': student_form, 'page_title': 'Add Student'}
     return render(request, 'hod_template/add_student_template.html', context)
 
-
-def view_assignment(request):
-    pass
 
 @csrf_exempt
 def get_students(request):
@@ -200,15 +293,24 @@ def staff_apply_leave(request):
     return render(request, "staff_template/staff_apply_leave.html", context)
 
 
-def upload_assignment_questions(request):
-    form = AssignmentQuestionsForm(request.POST, request.FILES)
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('success')
-    else:
-        form = AssignmentQuestionsForm()
-    return render(request, 'upload_assignment.html', {'form': form})
+def view_assignment(request):
+    # Get all assignments posted by the staff (user)
+    assignments = AssignmentQuestions.objects.filter(uploaded_by=request.user)
+    print(assignments, '\n\n\n\n')
+    # Retrieve all answers for the assignments posted by the staff
+    assignment_answers = AssignmentAnswers.objects.filter(assignment_question__in=assignments)
+    
+    # Create a dictionary to map assignments to their answers
+    assignment_answers_dict = {}
+    for assignment in assignments:
+        assignment_answers_dict[assignment.id] = assignment_answers.filter(assignment_question=assignment)
+    
+    context = {
+        'assignments': assignments,
+        'assignment_answers': assignment_answers_dict
+    }
+    
+    return render(request, 'staff_template/staff_view_assignment.html', context)
 
 
 def staff_feedback(request):
@@ -344,3 +446,4 @@ def fetch_student_result(request):
         return HttpResponse(json.dumps(result_data))
     except Exception as e:
         return HttpResponse('False')
+
