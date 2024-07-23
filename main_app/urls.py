@@ -39,6 +39,7 @@ urlpatterns = [
     path("student/view/leave/", hod_views.view_student_leave, name="view_student_leave",),
     path("staff/view/leave/", hod_views.view_staff_leave, name="view_staff_leave",),
     path("attendance/view/", hod_views.admin_view_attendance, name="admin_view_attendance",),
+    # path("attendance/view_multi/", hod_views.student_view_multi_attendance, name="student_view_multi_attendance",),
     path("attendance/fetch/", hod_views.get_admin_attendance, name='get_admin_attendance'),
     path('admin/get_classes_by_department/', hod_views.get_classes_by_department, name='get_classes_by_department'),
     path('fetch-students/', staff_views.fetch_students, name='fetch_students'),
@@ -67,6 +68,7 @@ urlpatterns = [
      # path('class/delete/<int:class_id>', hod_views.delete_class, name='delete_class'),
      path('download/student-template/', hod_views.download_student_template, name='download_student_template'),
      path('download/staff-template/', hod_views.download_staff_template, name='download_staff_template'),
+     path('download/download-day-attendance/', hod_views.download_single_day_attendance, name='download_single_day_attendance'),
 
 
 
@@ -88,6 +90,7 @@ urlpatterns = [
     path("staff/view/notification/", staff_views.staff_view_notification, name="staff_view_notification"),
     path("staff/result/add/", staff_views.staff_add_result, name='staff_add_result'),
     path('staff/result/fetch/', staff_views.fetch_student_result, name='fetch_student_result'),
+    path('staff/timetable/', staff_views.staff_timetable_view, name='staff_timetable_view'),
 
 #     path("staff/result/edit/", EditResultView.as_view(), name='edit_student_result'),
 
@@ -102,5 +105,6 @@ urlpatterns = [
     path("student/view/notification/", student_views.student_view_notification, name="student_view_notification"),
     path('student/view/result/', student_views.student_view_result, name='student_view_result'),
     path('student/view/assignment/', student_views.student_view_assignment, name='student_view_assignment'),
+    path('student/view/timetable/', student_views.student_view_timetable, name='student_view_timetable'),
 
 ]

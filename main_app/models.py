@@ -220,6 +220,62 @@ class TimeTable(models.Model):
 
     def __str__(self):
         return f"{self.class_name} Timetable"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Define fields to update in the staff model
+        period_fields = [
+            ('monday_1', 'monday_1'),
+            ('monday_2', 'monday_2'),
+            ('monday_3', 'monday_3'),
+            ('monday_4', 'monday_4'),
+            ('monday_5', 'monday_5'),
+            ('monday_6', 'monday_6'),
+            ('monday_7', 'monday_7'),
+            ('monday_8', 'monday_8'),
+            ('tuesday_1', 'tuesday_1'),
+            ('tuesday_2', 'tuesday_2'),
+            ('tuesday_3', 'tuesday_3'),
+            ('tuesday_4', 'tuesday_4'),
+            ('tuesday_5', 'tuesday_5'),
+            ('tuesday_6', 'tuesday_6'),
+            ('tuesday_7', 'tuesday_7'),
+            ('tuesday_8', 'tuesday_8'),
+            ('wednesday_1', 'wednesday_1'),
+            ('wednesday_2', 'wednesday_2'),
+            ('wednesday_3', 'wednesday_3'),
+            ('wednesday_4', 'wednesday_4'),
+            ('wednesday_5', 'wednesday_5'),
+            ('wednesday_6', 'wednesday_6'),
+            ('wednesday_7', 'wednesday_7'),
+            ('wednesday_8', 'wednesday_8'),
+            ('thursday_1', 'thursday_1'),
+            ('thursday_2', 'thursday_2'),
+            ('thursday_3', 'thursday_3'),
+            ('thursday_4', 'thursday_4'),
+            ('thursday_5', 'thursday_5'),
+            ('thursday_6', 'thursday_6'),
+            ('thursday_7', 'thursday_7'),
+            ('thursday_8', 'thursday_8'),
+            ('friday_1', 'friday_1'),
+            ('friday_2', 'friday_2'),
+            ('friday_3', 'friday_3'),
+            ('friday_4', 'friday_4'),
+            ('friday_5', 'friday_5'),
+            ('friday_6', 'friday_6'),
+            ('friday_7', 'friday_7'),
+            ('friday_8', 'friday_8'),
+        ]
+
+        # Iterate over each field and update the corresponding Staff instance
+        for timetable_field, period_field in period_fields:
+            period = getattr(self, timetable_field)
+            if period:
+                staff = period.staff
+                if staff:
+                    setattr(staff, period_field, period.class_name)
+                    staff.save()
 
 
 class Attendance(models.Model):
@@ -227,7 +283,7 @@ class Attendance(models.Model):
     STATUS_CHOICES = [
         (0, 'Absent'),
         (1, 'Present'),
-        (2, 'On Duty Internal'),
+        (2, 'On Duty Internal'),  
         (3, 'On Duty External'),
         (4, 'Pending')
     ]
@@ -240,7 +296,7 @@ class Attendance(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
+
     class Meta:
         unique_together = ('student', 'date', 'period')  # Ensure unique records
         indexes = [
@@ -275,7 +331,8 @@ class BloomKeyword(models.Model):
     )
     word = models.CharField(max_length=120)
     bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
-
+    def __str__(self):
+        return self.word+' - '+ self.bloom_level
 
 class QuestionPaper(models.Model):
     SEM_CHOICES = (

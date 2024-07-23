@@ -37,57 +37,7 @@
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
 
-                    <!-- /.card-header -->
-                    <!-- form start -->
-                    <div class="card-body">
-
-
-
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <select name="subject" class="form-control" id='subject'>
-                                <option value="">----</option>
-                                {% for subject in subjects  %}
-                                <option value="{{subject.id}}">{{subject.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Session</label>
-                            <select name="session" class="form-control" id='session'>
-                                <option value="">----</option>
-                                {% for session in sessions  %}
-                                <option value="{{session.id}}">{{session}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group"><div  style="display: none;" class="alert alert-danger" id='error_attendance'></div>
-                                <div class="alert alert-success" id='success_attendance' style="display: none;"></div>
-                             <button type="button" id='fetch_attendance' class="btn btn-success btn-block">Fetch Attendance</button>
-                        </div>
-                    <!-- /.card-body -->
-                    
-                        
-                               
-                            <div class="form-group" style="display: none;" id="attendance_block">
-                            <div class="form-group">
-                                <label>Attendance Date</label>
-                                <select name="attendance_date" id='attendance_date' class="form-control">
-                               
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                
-                            <div id="fetch_student_block" style="display: none;">
-                                <button type="button" id='fetch_student' class="btn btn-success btn-block">Fetch Students</button>
-
-
-                            </div>
-                            <div id='student_data' class="card-footer">
-
-                            </div>
-                        </div>
-                    </div>  
+                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="View Attendance"%}
                 </div>
                 <!-- /.card -->
 
@@ -100,107 +50,120 @@
 
 {% block custom_js %}
 <script>
-    $(document).ready(function () {
-        $("#fetch_attendance").click(function(){
-            var subject = $("#subject").val()
-            var session = $("#session").val()
-            $("#student_data").html("")
+    document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById("fetch_attendance").addEventListener("click", function () {
+        var subject = document.getElementById("subject").value;
+        var attendance = document.getElementById("attendance").value;
+        document.getElementById("student_data").innerHTML = "";
 
-            if (session.length < 1 || subject.length < 1){
-                $("#error_attendance").html("Kindly Choose Both Subject and Session")
-                $("#attendance_block").hide()
-                $("#error_attendance").show()
-                return false
+        if (attendance.length < 1 || subject.length < 1) {
+            document.getElementById("error_attendance").innerHTML = "Kindly Choose Both Subject and Attendance";
+            document.getElementById("attendance_block").style.display = "none";
+            document.getElementById("error_attendance").style.display = "block";
+            return false;
+        }
+
+        fetch("{% url 'get_attendance' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken() // Adjust this function to get CSRF token
+            },
+            body: JSON.stringify({
+                subject: subject,
+                attendance: attendance
+            })
+        })
+        .then(response => response.json())
+        .then(json_data => {
+            if (json_data.length > 0) {
+                let html = "";
+                json_data.forEach(item => {
+                    html += `<option value='${item.id}'>${item.attendance_date}</option>`;
+                });
+                document.getElementById("attendance_date").innerHTML = html;
+                document.getElementById("error_attendance").style.display = "none";
+                document.getElementById("error_attendance").innerHTML = "";
+                document.getElementById("attendance_block").style.display = "block";
+                document.getElementById("fetch_student_block").style.display = "block";
+            } else {
+                document.getElementById("error_attendance").innerHTML = "No Attendance Date Found For Specified Data";
+                document.getElementById("error_attendance").style.display = "block";
+                document.getElementById("attendance_date").innerHTML = "";
+                document.getElementById("attendance_block").style.display = "none";
+                document.getElementById("student_data").innerHTML = "";
             }
-            $.ajax({
-                url: "{% url 'get_attendance' %}",
-                type: 'POST',
-                data:{
-                    subject:subject,
-                    session:session
-                }
-            
-            }
+        })
+        .catch(error => {
+            alert("Error While Fetching Data");
+            document.getElementById("error_attendance").innerHTML = "";
+            document.getElementById("error_attendance").style.display = "block";
+            document.getElementById("attendance_block").style.display = "none";
+            document.getElementById("student_data").innerHTML = "";
+        });
+    });
 
-            ).done(function(response){
-                var json_data = JSON.parse(response)
-                if (json_data.length > 0){
+    document.getElementById("fetch_student").addEventListener("click", function () {
+        var attendance_date = document.getElementById("attendance_date").value;
+        var attendance = document.getElementById("attendance").value;
+        var subject = document.getElementById("subject").value;
+        document.getElementById("student_data").innerHTML = "";
 
-                    var html = "";
-                    for (key in json_data){
-                        html += "<option value='"+json_data[key]['id']+"'>"+json_data[key]['attendance_date']+"</option>"
+        if (attendance_date.length === 0) {
+            alert("Please Choose A Date");
+            document.getElementById("save_attendance").style.display = "none";
+            return false;
+        }
+
+        fetch("{% url 'get_admin_attendance' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken() // Adjust this function to get CSRF token
+            },
+            body: JSON.stringify({
+                attendance_date_id: attendance_date,
+                attendance: attendance,
+                subject: subject
+            })
+        })
+        .then(response => response.json())
+        .then(json_data => {
+            if (json_data.length < 1) {
+                alert("No data to display");
+            } else {
+                let div_data = "<hr/><div class='form-group'></div><div class='form-group'> <label>Student Attendance</label><div class='row'>";
+
+                json_data.forEach(item => {
+                    if (item.status === 'True') {
+                        div_data += `<div class='col-lg-3 attendance_div_green'><b>${item.name}</b><br/>Present</div>`;
+                    } else {
+                        div_data += `<div class='col-lg-3 attendance_div_red'><b>${item.name}</b><br/>Absent</div>`;
                     }
-                    $("#attendance_date").html(html)
-                    $("#error_attendance").hide()
-                    $("#error_attendance").html("")
-                    $("#attendance_block").show()  
-                    $("#fetch_student_block").show()
-                }else{
-                    $("#error_attendance").html("No Attendance Date Found For Specified Data")
-                    $("#error_attendance").show()
-                    $("#attendance_date").html("")
-                    $("#attendance_block").hide()
-                    $("#student_data").html("")
-
-
-                }
-            }).fail(function(response){
-                alert("Error While Fetching Data")
-                $("#error_attendance").html("")
-                $("#error_attendance").show()
-                $("#attendance_block").hide()
-                $("#student_data").html("")
-
-
-            })
+                });
+                div_data += "</div></div>";
+                document.getElementById("student_data").innerHTML = div_data;
+            }
         })
+        .catch(error => {
+            alert("Error in fetching students");
+        });
+    });
+});
 
-        $("#fetch_student").click(function () {
-            var attendance_date = $("#attendance_date").val()
-            var session = $("#session").val()
-            var subject = $("#subject").val()
-            $("#student_data").html(null)
-if (attendance_date.length  == 0){
-    alert("Please Choose A Date");
-    $("#save_attendance").hide()
-
-    return false;
+// Example function to get CSRF token (customize based on your setup)
+function getCsrfToken() {
+    var csrftoken = null;
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            csrftoken = cookie.substring('csrftoken='.length, cookie.length);
+            break;
+        }
+    }
+    return csrftoken;
 }
-            $.ajax({
-                url: "{% url 'get_admin_attendance' %}",
-                type: 'POST',
-                data: {
-                    attendance_date_id:attendance_date,
-                    session:session,
-                    subject:subject
-                }
-            }).done(function (response) {
-                var json_data = JSON.parse(response)
-                if (json_data.length < 1) {
-                    alert("No data to display")
 
-                } else {
-
-                    var div_data = "<hr/><div class='form-group'></div><div class='form-group'> <label>Student Attendance</label><div class='row'>"
-
-                    for (key in json_data) {
-                            if (json_data[key]['status'] == 'True'){
-                                div_data += "<div class='col-lg-3 attendance_div_green'><b>"+ json_data[key]['name'] + "</b><br/>Present</div>" 
-                            }else{
-        
-                                div_data += "<div class='col-lg-3 attendance_div_red'><b>"+ json_data[key]['name'] + "</b><br/>Absent</div>"
-                            }
-                        }
-                       // div_data += "<div class='col-lg-3'><div class='form-check custom-control custom-checkbox'><input type='checkbox' class='custom-control-input' " + (json_data[key]['status'] ? "checked='checked'" : "")+" name='student_data[]' value=" + json_data[key]['id'] + " id='checkbox" + json_data[key]['id'] + "' /> <label for='checkbox" + json_data[key]['id'] + "' class='custom-control-label'>" + json_data[key]['name']  + (json_data[key]['status'] ? " [Present] " : " [Absent] ")+"</label></div> </div>"
-                    div_data += "</div></div>"
-                    $("#student_data").html(div_data)
-                }
-            }).fail(function (response) {
-                alert("Error in fetching students")
-            })
-
-        })
-       
-    })
 </script>
 {% endblock custom_js %}

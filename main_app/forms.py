@@ -64,6 +64,15 @@ class DateSelectionForm(forms.Form):
     period = forms.ChoiceField(choices=[(i, f'Period {i}') for i in range(1, 9)], required=False)
 
 
+class AttendanceSelectionForm(forms.Form):
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
+    class_name = forms.ModelChoiceField(    
+        queryset=ClassList.objects.all().order_by('department__name', 'semester', 'section'),
+        empty_label="Select a class",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(AdminForm, self).__init__(*args, **kwargs)
@@ -90,18 +99,18 @@ class AttendanceForm(FormSettings):
         }
 
 
-class AssignmentQuestionsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(AssignmentQuestionsForm, self).__init__(*args, **kwargs)
+# class AssignmentQuestionsForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super(AssignmentQuestionsForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = AssignmentQuestions
-        fields = ['class_name','deadline_date', 'pdf']
-        widgets = {
-            'class_name': forms.Select(attrs={'class': 'form-control'}),
-            'deadline_date': forms.DateInput(attrs={'class': 'form-control'}),
-            'pdf': forms.FileInput(attrs={'class': 'form-control'})
-        }
+#     class Meta:
+#         model = AssignmentQuestions
+#         fields = ['class_name','deadline_date', 'pdf']
+#         widgets = {
+#             'class_name': forms.Select(attrs={'class': 'form-control'}),
+#             'deadline_date': forms.DateInput(attrs={'class': 'form-control'}),
+#             'pdf': forms.FileInput(attrs={'class': 'form-control'})
+#         }
 
 
 class AssignmentAnswersForm(forms.ModelForm):

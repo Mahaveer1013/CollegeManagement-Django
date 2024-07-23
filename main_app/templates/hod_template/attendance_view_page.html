@@ -1,0 +1,63 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Attendance of {{ class_name }}{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title" style="margin-right: auto;padding: 10px 20px;">Attendance of &nbsp;<b>{{ class_name }}</b></h3>
+                        <a id="download-link" style="padding: 10px 20px; border-radius: 10px; background-color: #10af3d;position: absolute;right: 20px;">Download Attendance</a>
+                    </div>
+                    <div class="timetable" style="overflow-x: auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Period 1</th>
+                                    <th>Period 2</th>
+                                    <th>Period 3</th>
+                                    <th>Period 4</th>
+                                    <th>Period 5</th>
+                                    <th>Period 6</th>
+                                    <th>Period 7</th>
+                                    <th>Period 8</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in attendance_list %}
+                                <tr>
+                                    {% for atten in attendance %}
+                                        {% if atten == 0 %}<td style="background-color: #ff4400; color: white;">Absent</td>
+                                        {% elif atten == 1 %}<td style="background-color: #10af3d; color: white;">Present</td>
+                                        {% elif atten == 2 %}<td style="background-color: #ffcc33; color: black;">On Duty Internal</td>
+                                        {% elif atten == 3 %}<td style="background-color: #ffcc33; color: black;">On Duty External</td>
+                                        {% elif atten == 4 %}<td>Pending</td>
+                                        {% else %}<td>{{ atten }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const attendanceList = {{ attendance_list|safe }};
+        const downloadLink = document.getElementById('download-link');
+        const url = new URL("{% url 'download_single_day_attendance' %}", window.location.origin);
+        url.searchParams.set('attendance_list', JSON.stringify(attendanceList));
+        downloadLink.href = url.toString();
+    });
+</script>
+
+{% endblock content %}

@@ -1,0 +1,130 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Timetable {{class_name}}{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+
+                <!-- /.card -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Timetable {{class_name}}</h3>
+                    </div>
+                    <div class="timetable" style="overflow-x: auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Day</th>
+                                    <th style="text-align: center;">1</th>
+                                    <th style="text-align: center;">2</th>
+                                    <th style="text-align: center;">3</th>
+                                    <th style="text-align: center;">4</th>
+                                    <th style="text-align: center;">5</th>
+                                    <th style="text-align: center;">6</th>
+                                    <th style="text-align: center;">7</th>
+                                    <th style="text-align: center;">8</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td><b>Monday</b></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_1.subject}}</span><span class="teacher">{{ timetable.monday_1.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_2.subject}}</span><span class="teacher">{{ timetable.monday_2.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_3.subject}}</span><span class="teacher">{{ timetable.monday_3.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_4.subject}}</span><span class="teacher">{{ timetable.monday_4.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_5.subject}}</span><span class="teacher">{{ timetable.monday_5.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_6.subject}}</span><span class="teacher">{{ timetable.monday_6.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_7.subject}}</span><span class="teacher">{{ timetable.monday_7.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.monday_8.subject}}</span><span class="teacher">{{ timetable.monday_8.staff }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Tuesday</b></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_1.subject}}</span><span class="teacher">{{ timetable.tuesday_1.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_2.subject}}</span><span class="teacher">{{ timetable.tuesday_2.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_3.subject}}</span><span class="teacher">{{ timetable.tuesday_3.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_4.subject}}</span><span class="teacher">{{ timetable.tuesday_4.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_5.subject}}</span><span class="teacher">{{ timetable.tuesday_5.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_6.subject}}</span><span class="teacher">{{ timetable.tuesday_6.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_7.subject}}</span><span class="teacher">{{ timetable.tuesday_7.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.tuesday_8.subject}}</span><span class="teacher">{{ timetable.tuesday_8.staff }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Wednesday</b></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_1.subject}}</span><span class="teacher">{{ timetable.wednesday_1.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_2.subject}}</span><span class="teacher">{{ timetable.wednesday_2.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_3.subject}}</span><span class="teacher">{{ timetable.wednesday_3.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_4.subject}}</span><span class="teacher">{{ timetable.wednesday_4.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_5.subject}}</span><span class="teacher">{{ timetable.wednesday_5.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_6.subject}}</span><span class="teacher">{{ timetable.wednesday_6.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_7.subject}}</span><span class="teacher">{{ timetable.wednesday_7.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.wednesday_8.subject}}</span><span class="teacher">{{ timetable.wednesday_8.staff }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Thursday</b></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_1.subject}}</span><span class="teacher">{{ timetable.thursday_1.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_2.subject}}</span><span class="teacher">{{ timetable.thursday_2.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_3.subject}}</span><span class="teacher">{{ timetable.thursday_3.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_4.subject}}</span><span class="teacher">{{ timetable.thursday_4.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_5.subject}}</span><span class="teacher">{{ timetable.thursday_5.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_6.subject}}</span><span class="teacher">{{ timetable.thursday_6.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_7.subject}}</span><span class="teacher">{{ timetable.thursday_7.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.thursday_8.subject}}</span><span class="teacher">{{ timetable.thursday_8.staff }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Friday</b></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_1.subject}}</span><span class="teacher">{{ timetable.friday_1.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_2.subject}}</span><span class="teacher">{{ timetable.friday_2.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_3.subject}}</span><span class="teacher">{{ timetable.friday_3.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_4.subject}}</span><span class="teacher">{{ timetable.friday_4.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_5.subject}}</span><span class="teacher">{{ timetable.friday_5.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_6.subject}}</span><span class="teacher">{{ timetable.friday_6.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_7.subject}}</span><span class="teacher">{{ timetable.friday_7.staff }}</span></td>
+                                    <td class="timetable_data"><span class="subject">{{ timetable.friday_8.subject}}</span><span class="teacher">{{ timetable.friday_8.staff }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<style>
+    .timetable_data{
+        cursor: pointer;
+    }
+    .timetable_data .teacher{
+        display: none;
+    }
+    .timetable_data.active .teacher{
+        display: flex;
+    }
+    .timetable_data.active .subject{
+        display: none;
+    }
+    .timetable_data.active{
+        background-color: #ddd;
+        font-weight: 800;
+    }
+    
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const td = document.querySelectorAll('.timetable_data')
+        td.forEach(element => {
+            element.addEventListener('click',()=>{
+                element.classList.toggle('active');
+            })
+        });
+    })
+</script>
+
+{% endblock custom_js %}

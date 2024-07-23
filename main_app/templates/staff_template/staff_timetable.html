@@ -1,0 +1,33 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<h1>Your Timetable</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Day</th>
+            {% for i in 1|to:8 %}
+            <th>Period {{ i }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for day, periods_list in timetable_data.items %}
+        <tr>
+            <td>{{ day|title }}</td>
+            {% for period in periods_list %}
+            <td>
+                {% if period %}
+                    {{ period.subject.name }}<br>
+                    Class: {{ period.class_name.section }}
+                {% else %}
+                    Free
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

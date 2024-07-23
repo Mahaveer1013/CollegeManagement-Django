@@ -179,7 +179,7 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 {% url 'staff_add_result' as staff_add_result %}
                                 <a href="{{staff_add_result}}"
                                     class="nav-link {% if staff_add_result == request.path %} active {% endif %}">
@@ -198,7 +198,7 @@
                                         Edit Result
                                     </p>
                                 </a>
-                            </li>
+                            </li> -->
                             <li class="nav-item">
                                 {% url 'staff_take_attendance' as staff_take_attendance %}
                                 <a href="{{staff_take_attendance}}"
@@ -210,7 +210,7 @@
                                     </p>
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 {% url 'staff_update_attendance' as staff_update_attendance %}
                                 <a href="{{staff_update_attendance}}"
                                     class="nav-link {% if staff_update_attendance == request.path %} active {% endif %}">
@@ -220,7 +220,7 @@
 
                                     </p>
                                 </a>
-                            </li>
+                            </li> -->
                             <!-- <li class="nav-item">
                                 {% url 'add_assignment' as add_assignment %}
                                 <a href="{{add_assignment}}"
@@ -332,7 +332,7 @@
                                             {% url 'student_view_assignment' as student_view_assignment %}
                                             <a href="{{student_view_assignment}}"
                                                 class="nav-link {% if student_view_assignment == request.path %} active {% endif %}">
-                                                <i class="nav-icon fas fa-address-card"></i>
+                                                <i class="nav-icon fas fa-calendar-alt"></i>
                                                 <p>
                                                     View Assignment
 
@@ -345,7 +345,25 @@
                                             <a href="{{student_view_attendance}}"
                                                 class="nav-link {% if student_view_attendance == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-calendar-alt"></i>
-                                                <p>View Attendance</p>
+                                                <p>One day Attendance</p>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            {% url 'student_view_multi_attendance' as student_view_multi_attendance %}
+                                            <a href="{{student_view_multi_attendance}}"
+                                                class="nav-link {% if student_view_multi_attendance == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                                <p>Multi days Attendance</p>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            {% url 'student_view_timetable' as student_view_timetable %}
+                                            <a href="{{student_view_timetable}}"
+                                                class="nav-link {% if student_view_timetable == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                                <p>View Timetable</p>
                                             </a>
                                         </li>
 

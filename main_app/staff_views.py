@@ -11,6 +11,7 @@ from datetime import datetime
 from .forms import *
 from .models import *
 from django.db.models import Q
+from datetime import datetime
 
 
 def staff_home(request):
@@ -30,7 +31,7 @@ def staff_home(request):
         subject_list.append(subject.name)
         # attendance_list.append(attendance_count)
     context = {
-        'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.department) + ')',
+        'page_title': 'Staff Panel - ' + str(staff.admin) + ' (' + str(staff.department) + ')',
         'total_students': total_students,
         'total_attendance': 10,
         'total_leave': total_leave,
@@ -58,6 +59,8 @@ def fetch_students(request):
     if request.method == 'POST':
         date = request.POST.get('date')
         period = request.POST.get('period')
+        staff = get_object_or_404(Staff, admin=request.user)
+        print(staff)
 
         if not date or not period:
             return JsonResponse({'error': 'Date and period are required.'}, status=400)
@@ -66,7 +69,6 @@ def fetch_students(request):
         # Process date and period to filter timetable and students
 
         # Example to get weekday number from date string (assuming YYYY-MM-DD format)
-        from datetime import datetime
         try:
             selected_date = datetime.strptime(date, '%Y-%m-%d')
             weekday = selected_date.weekday()
@@ -85,37 +87,40 @@ def fetch_students(request):
             6: 'sunday',
         }
 
-        # Build the period attribute based on the selected period
-        # week_number = datetime.date(2024, 2, 26).isocalendar()[1]
         if weekday != 5 and weekday != 6:
-            period_attr = f'{days_of_week.get(weekday, "unknown")}_{period}'
+            period_attr = f'{days_of_week.get(weekday)}_{period}'
         else:
             period_attr = 'Leave'
 
-        # Filter timetables for the selected date, period
         if period_attr != 'Leave':
-            timetables = TimeTable.objects.filter(
-                **{f"{period_attr}__isnull": False})
-            class_ids = timetables.values_list('class_name_id', flat=True)
-            # print('class_ids', class_ids)
-            students = Student.objects.filter(class_name_id__in=class_ids)
-            if len(students) > 0:
-                student_data = []
-                for student in students:
-                    # print(student.admin.first_name)
-                    student_data.append({
-                        'id': student.id,
-                        'name': student.admin.first_name + ' ' + student.admin.last_name,
-                        'roll_number': student.roll_number
-                    })
-                # print(student_data)
-                return JsonResponse({'students': student_data, 'date': date, 'period': period})
+            timetable = TimeTable.objects.filter(
+                **{f"{period_attr}__isnull": False},
+                **{f"{period_attr}__staff": staff}
+            ).first()
+
+            if timetable:
+                students = Student.objects.filter(class_name=timetable.class_name)
+                if len(students) > 0:
+                    student_data = []
+                    print(timetable.class_name,'\n\n\n\n',str(timetable.class_name))
+                    for student in students:
+                        student_data.append({
+                            'id': student.id,
+                            'name': student.admin.first_name + ' ' + student.admin.last_name,
+                            'roll_number': student.roll_number,
+                            'register_number': student.register_number
+                        })
+                    class_name = str(timetable.class_name)
+                    return JsonResponse({'students': student_data, 'date': date, 'period': period,'class_name': class_name})
+            else:
+                return JsonResponse({'message': 'Its a Free Period'})
             return JsonResponse({'error': 'No students Found'}, status=404)
         else:
             return JsonResponse({'message': 'Its a Holiday'})
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 @csrf_exempt
 def submit_attendance(request):
@@ -205,6 +210,51 @@ def submit_attendance(request):
         return redirect('staff_take_attendance')  # Redirect to a success page or the same page
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+def staff_timetable_view(request):
+    # Get the current logged-in user
+    user = request.user
+    staff = Staff.objects.filter(admin=user).first()
+
+    if not staff:
+        return render(request, 'error.html', {'message': 'Staff not found'})
+
+    # Retrieve all periods where the staff member is assigned
+    periods = Period.objects.filter(staff=staff)
+
+    # Retrieve the timetable
+    timetable = TimeTable.objects.filter(
+        department=staff.department,
+        class_name__in=[period.class_name for period in periods]
+    ).first()
+
+    if not timetable:
+        return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
+
+    # Create a structure to hold the timetable data
+    timetable_data = {
+        'monday': [None] * 8,
+        'tuesday': [None] * 8,
+        'wednesday': [None] * 8,
+        'thursday': [None] * 8,
+        'friday': [None] * 8,
+    }
+
+    # Map periods to each day
+    for period in periods:
+        day = period.day_of_week  # Assuming you have a day_of_week field in Period
+        period_number = period.period_number  # Assuming you have a period_number field in Period
+        period_key = f'{day}_{period_number}'
+        if period_key in timetable_data:
+            timetable_data[day][period_number - 1] = period
+        timetable_data['monday'][0]=period
+        
+
+    return render(request, 'staff_template/staff_timetable.html', {'timetable_data': timetable_data})
+
+    # return render(request, 'staff_template/staff_timetable.html', {'timetable': timetable})
+
 
 def add_assignment(request):
     print('this is my data \n',get_object_or_404(Staff, admin=request.user))
@@ -353,17 +403,15 @@ def staff_apply_leave(request):
 
 
 def view_assignment(request):
-    # Get all assignments posted by the staff (user)
     assignments = AssignmentQuestions.objects.filter(uploaded_by=request.user)
-    print(assignments, '\n\n\n\n')
-    # Retrieve all answers for the assignments posted by the staff
     assignment_answers = AssignmentAnswers.objects.filter(assignment_question__in=assignments)
     
-    # Create a dictionary to map assignments to their answers
     assignment_answers_dict = {}
     for assignment in assignments:
         assignment_answers_dict[assignment.id] = assignment_answers.filter(assignment_question=assignment)
-    
+    print(assignments,assignment_answers_dict)
+    for assi in assignments:
+        print(assi.id)
     context = {
         'assignments': assignments,
         'assignment_answers': assignment_answers_dict

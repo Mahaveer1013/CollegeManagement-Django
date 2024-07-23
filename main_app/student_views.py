@@ -16,8 +16,8 @@ from .models import *
 def student_home(request):
     student = get_object_or_404(Student, admin=request.user)
     total_subject = Subject.objects.count()
-    total_attendance = AttendanceReport.objects.filter(student=student).count()
-    total_present = AttendanceReport.objects.filter(
+    total_attendance = Attendance.objects.filter(student=student).count()
+    total_present = Attendance.objects.filter(
         student=student, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
         percent_absent = percent_present = 0
@@ -51,6 +51,13 @@ def student_home(request):
     }
     return render(request, 'student_template/home_content.html', context)
 
+
+def student_view_timetable(request):
+    student = get_object_or_404(Student, admin=request.user)
+    timetable = TimeTable.objects.filter(class_name=student.class_name).first()
+
+    return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
+            
 
 @ csrf_exempt
 def student_view_attendance(request):

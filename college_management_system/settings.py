@@ -35,18 +35,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    # Django Apps
     'jazzmin',
-    
-    # 'django.contrib.sites',
-    # 'admin_interface',
-    # 'colorfield',
-
-    # 'grappelli',
-    
-    # 'jet',
-
-    # 'admin_tools',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,7 +46,6 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     # My Apps
-    # 'main_app.apps.MainAppConfig',
     'main_app'
 ]
 
@@ -217,37 +205,71 @@ JAZZMIN_SETTINGS = {
     },
 }
 
+# JAZZMIN_UI_TWEAKS = {
+#     "navbar_small_text": False,
+#     "footer_small_text": False,
+#     "body_small_text": False,
+#     "brand_small_text": False,
+#     "accent": "accent-teal",
+#     "navbar": "navbar-dark",
+#     # "navbar": "navbar-light",
+#     "no_navbar_border": False,
+#     "navbar_fixed": False,
+#     "layout_boxed": False,
+#     "footer_fixed": False,
+#     "sidebar_fixed": False,
+#     "sidebar": "sidebar-dark-info",
+#     # "sidebar": "sidebar-light-info",
+#     "sidebar_nav_small_text": False,
+#     "sidebar_disable_expand": False,
+#     "sidebar_nav_child_indent": False,
+#     "sidebar_nav_compact_style": False,
+#     "sidebar_nav_legacy_style": False,
+#     "sidebar_nav_flat_style": False,
+#     # "theme": "cyborg",
+#     "theme": "flatly",
+#     "dark_mode_theme": None,
+#     "button_classes": {
+#         "primary": "btn-primary",
+#         "secondary": "btn-secondary",
+#         "info": "btn-info",
+#         "warning": "btn-warning",
+#         "danger": "btn-danger",
+#         "success": "btn-success",
+#     }
+# }
+
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "accent": "accent-teal",
+    # "accent": "accent-teal",
     # "navbar": "navbar-dark",
-    "navbar": "navbar-light",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": False,
+    # # "navbar": "navbar-light",
+    # "no_navbar_border": False,
+    # "navbar_fixed": False,
+    # "layout_boxed": False,
+    # "footer_fixed": False,
+    # "sidebar_fixed": False,
     # "sidebar": "sidebar-dark-info",
-    "sidebar": "sidebar-light-info",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
+    # # "sidebar": "sidebar-light-info",
+    # "sidebar_nav_small_text": False,
+    # "sidebar_disable_expand": False,
+    # "sidebar_nav_child_indent": False,
+    # "sidebar_nav_compact_style": False,
+    # "sidebar_nav_legacy_style": False,
+    # "sidebar_nav_flat_style": False,
     # "theme": "cyborg",
     "theme": "flatly",
-    "dark_mode_theme": None,
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success",
-    }
+    # "dark_mode_theme": None,
+    # "button_classes": {
+    #     "primary": "btn-primary",
+    #     "secondary": "btn-secondary",
+    #     "info": "btn-info",
+    #     "warning": "btn-warning",
+    #     "danger": "btn-danger",
+    #     "success": "btn-success",
+    # }
 }
 

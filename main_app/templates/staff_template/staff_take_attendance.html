@@ -55,7 +55,7 @@
 {% endblock content %}
 
 {% block custom_js %}
-<script>
+<script>document.getElementById('student_data').innerHTML = ''
     function collectCheckboxes() {
         const form = document.getElementById('attendance-form');
         if(form){
@@ -109,7 +109,8 @@
                 .then(data => {
                     if (data.students) {
                         var students = data.students;
-                        var studentDataHtml = "<h3>Students:</h3>";
+                        console.log(students);
+                        var studentDataHtml = `<h3>Students: (${data.class_name})</h3>`;
 
                         if (students.length > 0) {
                             studentDataHtml += `<input type='hidden' value='${data.date}' name='date' id='date' />`;
@@ -121,7 +122,7 @@
                                 <div class='col-lg-5'>
                                     <div class='form-check custom-control custom-checkbox' style="display: flex;align-items: center;justify-content: start;">
                                         <input type='checkbox' class='custom-control-input' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}' onchange='collectCheckboxes()'>
-                                        <label for='checkbox${student.id}'  style="display:flex;text-wrap:nowrap;padding:10px" class='custom-control-label'>${student.name} - (${student.roll_number})</label>
+                                        <label for='checkbox${student.id}'  style="display:flex;text-wrap:nowrap;padding:10px" class='custom-control-label'>${student.name} - (${student.roll_number}) - (${student.register_number})</label>
                                     </div>
                                 </div>
                             `;
@@ -141,7 +142,7 @@
                         }
 
                     } else if (data.message) {
-                        studentDataHtml += "<h3>It's a Holiday<h3>";
+                        studentDataHtml += `<h3 style="width:100%; text-align:center;">${data.message}<h3>`;
                     }
                     document.getElementById('student_data').innerHTML = studentDataHtml;
                 })
