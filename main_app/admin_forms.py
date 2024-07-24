@@ -69,8 +69,9 @@ class StudentForm(forms.ModelForm):
         # Exclude those users from the options in the admin field
         self.fields['admin'].queryset = CustomUser.objects.exclude(
             id__in=linked_users).exclude(user_type='2').exclude(user_type='1')
-        if self.instance.pk:
-            self.fields['admin'].disabled = True
+        if self.instance.pk:  # Check if this is an editing operation
+            if 'admin' in self.fields:
+                del self.fields['admin']
 
 
 class TimeTableForm(forms.ModelForm):

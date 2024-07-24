@@ -38,7 +38,7 @@
 
                         <form id="attendance-form" method="post" action="{% url 'submit_attendance' %}" onsubmit="collectCheckboxes()">
                             {% csrf_token %}
-                            <div id="student_data" class="mt-4">
+                            <div id="student_data" class="mt-4" style="overflow: auto;">
                                 <!-- Students will be populated here with checkboxes -->
                             </div>
 
@@ -153,5 +153,17 @@
         });
     });
 </script>
+<style>
+    .custom-control-label::after{
+        top: 14px;
+        left: -12px;
+    }
+    .custom-control-label::before{
+        position: absolute;
+        top: 14px;
+        left: -12px;
+    }
+</style>
+
 
 {% endblock custom_js %}

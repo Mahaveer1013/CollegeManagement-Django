@@ -68,19 +68,30 @@
                         </p>
                     </a>
                 </li>
+<!-- 
+                <li class="nav-item">
+                    {% url 'admin_view_attendance' as admin_view_attendance %} -->
 
                 <li class="nav-item">
-                    {% url 'admin_view_attendance' as admin_view_attendance %}
-
-                <li class="nav-item">
-                    <a href="{{admin_view_attendance}}"
+                    <a href="{{ admin_view_attendance }}"
                         class="nav-link  {% if admin_view_attendance == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-calendar-alt"></i>
                         <p>
-                            View Attendance
+                            Periodic Attendance
                         </p>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="/attendance/view-overall/"
+                        class="nav-link  {% if admin_view_overall_attendance == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>
+                            Overall Attendance
+                        </p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     {% url 'student_feedback_message' as student_feedback_message %}
 
@@ -345,16 +356,7 @@
                                             <a href="{{student_view_attendance}}"
                                                 class="nav-link {% if student_view_attendance == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-calendar-alt"></i>
-                                                <p>One day Attendance</p>
-                                            </a>
-                                        </li>
-
-                                        <li class="nav-item">
-                                            {% url 'student_view_multi_attendance' as student_view_multi_attendance %}
-                                            <a href="{{student_view_multi_attendance}}"
-                                                class="nav-link {% if student_view_multi_attendance == request.path %} active {% endif %}">
-                                                <i class="nav-icon fas fa-calendar-alt"></i>
-                                                <p>Multi days Attendance</p>
+                                                <p>View Attendance</p>
                                             </a>
                                         </li>
 

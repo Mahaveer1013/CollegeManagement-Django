@@ -3,7 +3,6 @@ from django import forms
 from django.contrib.auth.admin import UserAdmin
 from dal import autocomplete
 from .models import *
-from .admin_models import *
 from .forms import *
 from .admin_forms import *
 
@@ -37,6 +36,11 @@ class StaffAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     form = StudentForm
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # Editing an existing object
+            return self.readonly_fields + ('admin',)
+        return self.readonly_fields
 
 
 @admin.register(AssignmentQuestions)
@@ -91,9 +95,9 @@ class CustomUserAdmin(UserAdmin):
          ),
     )
 
-
+admin.site.register(Examdetail)
 admin.site.register(Department)
 admin.site.register(Subject)
 admin.site.register(ClassList)
 admin.site.register(BloomKeyword)
-admin.site.register(QuestionPaper)
+# admin.site.register(QuestionPaper)

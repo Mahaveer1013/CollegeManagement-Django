@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f2f2;
+            margin: 20px;
+        }
+
+        * {
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        input[type='text'],
+        input[type='number'],
+        select {
+            height: 35px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: aqua;
+        }
+
+        a {
+            color: #008CBA;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 96%;
+        }
+
+        a:hover {
+            color: white;
+            background-color: greenyellow;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="retrievequestionpaper.php" method="post">
+        <a href="faculty.html" style="margin-right: 96%;">Back</a>
+        <table align="center">
+            <tr>
+                <td>Subject Code:</td>
+                <td>
+                    <input type="text" required name="subject_code" id="subject_code" oninput="convertToUpperCase(this)">
+                </td>
+            </tr>
+            <tr>
+                <td>Academic Year:</td>
+                <td><input type="text" required name="academic_year" id="academic_year">
+                </td>
+            </tr>
+            <tr>
+                <td>Faculty ID:</td>
+                <td><input type="number" required name="faculty_id" id="faculty_id">
+                </td>
+            </tr>
+            <tr>
+                <td>Question Paper ID:</td>
+                <td><input type="number" required name="questionpaperid" id="questionpaperid">
+                </td>
+            </tr>
+            <tr>
+                <td>Exam Type:</td>
+                <td>
+
+                    <select name="examtype" id="examtype" required>
+                        <option value=''>TYPE</option>
+                        <option value='INTERNAL ASSESMENT-I'>INTERNAL ASSESMENT-I</option>
+                        <option value='INTERNAL ASSESMENT-II'>INTERNAL ASSESMENT-II</option>
+                        <option value='SEMESTER EXAMINATION'>SEMESTER EXAMINATION</option>
+                    </select>
+                </td>
+            </tr>
+
+        </table>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <script>
+        function convertToUpperCase(inputField) {
+            // Get the user input value
+            var userInput = inputField.value;
+
+            // Convert to uppercase
+            var uppercaseText = userInput.toUpperCase();
+
+            // Update the input field with the uppercase value
+            inputField.value = uppercaseText;
+        }
+    </script>
+</body>
+
+</html>

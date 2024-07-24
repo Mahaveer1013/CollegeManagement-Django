@@ -73,6 +73,25 @@ class AttendanceSelectionForm(forms.Form):
     )
 
 
+class OverallAttendanceSelectionForm(forms.Form):
+    from_date = forms.DateField(label='From :',widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
+    to_date = forms.DateField(label='To :',widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
+    class_name = forms.ModelChoiceField(    
+        queryset=ClassList.objects.all().order_by('department__name', 'semester', 'section'),
+        empty_label="Select a class",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    def clean(self):
+        cleaned_data = super().clean()
+        from_date = cleaned_data.get('from_date')
+        to_date = cleaned_data.get('to_date')
+        if from_date and to_date:
+            if from_date >= to_date:
+                raise ValidationError('From date must be less than to date and they should not be equal.')
+
+        return cleaned_data
+
+
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(AdminForm, self).__init__(*args, **kwargs)

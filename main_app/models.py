@@ -7,13 +7,16 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
+
 def create_default_superuser(sender, **kwargs):
     User = get_user_model()
     if not User.objects.filter(email="admin@gmail.com").exists():
         User.objects.create_superuser(email="admin@gmail.com", password="1013")
         print("Default superuser created with email: admin@gmail.com and password: 1013")
 
+
 post_migrate.connect(create_default_superuser)
+
 
 class CustomUserManager(UserManager):
     def _create_user(self, email, password, **extra_fields):
@@ -82,7 +85,8 @@ class ClassList(models.Model):
         ('8', '8th'),
     )
 
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     section = models.CharField(max_length=100)
 
@@ -103,8 +107,10 @@ class Subject(models.Model):
 
 class Student(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(
+        ClassList, on_delete=models.SET_NULL, null=True)
     register_number = models.CharField(max_length=100, unique=True)
     roll_number = models.CharField(max_length=100, unique=True)
     dob = models.DateField(null=True, default=None)
@@ -114,17 +120,19 @@ class Student(models.Model):
 
 
 class Staff(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=False)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
 
 
 class Period(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(
+        ClassList, on_delete=models.SET_NULL, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
     staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True)
 
@@ -133,8 +141,10 @@ class Period(models.Model):
 
 
 class TimeTable(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    class_name = models.ForeignKey(ClassList, on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True)
+    class_name = models.ForeignKey(
+        ClassList, on_delete=models.SET_NULL, null=True)
     monday_1 = models.ForeignKey(
         Period, on_delete=models.CASCADE, related_name='monday_1')
     monday_2 = models.ForeignKey(
@@ -220,7 +230,7 @@ class TimeTable(models.Model):
 
     def __str__(self):
         return f"{self.class_name} Timetable"
-    
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -283,26 +293,30 @@ class Attendance(models.Model):
     STATUS_CHOICES = [
         (0, 'Absent'),
         (1, 'Present'),
-        (2, 'On Duty Internal'),  
+        (2, 'On Duty Internal'),
         (3, 'On Duty External'),
         (4, 'Pending')
     ]
 
-    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='attendances')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
+    subject = models.ForeignKey(
+        Subject, on_delete=models.SET_NULL, null=True, related_name='attendances')
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField()
     period = models.PositiveIntegerField()  # Ensure this is a positive integer
-    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=4)
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_CHOICES, default=4)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-
     class Meta:
-        unique_together = ('student', 'date', 'period')  # Ensure unique records
+        # Ensure unique records
+        unique_together = ('student', 'date', 'period')
         indexes = [
-            models.Index(fields=['student', 'date']),  # Indexes for faster querying
+            # Indexes for faster querying
+            models.Index(fields=['student', 'date']),
         ]
-    
+
     def clean(self):
         super().clean()
         if not (1 <= self.period <= 8):
@@ -331,10 +345,12 @@ class BloomKeyword(models.Model):
     )
     word = models.CharField(max_length=120)
     bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
-    def __str__(self):
-        return self.word+' - '+ self.bloom_level
 
-class QuestionPaper(models.Model):
+    def __str__(self):
+        return self.word+' - ' + self.bloom_level
+
+
+class Examdetail(models.Model):
     SEM_CHOICES = (
         ('1', '1st'),
         ('2', '2nd'),
@@ -351,13 +367,30 @@ class QuestionPaper(models.Model):
         ('3', 'Semester Examination')
     )
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    added_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    added_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=False)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     exam_date = models.DateField()
     exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=False)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True, blank=False)
+    academic_year = models.CharField(max_length=20)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Question(models.Model):
+    QUESTION_MARK = (
+        ('1', '2 Mark'),
+        ('2', '13 Mark'),
+        ('3', '15 mark')
+    )
+    exam_detail = models.ForeignKey(Examdetail, on_delete=models.CASCADE)
+    question_text = models.TextField()
+    unit_no = models.IntegerField()
+    mark = models.CharField(max_length=1, choices=QUESTION_MARK)
+    course_outcome = models.CharField(max_length=10)
+    bloom_level = models.CharField(max_length=50)
 
 
 class AssignmentQuestions(models.Model):
@@ -368,15 +401,17 @@ class AssignmentQuestions(models.Model):
     subject = models.ForeignKey(Period, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return f"{self.subject} - {self.uploaded_by}"
-    
+
 
 class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
         AssignmentQuestions, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    pdf = models.FileField(upload_to='assignments/answers', null=True, blank=True)
+    pdf = models.FileField(
+        upload_to='assignments/answers', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -457,7 +492,3 @@ def save_user_profile(sender, instance, **kwargs):
         instance.staff.save()
     if instance.user_type == 3:
         instance.student.save()
-
-
-
-

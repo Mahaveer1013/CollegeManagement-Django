@@ -235,7 +235,6 @@ def student_view_assignment(request):
     return render(request, 'student_template/student_view_assignment.html', context)
 
 
-
 @csrf_exempt
 def student_fcmtoken(request):
     token = request.POST.get('token')
