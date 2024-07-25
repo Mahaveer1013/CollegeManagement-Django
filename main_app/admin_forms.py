@@ -44,6 +44,9 @@ class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
         fields = '__all__'
+        labels = {
+            'admin': 'User',  # Setting the label for the admin field
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,6 +77,9 @@ class StudentForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'class_name': autocomplete.ModelSelect2(url='dep-to-class-autocomplete', forward=['department']),
+        }
+        labels = {
+            'admin': 'User',  # Setting the label for the admin field
         }
 
     def __init__(self, *args, **kwargs):

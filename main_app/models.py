@@ -156,6 +156,7 @@ class Staff(models.Model):
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    resume = models.FileField(upload_to='staff/resume',null=True)
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"

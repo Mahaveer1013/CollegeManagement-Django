@@ -110,7 +110,7 @@ class QuestionAdmin(admin.ModelAdmin):
                             bloom_keyword = BloomKeyword.objects.filter(
                                 word__iexact=word).first()
                             if bloom_keyword:
-                                bloom_level = bloom_keyword.bloom_level
+                                bloom_level = bloom_keyword
                                 break
 
                     setattr(obj, f'bloom_level{i}', bloom_level)
@@ -129,16 +129,16 @@ class NotesAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-class CustomPermissionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'get_permission_label', 'content_type')
+# class CustomPermissionAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'get_permission_label', 'content_type')
 
-    def get_permission_label(self, obj):
-        return obj.get_permission_label()
-    get_permission_label.short_description = 'Label'
+#     def get_permission_label(self, obj):
+#         return obj.get_permission_label()
+#     get_permission_label.short_description = 'Label'
 
 
-# Unregister the default Permission model admin and register the custom one
-admin.site.register(Permission, CustomPermissionAdmin)
+# # Unregister the default Permission model admin and register the custom one
+# admin.site.register(Permission, CustomPermissionAdmin)
 
 admin.site.register(ExamDetail)
 admin.site.register(Department)

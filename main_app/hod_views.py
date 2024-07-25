@@ -266,7 +266,7 @@ def exam_filter_page(request):
         else:
             messages.error(request, 'There was an error with your form submission.')
     
-    return render(request, 'hod_template/exam_filter_page.html', {'form': form})
+    return render(request, 'hod_template/exam_filter_page.html', {'form': form,'page_title':'Question Paper Details'})
 
 
 # @csrf_exempt
