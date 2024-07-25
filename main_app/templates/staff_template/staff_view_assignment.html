@@ -34,7 +34,7 @@
                                         {% if assignment_id %}
                                         <ul style="list-style: none;padding: 10px;display: flex;flex-direction: column;gap: 20px;">
                                             {% for answer in assignment_id %}
-                                            <li style="display: flex;justify-content: space-between;align-items: center;">
+                                            <li style="display: flex;justify-content: space-between;align-items: center;gap: 8px;">
                                                 {% if answer.pdf %}
                                                 {{answer.student.register_number}} <i class="fas fa-arrow-right"></i> <a href="{{ answer.pdf.url }}" class="btn btn-info" target="_blank">View</a>
                                                 {% else %}

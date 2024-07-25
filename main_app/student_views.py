@@ -8,7 +8,8 @@ from django.shortcuts import (HttpResponseRedirect, get_object_or_404,
                               redirect, render)
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db.models import Value, CharField
+from django.db.models.functions import Concat
 from .forms import *
 from .models import *
 
@@ -29,11 +30,8 @@ def student_home(request):
     data_absent = []
     subjects = Subject.objects.all()
     for subject in subjects:
-        attendance = Attendance.objects.filter(subject=subject)
-        present_count = AttendanceReport.objects.filter(
-            attendance__in=attendance, status=True, student=student).count()
-        absent_count = AttendanceReport.objects.filter(
-            attendance__in=attendance, status=False, student=student).count()
+        present_count = Attendance.objects.filter(student=student,subject=subject,status=1).count()
+        absent_count = Attendance.objects.filter(student=student,subject=subject,status=0).count()
         subject_name.append(subject.name)
         data_present.append(present_count)
         data_absent.append(absent_count)
@@ -189,7 +187,7 @@ def student_view_assignment(request):
     if request.method == 'POST':
         try:
             assignment_id = request.POST.get('assignment_id')
-            assignment = get_object_or_404(AssignmentQuestions, id=assignment_id)
+            assignment = get_object_or_404(AssignmentQuestion, id=assignment_id)
             form = AssignmentAnswersForm(request.POST, request.FILES, prefix=str(assignment.id))
             if form.is_valid():
                 pdf_file = form.cleaned_data['pdf']
@@ -204,7 +202,7 @@ def student_view_assignment(request):
         except Exception as e:
             messages.error(request, "Error Occurred Uploading Answer " + str(e))
     
-    assignments = AssignmentQuestions.objects.filter(class_name=student.class_name)
+    assignments = AssignmentQuestion.objects.filter(class_name=student.class_name)
     
     # Initialize the context with assignments and forms
     context = {
@@ -233,6 +231,24 @@ def student_view_assignment(request):
             context['answer_urls'][assignment.id] = None
 
     return render(request, 'student_template/student_view_assignment.html', context)
+
+
+def student_view_note(request):
+    student = get_object_or_404(Student, admin=request.user)
+    all_student_periods = Period.objects.filter(class_name=student.class_name).values_list('subject', flat=True)
+    print(all_student_periods)
+    notes = Note.objects.filter(department=student.department, subject__in=all_student_periods).annotate(
+    str_representation=Concat(
+        'department__name',  # Assuming the Department model has a 'name' field
+        Value(' - '),
+        'subject__name',     # Assuming the Subject model has a 'name' field
+        Value(' - '),
+        'unit',
+        output_field=CharField()
+    )
+).order_by('str_representation')
+    return render(request, 'student_template/student_notes.html', {'notes':notes})
+
 
 
 @csrf_exempt

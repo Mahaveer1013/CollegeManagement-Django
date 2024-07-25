@@ -129,8 +129,6 @@ def admin_view_attendance(request):
             else:
                 messages.success(request, "No Attendance Records Found")
                 return redirect(reverse('admin_view_attendance'))
-            for atten in attendance_array:
-                print(atten, '\n\n\n')
 
             return render(request, "hod_template/attendance_view_page.html", {'attendance_list': attendance_array, 'class_name': str(class_id)})
         else:
@@ -155,29 +153,26 @@ def admin_view_overall_attendance(request):
                 if len(students_id) > 0:
                     for student in students_id:
                         if Attendance.objects.filter(date = current_date, student=student, status=1).first():
-                            attendance_array[student.id] = 'Present'
+                            attendance_array[student.roll_number] = 'Present'
                         elif  Attendance.objects.filter(date = current_date, student=student, status=2).first():
-                            attendance_array[student.id] = 'OD Internal'
+                            attendance_array[student.roll_number] = 'OD Internal'
                         elif  Attendance.objects.filter(date = current_date, student=student, status=3).first():
-                            attendance_array[student.id] = 'OD External'
+                            attendance_array[student.roll_number] = 'OD External'
                         elif  Attendance.objects.filter(date = current_date, student=student, status=0).first():
-                            attendance_array[student.id] = 'Absent'
+                            attendance_array[student.roll_number] = 'Absent'
                         elif  Attendance.objects.filter(date = current_date, student=student, status=4).first():
-                            attendance_array[student.id] = 'Pending'
+                            attendance_array[student.roll_number] = 'Pending'
                 if len(attendance_array)>0:
-                    overall_attendance[current_date]=attendance_array
+                    overall_attendance[str(current_date)]=attendance_array
                 current_date += datetime.timedelta(days=1)  
-            print(overall_attendance, '\n\n\n')
             dates = list(overall_attendance.keys())
-            register_numbers = list(overall_attendance[dates[0]]) if dates else []
-            print(dates, register_numbers)
-            return render(request, "hod_template/overall_attendance_view_page.html", {'overall_attendance': overall_attendance, 'class_name': str(class_id), 'dates': dates, 'register_numbers':register_numbers})
+            roll_numbers = list(overall_attendance[dates[0]]) if dates else []
+            return render(request, "hod_template/overall_attendance_view_page.html", {'overall_attendance': overall_attendance, 'class_name': str(class_id), 'dates': dates, 'roll_numbers':roll_numbers})
         else:
             messages.error(request, "Invalid Data Provided")
     context = {'form': form, 'page_title': 'Select Attendance Details'}
 
     return render(request, "hod_template/admin_view_overall_attendance.html", context)
-
 
 
 def admin_view_profile(request):
@@ -233,6 +228,45 @@ def admin_notify_student(request):
         'students': student
     }
     return render(request, "hod_template/student_notification.html", context)
+
+
+# def get_subjects(request):
+#     department_id = request.GET.get('department')
+#     subjects = Subject.objects.all()
+#     return JsonResponse(list(subjects), safe=False)
+
+
+def exam_filter_page(request):
+    form = ExamDetailForm()
+    context={
+        'form':form,
+        'page_title': 'Question Paper'
+    }
+    if request.method == 'POST':
+        form = ExamDetailForm(request.POST)
+        if form.is_valid():
+            department = form.cleaned_data['department']
+            subject = form.cleaned_data['subject']
+            semester = form.cleaned_data['semester']
+            exam_type = form.cleaned_data['exam_type']
+            print(department)
+            print(subject)
+            print(semester)
+            print(exam_type)
+            exam_detail = ExamDetail.objects.filter(subject=subject, department=department, semester=semester, exam_type=exam_type).first()
+            print(exam_detail)
+            q_paper = Question.objects.filter(exam_detail=exam_detail).first()
+
+            if q_paper:
+                print(q_paper)
+                return render(request, "hod_template/question_paper_template.html", {'q_paper':q_paper})
+            else:
+                messages.error(request, 'No Question Paper Found.')
+                
+        else:
+            messages.error(request, 'There was an error with your form submission.')
+    
+    return render(request, 'hod_template/exam_filter_page.html', {'form': form})
 
 
 # @csrf_exempt
@@ -530,11 +564,13 @@ def download_single_day_attendance(request):
             attendance_list = []
     else:
         attendance_list = []
+    roll_num_of_one_student = attendance_list[0][0]
+    student = get_object_or_404(Student, roll_number=roll_num_of_one_student)
 
     # Create a workbook and select the active worksheet
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
-    worksheet.title = "Attendance"
+    worksheet.title = str(student.class_name)+" - Attendance"
 
     # Define fill colors
     # Orange background for Absent
@@ -550,7 +586,7 @@ def download_single_day_attendance(request):
 
     # Write the header row
     headers = [
-        'Student',
+        'Roll Number',
         'Period 1',
         'Period 2',
         'Period 3',
@@ -584,7 +620,7 @@ def download_single_day_attendance(request):
     # Create the HTTP response object with Excel content type
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="attendance.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="{str(student.class_name)} -attendance.xlsx"'
 
     # Save the workbook to the response object
     workbook.save(response)
@@ -605,3 +641,40 @@ def check_atten_with_number(atten):
         return 'On Duty External'
     elif atten == 4:
         return 'Pending'
+
+
+@require_GET
+def download_overall_day_attendance(request):
+    print('frbtdg\n\n\n')
+    user = get_object_or_404(Admin, admin=request.user)
+    overall_attendance = json.loads(request.GET.get('overall_attendance', '{}'))
+
+    # Add headers
+    dates = list(overall_attendance.keys())
+    roll_numbers = list(next(iter(overall_attendance.values())).keys())
+    student = get_object_or_404(Student, roll_number=roll_numbers[0])
+    # Create an Excel workbook and sheet
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = f'Attendance of {student.class_name}'
+
+
+    header = ['Roll Number'] + dates
+    sheet.append(header)
+
+    # Add data
+    for reg in roll_numbers:
+        row = [reg]
+        for date in dates:
+            row.append(overall_attendance[date].get(reg, ''))
+        sheet.append(row)
+
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename={student.class_name}_overall_attendance.xlsx'
+
+    # Save workbook to response
+    workbook.save(response)
+    return response

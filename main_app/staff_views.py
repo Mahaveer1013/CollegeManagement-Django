@@ -10,7 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .forms import *
 from .models import *
-from django.db.models import Q
+from django.db.models import Value, CharField
+from django.db.models.functions import Concat
 from datetime import datetime
 
 
@@ -18,7 +19,7 @@ def staff_home(request):
     staff = get_object_or_404(Staff, admin=request.user)
     total_students = Student.objects.filter(
         department=staff.department).count()
-    total_leave = LeaveReportStaff.objects.filter(staff=staff).count()
+    total_leave = LeaveReportStaff.objects.filter(staff=staff, status=1).count()
     subjects = Subject.objects.filter(period__staff=staff).distinct()
     print(subjects, 'this is sthe stsaff\n\n\n')
     total_subject = subjects.count()
@@ -52,6 +53,23 @@ def staff_take_attendance(request):
     }
 
     return render(request, 'staff_template/staff_take_attendance.html', context)
+
+
+def staff_view_note(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    all_staff_periods = Period.objects.filter(department=staff.department).values_list('subject', flat=True)
+    print(all_staff_periods)
+    notes = Note.objects.filter(department=staff.department, subject__in=all_staff_periods).annotate(
+    str_representation=Concat(
+        'department__name',  # Assuming the Department model has a 'name' field
+        Value(' - '),
+        'subject__name',     # Assuming the Subject model has a 'name' field
+        Value(' - '),
+        'unit',
+        output_field=CharField()
+    )
+).order_by('str_representation')
+    return render(request, 'student_template/student_notes.html', {'notes':notes})
 
 
 @csrf_exempt  # Temporarily exempt from CSRF validation for debugging
@@ -212,46 +230,44 @@ def submit_attendance(request):
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
-def staff_timetable_view(request):
+def staff_view_timetable(request):
     # Get the current logged-in user
-    user = request.user
-    staff = Staff.objects.filter(admin=user).first()
+    staff = get_object_or_404(Staff, admin=request.user)
 
     if not staff:
         return render(request, 'error.html', {'message': 'Staff not found'})
 
-    # Retrieve all periods where the staff member is assigned
     periods = Period.objects.filter(staff=staff)
+    staff_timetable = {}
+    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    period_count = ['1','2','3','4','5','6','7','8']
 
-    # Retrieve the timetable
-    timetable = TimeTable.objects.filter(
-        department=staff.department,
-        class_name__in=[period.class_name for period in periods]
-    ).first()
+    for day in days:
+        for count in period_count:
+            column = f"{day}_{count}"
+            print(column)
+
+            timetable_list = TimeTable.objects.filter(
+                department=staff.department,
+                class_name__in=[period.class_name for period in periods]
+            )
+            found = False
+            for timetable in timetable_list:
+                print(getattr(timetable,column).staff, '\n', type(getattr(timetable,column).staff))
+                print(staff, '\n', type(staff))
+                if getattr(timetable,column).staff == staff:
+                    staff_timetable[column] = timetable.class_name
+                    found = True
+                    break
+            if found == False:
+                staff_timetable[column] = 'Free Period'
+    print(staff_timetable)
 
     if not timetable:
         return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
-
-    # Create a structure to hold the timetable data
-    timetable_data = {
-        'monday': [None] * 8,
-        'tuesday': [None] * 8,
-        'wednesday': [None] * 8,
-        'thursday': [None] * 8,
-        'friday': [None] * 8,
-    }
-
-    # Map periods to each day
-    for period in periods:
-        day = period.day_of_week  # Assuming you have a day_of_week field in Period
-        period_number = period.period_number  # Assuming you have a period_number field in Period
-        period_key = f'{day}_{period_number}'
-        if period_key in timetable_data:
-            timetable_data[day][period_number - 1] = period
-        timetable_data['monday'][0]=period
         
 
-    return render(request, 'staff_template/staff_timetable.html', {'timetable_data': timetable_data})
+    return render(request, 'staff_template/staff_timetable.html', {'staff_timetable': staff_timetable})
 
     # return render(request, 'staff_template/staff_timetable.html', {'timetable': timetable})
 
@@ -403,7 +419,7 @@ def staff_apply_leave(request):
 
 
 def view_assignment(request):
-    assignments = AssignmentQuestions.objects.filter(uploaded_by=request.user)
+    assignments = AssignmentQuestion.objects.filter(uploaded_by=request.user)
     assignment_answers = AssignmentAnswers.objects.filter(assignment_question__in=assignments)
     
     assignment_answers_dict = {}

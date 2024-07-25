@@ -1,33 +1,114 @@
 {% extends 'main_app/base.html' %}
-
+{% load static %}
+{% block page_title %}Timetable {{class_name}}{% endblock page_title %}
 {% block content %}
-<h1>Your Timetable</h1>
 
-<table>
-    <thead>
-        <tr>
-            <th>Day</th>
-            {% for i in 1|to:8 %}
-            <th>Period {{ i }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for day, periods_list in timetable_data.items %}
-        <tr>
-            <td>{{ day|title }}</td>
-            {% for period in periods_list %}
-            <td>
-                {% if period %}
-                    {{ period.subject.name }}<br>
-                    Class: {{ period.class_name.section }}
-                {% else %}
-                    Free
-                {% endif %}
-            </td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+
+                <!-- /.card -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Timetable {{class_name}}</h3>
+                    </div>
+                    <div class="timetable" style="overflow-x: auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Day</th>
+                                    <th style="text-align: center;">1</th>
+                                    <th style="text-align: center;">2</th>
+                                    <th style="text-align: center;">3</th>
+                                    <th style="text-align: center;">4</th>
+                                    <th style="text-align: center;">5</th>
+                                    <th style="text-align: center;">6</th>
+                                    <th style="text-align: center;">7</th>
+                                    <th style="text-align: center;">8</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td><b>Monday</b></td>
+                                    <td class="{% if staff_timetable.monday_1 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_1}}</td>
+                                    <td class="{% if staff_timetable.monday_2 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_2}}</td>
+                                    <td class="{% if staff_timetable.monday_3 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_3}}</td>
+                                    <td class="{% if staff_timetable.monday_4 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_4}}</td>
+                                    <td class="{% if staff_timetable.monday_5 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_5}}</td>
+                                    <td class="{% if staff_timetable.monday_6 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_6}}</td>
+                                    <td class="{% if staff_timetable.monday_7 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_7}}</td>
+                                    <td class="{% if staff_timetable.monday_8 == 'Free Period' %} free {% endif %}">{{staff_timetable.monday_8}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Tuesday</b></td>
+                                    <td class="{% if staff_timetable.tuesday_1 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_1}}</td>
+                                    <td class="{% if staff_timetable.tuesday_2 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_2}}</td>
+                                    <td class="{% if staff_timetable.tuesday_3 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_3}}</td>
+                                    <td class="{% if staff_timetable.tuesday_4 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_4}}</td>
+                                    <td class="{% if staff_timetable.tuesday_5 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_5}}</td>
+                                    <td class="{% if staff_timetable.tuesday_6 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_6}}</td>
+                                    <td class="{% if staff_timetable.tuesday_7 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_7}}</td>
+                                    <td class="{% if staff_timetable.tuesday_8 == 'Free Period' %} free {% endif %}">{{staff_timetable.tuesday_8}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Wednesday</b></td>
+                                    <td class="{% if staff_timetable.wednesday_1 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_1}}</td>
+                                    <td class="{% if staff_timetable.wednesday_2 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_2}}</td>
+                                    <td class="{% if staff_timetable.wednesday_3 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_3}}</td>
+                                    <td class="{% if staff_timetable.wednesday_4 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_4}}</td>
+                                    <td class="{% if staff_timetable.wednesday_5 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_5}}</td>
+                                    <td class="{% if staff_timetable.wednesday_6 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_6}}</td>
+                                    <td class="{% if staff_timetable.wednesday_7 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_7}}</td>
+                                    <td class="{% if staff_timetable.wednesday_8 == 'Free Period' %} free {% endif %}">{{staff_timetable.wednesday_8}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Thursday</b></td>
+                                    <td class="{% if staff_timetable.thursday_1 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_1}}</td>
+                                    <td class="{% if staff_timetable.thursday_2 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_2}}</td>
+                                    <td class="{% if staff_timetable.thursday_3 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_3}}</td>
+                                    <td class="{% if staff_timetable.thursday_4 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_4}}</td>
+                                    <td class="{% if staff_timetable.thursday_5 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_5}}</td>
+                                    <td class="{% if staff_timetable.thursday_6 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_6}}</td>
+                                    <td class="{% if staff_timetable.thursday_7 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_7}}</td>
+                                    <td class="{% if staff_timetable.thursday_8 == 'Free Period' %} free {% endif %}">{{staff_timetable.thursday_8}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Friday</b></td>
+                                    <td class="{% if staff_timetable.friday_1 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_1}}</td>
+                                    <td class="{% if staff_timetable.friday_2 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_2}}</td>
+                                    <td class="{% if staff_timetable.friday_3 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_3}}</td>
+                                    <td class="{% if staff_timetable.friday_4 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_4}}</td>
+                                    <td class="{% if staff_timetable.friday_5 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_5}}</td>
+                                    <td class="{% if staff_timetable.friday_6 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_6}}</td>
+                                    <td class="{% if staff_timetable.friday_7 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_7}}</td>
+                                    <td class="{% if staff_timetable.friday_8 == 'Free Period' %} free {% endif %}">{{staff_timetable.friday_8}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<style>
+    .timetable{
+        cursor: pointer;
+    }
+    .timetable td{
+        text-align: center;
+        font-weight: 1000;
+    }
+    .timetable td.free{
+        color: red;
+    }
+    
+</style>
+
+{% endblock custom_js %}

@@ -1,0 +1,47 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+
+                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Update Profile"%}
+                </div>
+                <!-- /.card -->
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<!-- <script>
+    function updateSubjects() {
+        const departmentId = document.querySelector('[name="department"]').value;
+        const subjectField = document.querySelector('[name="subject"]');
+        
+        fetch(`/api/subjects?department=${departmentId}`)
+            .then(response => response.json())
+            .then(data => {
+                subjectField.innerHTML = '<option value="">Select Subject</option>';
+                data.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.id;
+                    option.textContent = subject.name;
+                    subjectField.appendChild(option);
+                });
+            });
+    }
+</script> -->
+
+{% endblock custom_js %}

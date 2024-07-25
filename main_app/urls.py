@@ -26,6 +26,7 @@ urlpatterns = [
     path("doLogin/", views.doLogin, name='user_login'),
     path("logout_user/", views.logout_user, name='user_logout'),
     path("admin/home/", hod_views.admin_home, name='admin_home'),
+    path("admin/exam/filter", hod_views.exam_filter_page, name='exam_filter_page'),
     #     path("staff/add", hod_views.add_staff, name='add_staff'),
     #     path("department/add", hod_views.add_department, name='add_department'),
     path("send_student_notification/", hod_views.send_student_notification,
@@ -43,11 +44,12 @@ urlpatterns = [
          name="student_feedback_message",),
     path("staff/view/feedback/", hod_views.staff_feedback_message,
          name="staff_feedback_message",),
+     # path('api/subjects/', hod_views.get_subjects, name='get_subjects'),
     path("student/view/leave/", hod_views.view_student_leave,
          name="view_student_leave",),
     path("staff/view/leave/", hod_views.view_staff_leave, name="view_staff_leave",),
     path("attendance/view/", hod_views.admin_view_attendance,
-         name="admin_view_attendance",),
+         name="admin_view_attendance"),
     # path("attendance/view_multi/", hod_views.student_view_multi_attendance, name="student_view_multi_attendance",),
     # path("attendance/fetch/", hod_views.get_admin_attendance, name='get_admin_attendance'),
     path('admin/get_classes_by_department/',
@@ -87,6 +89,8 @@ urlpatterns = [
          name='download_staff_template'),
     path('download/download-day-attendance/',
          hod_views.download_single_day_attendance, name='download_single_day_attendance'),
+    path('download/download-overall-attendance/',
+         hod_views.download_overall_day_attendance, name='download_overall_day_attendance'),
 
 
 
@@ -103,6 +107,7 @@ urlpatterns = [
          staff_views.submit_attendance, name='submit_attendance'),
     path("staff/attendance/update/", staff_views.staff_update_attendance,
          name='staff_update_attendance'),
+    path("staff/notes/", staff_views.staff_view_note, name='staff_view_note'),
     path("staff/add_assignment/", staff_views.add_assignment, name='add_assignment'),
     path("staff/view_assignment/",
          staff_views.view_assignment, name='view_assignment'),
@@ -119,14 +124,15 @@ urlpatterns = [
     path("staff/result/add/", staff_views.staff_add_result, name='staff_add_result'),
     path('staff/result/fetch/', staff_views.fetch_student_result,
          name='fetch_student_result'),
-    path('staff/timetable/', staff_views.staff_timetable_view,
-         name='staff_timetable_view'),
+    path('staff/timetable/', staff_views.staff_view_timetable,
+         name='staff_view_timetable'),
 
-    #     path("staff/result/edit/", EditResultView.as_view(), name='edit_student_result'),
+    #path("staff/result/edit/", EditResultView.as_view(), name='edit_student_result'),
 
 
     # Student
     path("student/home/", student_views.student_home, name='student_home'),
+    path("student/notes/", student_views.student_view_note, name='student_view_note'),
     path("student/view/attendance/", student_views.student_view_attendance,
          name='student_view_attendance'),
     path("student/apply/leave/", student_views.student_apply_leave,

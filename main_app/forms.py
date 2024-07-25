@@ -117,6 +117,58 @@ class AttendanceForm(FormSettings):
             'end_semester': DateInput(attrs={'type': 'date'}),
         }
 
+class ExamDetailForm(FormSettings):
+    semester_choices = (
+        ('1st', '1st'),
+        ('2nd', '2nd'),
+        ('3rd', '3rd'),
+        ('4th', '4th'),
+        ('5th', '5th'),
+        ('6th', '6th'),
+        ('7th', '7th'),
+        ('8th', '8th'),
+    )
+    exam_type_choices = (
+        ('1', 'Internal Assesment 1'),
+        ('2', 'Internal Assesment 2'),
+        ('3', 'Semester Examination')
+    )
+
+    academic_year_choices = [
+        (year,year)
+        for year in AcademicYear.objects.all()
+    ]
+
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        empty_label="Select Department",
+        widget=forms.Select(attrs={'onchange': 'updateSubjects()'})
+    )
+
+    academic_year = forms.ChoiceField(
+        choices=academic_year_choices,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    subject = forms.ModelChoiceField(
+        queryset=Subject.objects.all(),
+        empty_label="Select Subject"
+    )
+    
+    semester = forms.ChoiceField(
+        choices=semester_choices,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    exam_type = forms.ChoiceField(
+        choices=exam_type_choices,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    class Meta:
+        model = ExamDetail
+        fields = ['department', 'subject', 'semester', 'exam_type']
+
 
 # class AssignmentQuestionsForm(forms.ModelForm):
 #     def __init__(self, *args, **kwargs):

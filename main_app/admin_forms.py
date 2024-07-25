@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from .models import *
 from dal import autocomplete
+import random
 
 User = get_user_model()
 
@@ -31,6 +32,14 @@ class PeriodForm(forms.ModelForm):
         }
 
 
+class ReadOnlyWidget(forms.widgets.Widget):
+    def render(self, name, value, attrs=None, renderer=None):
+        if value is None:
+            return ''
+        custom_user = CustomUser.objects.get(pk=value)
+        return f"{custom_user.first_name} {custom_user.last_name}"
+
+
 class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
@@ -47,8 +56,16 @@ class StaffForm(forms.ModelForm):
         self.fields['admin'].queryset = CustomUser.objects.exclude(
             id__in=linked_users
         ).exclude(user_type='3').exclude(user_type='1')
+        self.fields['admin'].required = False
         if self.instance.pk:
-            self.fields['admin'].disabled = True
+            # Set the initial value and use ReadOnlyWidget
+            self.fields['admin'].initial = self.instance.admin.id
+            self.fields['admin'].widget = ReadOnlyWidget()
+
+    def clean_admin(self):
+        if self.instance.pk:
+            return self.instance.admin
+        return self.cleaned_data.get('admin')
 
 
 class StudentForm(forms.ModelForm):
@@ -69,9 +86,16 @@ class StudentForm(forms.ModelForm):
         # Exclude those users from the options in the admin field
         self.fields['admin'].queryset = CustomUser.objects.exclude(
             id__in=linked_users).exclude(user_type='2').exclude(user_type='1')
-        if self.instance.pk:  # Check if this is an editing operation
-            if 'admin' in self.fields:
-                del self.fields['admin']
+        self.fields['admin'].required = False
+        if self.instance.pk:
+            # Set the initial value and use ReadOnlyWidget
+            self.fields['admin'].initial = self.instance.admin.id
+            self.fields['admin'].widget = ReadOnlyWidget()
+
+    def clean_admin(self):
+        if self.instance.pk:
+            return self.instance.admin
+        return self.cleaned_data.get('admin')
 
 
 class TimeTableForm(forms.ModelForm):
@@ -152,3 +176,26 @@ class TimeTableForm(forms.ModelForm):
     #         for field_name in self.fields:
     #             if field_name.endswith('_staff'):
     #                 self.fields[field_name].queryset = Staff.objects.exclude(id__in=assigned_staff)
+
+
+class QuestionForm(forms.ModelForm):
+
+    class Meta:
+        model = Question
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        existing_questions = Question.objects.values_list('exam_detail', flat=True)
+        self.fields['exam_detail'].queryset = ExamDetail.objects.exclude(
+            id__in=existing_questions)
+        
+
+        # Populate question_text fields with random words from BloomKeyword
+        bloom_keywords = BloomKeyword.objects.all()
+        word_array = [keyword.word for keyword in bloom_keywords]
+        for field_name in self.fields:
+            if field_name.startswith('question_text'):
+                random_word = random.choice(word_array)
+                self.fields[field_name].initial = 'Dummy Question By default. ' + random_word
+

@@ -6,6 +6,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+# from django.contrib.auth.models import Permission
+from django.utils.translation import gettext_lazy as _
 
 
 def create_default_superuser(sender, **kwargs):
@@ -64,6 +66,35 @@ class Admin(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
 
+class AcademicYear(models.Model):
+    academic_year_start = models.IntegerField()
+    academic_year_end = models.IntegerField()
+
+    def clean(self):
+        super().clean()
+
+        # Ensure both years are four digits
+        if not (1000 <= self.academic_year_start <= 9999):
+            raise ValidationError(
+                _('Academic year start must be a four-digit number.'))
+        if not (1000 <= self.academic_year_end <= 9999):
+            raise ValidationError(
+                _('Academic year end must be a four-digit number.'))
+
+        # Ensure the academic year end is after the start
+        if self.academic_year_end <= self.academic_year_start:
+            raise ValidationError(
+                _('Academic year end must be after the start year.'))
+
+        # Ensure the academic year end is exactly one year after the start
+        if self.academic_year_end != self.academic_year_start + 4:
+            raise ValidationError(
+                _('Academic year end must be exactly four years after the start year.'))
+
+    def __str__(self):
+        return f"{self.academic_year_start}-{self.academic_year_end}"
+
+
 class Department(models.Model):
     name = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -114,6 +145,8 @@ class Student(models.Model):
     register_number = models.CharField(max_length=100, unique=True)
     roll_number = models.CharField(max_length=100, unique=True)
     dob = models.DateField(null=True, default=None)
+    academic_year = models.ForeignKey(
+        AcademicYear, on_delete=models.SET_NULL, null=True, blank=False)
 
     def __str__(self):
         return f"{self.admin.first_name} {self.admin.last_name}"
@@ -350,50 +383,199 @@ class BloomKeyword(models.Model):
         return self.word+' - ' + self.bloom_level
 
 
-class Examdetail(models.Model):
+class ExamDetail(models.Model):
     SEM_CHOICES = (
-        ('1', '1st'),
-        ('2', '2nd'),
-        ('3', '3rd'),
-        ('4', '4th'),
-        ('5', '5th'),
-        ('6', '6th'),
-        ('7', '7th'),
-        ('8', '8th'),
+        ('1st', '1st'),
+        ('2nd', '2nd'),
+        ('3rd', '3rd'),
+        ('4th', '4th'),
+        ('5th', '5th'),
+        ('6th', '6th'),
+        ('7th', '7th'),
+        ('8th', '8th'),
     )
+
     EXAM_TYPE = (
         ('1', 'Internal Assesment 1'),
         ('2', 'Internal Assesment 2'),
         ('3', 'Semester Examination')
     )
+
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     added_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=False)
-    semester = models.CharField(max_length=1, choices=SEM_CHOICES)
+    semester = models.CharField(max_length=3, choices=SEM_CHOICES)
     exam_date = models.DateField()
     exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, blank=False)
-    academic_year = models.CharField(max_length=20)
+    academic_year = models.ForeignKey(
+        AcademicYear, on_delete=models.SET_NULL, null=True, blank=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.semester} sem - {self.get_exam_type_display()} - {self.subject} - ({self.academic_year})"
 
 
 class Question(models.Model):
     QUESTION_MARK = (
         ('1', '2 Mark'),
         ('2', '13 Mark'),
-        ('3', '15 mark')
     )
-    exam_detail = models.ForeignKey(Examdetail, on_delete=models.CASCADE)
-    question_text = models.TextField()
-    unit_no = models.IntegerField()
-    mark = models.CharField(max_length=1, choices=QUESTION_MARK)
-    course_outcome = models.CharField(max_length=10)
-    bloom_level = models.CharField(max_length=50)
+    UNIT_CHOICES = (
+        ('1', '1st Unit'),
+        ('2', '2nd Unit'),
+        ('3', '3rd Unit'),
+        ('4', '4th Unit'),
+        ('5', '5th Unit'),
+    )
+    CO_LEVEL_CHOICES = (
+        ('1', 'CO1'),
+        ('2', 'CO2'),
+        ('3', 'CO3'),
+        ('4', 'CO4'),
+        ('5', 'CO5'),
+    )
+    exam_detail = models.ForeignKey(ExamDetail, on_delete=models.CASCADE)
+    question_text1 = models.TextField(default=None, null=True)
+    unit_no1 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome1 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level1 = models.CharField(max_length=50, default=None, null=True)
+    question_text2 = models.TextField(default=None, null=True)
+    unit_no2 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome2 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level2 = models.CharField(max_length=50, default=None, null=True)
+    question_text3 = models.TextField(default=None, null=True)
+    unit_no3 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome3 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level3 = models.CharField(max_length=50, default=None, null=True)
+    question_text4 = models.TextField(default=None, null=True)
+    unit_no4 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome4 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level4 = models.CharField(max_length=50, default=None, null=True)
+    question_text5 = models.TextField(default=None, null=True)
+    unit_no5 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome5 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level5 = models.CharField(max_length=50, default=None, null=True)
+    question_text6 = models.TextField(default=None, null=True)
+    unit_no6 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome6 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level6 = models.CharField(max_length=50, default=None, null=True)
+    question_text7 = models.TextField(default=None, null=True)
+    unit_no7 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome7 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level7 = models.CharField(max_length=50, default=None, null=True)
+    question_text8 = models.TextField(default=None, null=True)
+    unit_no8 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome8 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level8 = models.CharField(max_length=50, default=None, null=True)
+    question_text9 = models.TextField(default=None, null=True)
+    unit_no9 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome9 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level9 = models.CharField(max_length=50, default=None, null=True)
+    question_text10 = models.TextField(default=None, null=True)
+    unit_no10 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome10 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level10 = models.CharField(max_length=50, default=None, null=True)
+    question_text11 = models.TextField(default=None, null=True)
+    unit_no11 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome11 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level11 = models.CharField(max_length=50, default=None, null=True)
+    question_text12 = models.TextField(default=None, null=True)
+    unit_no12 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome12 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level12 = models.CharField(max_length=50, default=None, null=True)
+    question_text13 = models.TextField(default=None, null=True)
+    unit_no13 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome13 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level13 = models.CharField(max_length=50, default=None, null=True)
+    question_text14 = models.TextField(default=None, null=True)
+    unit_no14 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome14 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level14 = models.CharField(max_length=50, default=None, null=True)
+    question_text15 = models.TextField(default=None, null=True)
+    unit_no15 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome15 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level15 = models.CharField(max_length=50, default=None, null=True)
+    question_text16 = models.TextField(default=None, null=True)
+    unit_no16 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome16 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level16 = models.CharField(max_length=50, default=None, null=True)
+    question_text17 = models.TextField(default=None, null=True)
+    unit_no17 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome17 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level17 = models.CharField(max_length=50, default=None, null=True)
+    question_text18 = models.TextField(default=None, null=True)
+    unit_no18 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome18 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level18 = models.CharField(max_length=50, default=None, null=True)
+    question_text19 = models.TextField(default=None, null=True)
+    unit_no19 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome19 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level19 = models.CharField(max_length=50, default=None, null=True)
+    question_text20 = models.TextField(default=None, null=True)
+    unit_no20 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome20 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level20 = models.CharField(max_length=50, default=None, null=True)
+    question_text21 = models.TextField(default=None, null=True)
+    unit_no21 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome21 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level21 = models.CharField(max_length=50, default=None, null=True)
+    question_text22 = models.TextField(default=None, null=True)
+    unit_no22 = models.CharField(
+        max_length=1, choices=UNIT_CHOICES, default=None, null=True)
+    course_outcome22 = models.CharField(
+        max_length=10, choices=CO_LEVEL_CHOICES, default=1)
+    bloom_level22 = models.CharField(max_length=50, default=None, null=True)
+
+    def __str__(self):
+        return f"{self.exam_detail} - Questions"
 
 
-class AssignmentQuestions(models.Model):
+class AssignmentQuestion(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
     pdf = models.FileField(upload_to='assignments/questions')
@@ -408,12 +590,26 @@ class AssignmentQuestions(models.Model):
 
 class AssignmentAnswers(models.Model):
     assignment_question = models.ForeignKey(
-        AssignmentQuestions, on_delete=models.CASCADE)
+        AssignmentQuestion, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     pdf = models.FileField(
         upload_to='assignments/answers', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class Note(models.Model):
+    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True)
+    pdf = models.FileField(upload_to='notes')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
+    unit = models.CharField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.department} - {self.subject} - {self.unit}"
 
 
 class LeaveReportStudent(models.Model):
@@ -472,6 +668,26 @@ class StudentResult(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+# class CustomPermission(Permission):
+#     class Meta:
+#         proxy = True
+
+#     def get_permission_codename(self):
+#         """
+#         Override this method to change the label of the permission.
+#         """
+#         # Example: Changing the codename
+#         if self.codename == 'add_user':
+#             return _('Can add user')
+#         elif self.codename == 'change_user':
+#             return _('Can change user')
+#         elif self.codename == 'delete_user':
+#             return _('Can delete user')
+#         elif self.codename == 'view_user':
+#             return _('Can view user')
+#         else:
+#             return super().get_permission_codename()
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):

@@ -44,6 +44,11 @@ class ClassToSub(autocomplete.Select2QuerySetView):
 
         # Get class_name_id from the forwarded data
         class_name_id = self.forwarded.get('class_name', None)
+        if class_name_id is None:
+            return Subject.objects.none()
+
+        # Retrieve the class object
+        class_name = get_object_or_404(ClassList, pk=int(class_name_id))
         
         # Get all timetables
         timetables = TimeTable.objects.all()
@@ -61,44 +66,24 @@ class ClassToSub(autocomplete.Select2QuerySetView):
         # Get all subjects initially
         subject_qs = Subject.objects.all()
 
-        # Filter subjects by class_name_id if provided
+        # Filter subjects by class_name if provided
         if class_name_id:
-            period_qs = Period.objects.filter(class_name_id=class_name_id)
+            period_qs = Period.objects.filter(class_name=class_name)
             subject_ids = period_qs.values_list('subject_id', flat=True)
             subject_qs = subject_qs.filter(id__in=subject_ids)
 
         # Exclude subjects that are already assigned to any staff
         subject_qs = subject_qs.exclude(id__in=exclude_subject_ids)
-
-        return subject_qs
-
-        if not self.request.user.is_authenticated:
-            return Period.objects.none()
-
-        # Get all periods initially
-        period_qs = Period.objects.all()
-
-        # Get class_name_id from the forwarded data
-        class_name_id = self.forwarded.get('class_name', None)
         
-        # Filter periods by class_name_id if provided
-        if class_name_id:
-            period_qs = period_qs.filter(class_name_id=class_name_id)
-        
-        # Get all timetables
-        timetables = TimeTable.objects.all()
-        
-        # Get periods to exclude
-        exclude_periods_ids = set()
-        for timetable in timetables:
-            for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']:
-                for period_number in range(1, 9):
-                    period_attr = f'{day}_{period_number}'
-                    period = getattr(timetable, period_attr, None)
-                    if period and period.staff:
-                        exclude_periods_ids.add(period.id)
-        
-        # Exclude periods that are already assigned to any staff
-        period_qs = period_qs.exclude(id__in=exclude_periods_ids)
+        # Print statement for debugging
+        print('Filtered subjects:', subject_qs)
 
-        return period_qs
+        # Filter periods for the specific class and subject
+        periods = []
+        for subject in subject_qs:
+            period = Period.objects.filter(class_name=class_name, subject=subject).first()
+            print(period)
+            periods.append(period)
+        print(periods)
+
+        return periods

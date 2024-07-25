@@ -1,0 +1,41 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Timetable {{class_name}}{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Timetable {{class_name}}</h3>
+                    </div>
+                    <div class="timetable" style="overflow-x: auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Subject</th>
+                                    <th style="text-align: center;">Unit</th>
+                                    <th style="text-align: center;">View</th>
+                                    <th style="text-align: center;">Download</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in notes %}
+                                    <tr>
+                                        <td style="text-align: center;"><b>{{note.subject}}</b></td>
+                                        <td style="text-align: center;">{{note.unit}}</td>
+                                        <td style="text-align: center;"><a href="{{ note.pdf.url }}" class="btn btn-info" target="_blank">View</a></td>
+                                        <td style="text-align: center;"><a href="{{ note.pdf.url }}" class="btn btn-success" download>Download</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

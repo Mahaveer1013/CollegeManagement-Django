@@ -1,107 +1,196 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>C.M.S | Log In</title>
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-    <!-- Google Recaptcha     -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>E.R.P | Log In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .bodytag {
+            background-image: url("https://panimalar.ac.in/assets/images/AboutUs/about-us-banner-img.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .containerForLoginPage {
+            background-color: white;
+            width: 90%;
+            max-width: 420px;
+            margin: 2% auto;
+            margin-top: 5%;
+            border-color: orangered;
+            border-radius: 30px;
+            border-width: 3px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .containerForLoginPage h1 {
+            font-size: 30px;
+            margin: 0;
+            padding: 0;
+            color: #2565AE;
+        }
+
+        .containerForLoginPage form {
+            margin: 20px;
+        }
+
+        .containerForLoginPage label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .containerForLoginPage input[type="email"],
+        .containerForLoginPage input[type="password"],
+        .containerForLoginPage input[type="number"] {
+            width: calc(100% - 24px);
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 5px;
+            border-width: 2px;
+            border-style: solid;
+            margin-bottom: 15px;
+        }
+
+        .sign {
+            background-color: green;
+            color: white;
+            border: solid;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            width: 100%;
+            font-family: Arial;
+            font-weight: bold;
+            border-radius: 9px;
+            transition: background-color 0.2s;
+        }
+
+        .sign:hover {
+            background-color: darkgreen;
+        }
+
+        .containerForLoginPage #t1 {
+            background-color: lightgray;
+            border-width: 2px;
+            border-color: black;
+            border-style: solid;
+            text-align: center;
+            margin: 0px;
+            padding: 5px;
+            margin-bottom: 16px;
+        }
+
+        .captcha-containerForLoginPage {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .captcha {
+            height: auto;
+            font-size: 15px;
+            border-radius: 5px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            padding-right: 5%;
+        }
+
+        .containerForLoginPage a {
+            color: blue;
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error {
+            display: none;
+            color: #fff;
+            background: #dc3545;
+            border-color: #d32535;
+            display: flex;
+            justify-content: center;
+            width: calc(100% - 32px);
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 5px;
+            border-width: 2px;
+            border-style: solid;
+            margin-bottom: 10px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .containerForLoginPage {
+                margin-top: 1%;
+                margin-bottom: 1%;
+            }
+        }
+    </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <a href=""><b>College</b> Management System</a>
-
+<body class="bodytag">
+    <fieldset class="containerForLoginPage">
+        <center>
+            <h1>WELCOME TO <br>PANIMALAR ENGINEERING COLLEGE</h1>
+            <a><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYpbqJhX3Z5NXX0oJW5K5hIMt6Xvu8JSwRmA&s"
+                    width="100px" height="100px"></a>
+            <h1 style="color:#df0430; font-size: 150%;">LOGIN PORTAL</h1>
+        </center>
+        {% if messages %}
+        <div class="error">
+            {% for message in messages %}
+            {% if message.tags == 'error' %}
+            {{ message }}
+            {% endif %}
+            {% endfor %}
         </div>
-        <!-- /.login-logo -->
-        <div class="card">
-            <div class="card-body login-card-body">
-                <!-- <p class="login-box-msg">Sign in to start your session</p> -->
-                {% if messages %}
-                <div class="col-12">
-                    {% for message in messages %}
-                    {% if message.tags == 'error' %}
-                    <div class="alert alert-danger text-center ">
-                        {{message }}
+        {% endif %}
+        <form action="doLogin/" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input required type="email" name='email' class="form-control" placeholder="Email">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-envelope"></span>
                     </div>
-                    {% endif %}
-                    {% endfor %}
                 </div>
-                {% endif %}
-                <form action="doLogin/" method="post">
-                    {% csrf_token %}
-                    <div class="input-group mb-3">
-                        <input required type="email" name='email' class="form-control" placeholder="Email">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input required type="password" name='password' class="form-control" placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- <div class="input-group mb-3">
-                        <div class="g-recaptcha" data-sitekey="6LfswtgZAAAAAJ7bhwqZZtDpBsc75ekH6FWA4Fnt"></div>
-
-                    </div> -->
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="remember">
-                                <label for="remember">
-                                    Remember Me
-                                </label>
-                            </div>
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-success btn-block">Log In</button>
-                        </div>
-
-
-                        <!-- /.col -->
-                    </div>
-                </form>
-
-
-                <p class="mb-1">
-                    <a href="{% url 'password_reset' %}">Forgot Password?</a>
-                </p>
-
             </div>
-            <!-- /.login-card-body -->
-        </div>
-    </div>
-    <!-- /.login-box -->
-
+            <div class="input-group mb-3">
+                <input required type="password" name='password' class="form-control" placeholder="Password">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+            <input type="checkbox" id="remember">
+            Remember Me
+            <button type="submit" class="sign">Log In</button>
+        </form>
+        <p class="mb-1">
+            <a href="{% url 'password_reset' %}">Forgot Password?</a>
+        </p>
+    </fieldset>
     <!-- jQuery -->
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
     <!-- Bootstrap 4 -->
     <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <!-- AdminLTE App -->
     <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
-
 </body>
 
 </html>

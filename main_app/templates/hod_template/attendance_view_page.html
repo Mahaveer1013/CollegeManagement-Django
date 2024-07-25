@@ -49,7 +49,9 @@
         </div>
     </div>
 </section>
+{% endblock content %}
 
+{% block custom_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const attendanceList = {{ attendance_list|safe }};
@@ -60,4 +62,4 @@
     });
 </script>
 
-{% endblock content %}
+{% endblock custom_js %}
