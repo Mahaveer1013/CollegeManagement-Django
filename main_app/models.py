@@ -631,6 +631,7 @@ class LeaveReportStaff(models.Model):
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
     date = models.CharField(max_length=60)
     message = models.TextField()
+
     related_documents = models.FileField(upload_to='leave/staff', default=None, null=True)
     status = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -684,6 +685,20 @@ class AdminAccessLog(models.Model):
     def __str__(self):
         return f"{self.user} - {self.ip_address} - {self.accessed_at}"
     
+
+class Notice(models.Model):
+    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, default=None)
+    pdf = models.FileField(upload_to='notice')
+    name = models.CharField(max_length=40)
+    content = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    def _str_(self):
+        return f"{self.department} - {self.subject} - {self.name}"
+
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
