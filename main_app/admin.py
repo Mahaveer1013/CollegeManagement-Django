@@ -20,12 +20,17 @@ class PeriodAdmin(admin.ModelAdmin):
 @admin.register(Staff)
 class StaffAdmin(admin.ModelAdmin):
     form = StaffForm
+    list_display = ['admin','department','resume']
+    search_fields = ()
+    ordering = ()
 
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     form = StudentForm
-
+    list_display = ['admin','department', 'class_name', 'academic_year']
+    search_fields = ('register_number','roll_number')
+    ordering = ('register_number',)
 
 @admin.register(AssignmentQuestion)
 class AssignmentQuestionsAdmin(admin.ModelAdmin):
@@ -54,6 +59,14 @@ class AssignmentQuestionsAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(uploaded_by=request.user)
 
+
+@admin.register(Notice)
+class NoticesAdmin(admin.ModelAdmin):
+    exclude = ('uploaded_by',)
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # If the object is being created (and not updated)
+            obj.uploaded_by = request.user
+        super().save_model(request, obj, form, change)
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
