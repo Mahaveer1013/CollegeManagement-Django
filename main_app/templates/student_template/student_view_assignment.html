@@ -16,56 +16,60 @@
                     <div class="card-header">
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
-                    <table class="table table-bordered" style="overflow-x: auto;">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Subject</th>
-                                <th>Deadline</th>
-                                <th>Download Question</th>
-                                <th>Upload Answer</th>
-                                <th>Submit</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for assignment in assignments %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ assignment.subject }}</td>
-                                <td>{{ assignment.deadline_date }}</td>
-                                <td style="display: flex;justify-content: space-evenly;align-items: center;">
-                                    {% if assignment.pdf %}
-                                    <a href="{{ assignment.pdf.url }}" class="btn btn-primary" download>Download</a>
-                                    {% else %}
-                                    <span>No File</span>
-                                    {% endif %}
-                                    
-                                    {% with status=answer_urls|get_item:assignment.id %}
-                                    {% if status %} <a href="{{ status }}" class="btn btn-success" download>Submitted Answer</a> {% endif %}
-                                    {% endwith %}
-                                </td>
-                                <td>
-                                    <form method="POST" enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
-                                        {% with form=forms|get_item:assignment.id %}
-                                        {{ form.pdf }}
-                                        {% endwith %}
-                                </td>
-                                <td>
-                                    <button type="submit" class="btn btn-success btn-block">
-                                        {% if button_text %}
-                                        {{ button_text }}
+                    <div style="overflow-x: auto;">
+                        <table class="table table-bordered" style="overflow-x: auto;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subject</th>
+                                    <th>Name</th>
+                                    <th>Deadline</th>
+                                    <th>Download Question</th>
+                                    <th>Upload Answer</th>
+                                    <th>Submit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in assignments %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ assignment.subject }}</td>
+                                    <td>{{ assignment.name }}</td>
+                                    <td>{{ assignment.deadline_date }}</td>
+                                    <td style="display: flex;justify-content: space-evenly;align-items: center;flex-direction: column;gap: 5px;">
+                                        {% if assignment.pdf %}
+                                        <a href="{{ assignment.pdf.url }}" class="btn btn-primary" download>Download</a>
                                         {% else %}
-                                        Submit
+                                        <span>No File</span>
                                         {% endif %}
-                                    </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                        
+                                        {% with status=answer_urls|get_item:assignment.id %}
+                                        {% if status %} <a href="{{ status }}" style="text-wrap: nowrap;" class="btn btn-success" download>My Answer</a> {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td style="min-width: 136px;">
+                                        <form method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                                            {% with form=forms|get_item:assignment.id %}
+                                            {{ form.pdf }}
+                                            {% endwith %}
+                                    </td>
+                                    <td>
+                                        <button type="submit" class="btn btn-success btn-block">
+                                            {% if button_text %}
+                                            {{ button_text }}
+                                            {% else %}
+                                            Submit
+                                            {% endif %}
+                                        </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

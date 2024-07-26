@@ -86,6 +86,15 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    {% url 'overall_timetable' as overall_timetable %}
+                    <a href="{{ overall_timetable }}"
+                        class="nav-link {% if overall_timetable == request.path %}active{% endif %}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>Timetable</p>
+                    </a>
+                </li>
+
                 <!-- <li class="nav-item">
                     {% url 'staff_view_note' as staff_view_note %}
                     <a href="{{ staff_view_note }}"

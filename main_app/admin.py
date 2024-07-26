@@ -109,8 +109,24 @@ class QuestionAdmin(admin.ModelAdmin):
                         if word:
                             bloom_keyword = BloomKeyword.objects.filter(
                                 word__iexact=word).first()
-                            if bloom_keyword:
-                                bloom_level = bloom_keyword
+                            print(bloom_keyword)
+                            if bloom_keyword.bloom_level==1:
+                                bloom_level = 'Creating'
+                                break
+                            if bloom_keyword.bloom_level==2:
+                                bloom_level = 'Evaluate'
+                                break
+                            if bloom_keyword.bloom_level==3:
+                                bloom_level = 'Analyzing'
+                                break
+                            if bloom_keyword.bloom_level==4:
+                                bloom_level = 'Applying'
+                                break
+                            if bloom_keyword.bloom_level==5:
+                                bloom_level = 'Understanding'
+                                break
+                            if bloom_keyword.bloom_level==6:
+                                bloom_level = 'Remember'
                                 break
 
                     setattr(obj, f'bloom_level{i}', bloom_level)
@@ -129,16 +145,14 @@ class NotesAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-# class CustomPermissionAdmin(admin.ModelAdmin):
-#     list_display = ('name', 'get_permission_label', 'content_type')
+from django.contrib import admin
+from .models import AdminAccessLog
 
-#     def get_permission_label(self, obj):
-#         return obj.get_permission_label()
-#     get_permission_label.short_description = 'Label'
-
-
-# # Unregister the default Permission model admin and register the custom one
-# admin.site.register(Permission, CustomPermissionAdmin)
+@admin.register(AdminAccessLog)
+class AdminAccessLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ip_address', 'accessed_at')
+    list_filter = ('accessed_at',)
+    search_fields = ('user__username', 'ip_address')
 
 admin.site.register(ExamDetail)
 admin.site.register(Department)

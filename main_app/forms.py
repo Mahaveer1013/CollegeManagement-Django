@@ -117,6 +117,15 @@ class AttendanceForm(FormSettings):
             'end_semester': DateInput(attrs={'type': 'date'}),
         }
 
+
+class StaffTimetableForHodForm(FormSettings):
+    faculty_id = forms.CharField(max_length=20)
+
+class StudentTimetableForHodForm(FormSettings):
+    register_number = forms.CharField(max_length=20, required=False)
+    roll_number = forms.CharField(max_length=20, required=False)
+
+
 class ExamDetailForm(FormSettings):
     semester_choices = (
         ('1st', '1st'),

@@ -230,12 +230,6 @@ def admin_notify_student(request):
     return render(request, "hod_template/student_notification.html", context)
 
 
-# def get_subjects(request):
-#     department_id = request.GET.get('department')
-#     subjects = Subject.objects.all()
-#     return JsonResponse(list(subjects), safe=False)
-
-
 def exam_filter_page(request):
     form = ExamDetailForm()
     context={
@@ -249,17 +243,13 @@ def exam_filter_page(request):
             subject = form.cleaned_data['subject']
             semester = form.cleaned_data['semester']
             exam_type = form.cleaned_data['exam_type']
-            print(department)
-            print(subject)
-            print(semester)
-            print(exam_type)
             exam_detail = ExamDetail.objects.filter(subject=subject, department=department, semester=semester, exam_type=exam_type).first()
-            print(exam_detail)
             q_paper = Question.objects.filter(exam_detail=exam_detail).first()
 
             if q_paper:
                 print(q_paper)
-                return render(request, "hod_template/question_paper_template.html", {'q_paper':q_paper})
+                print(q_paper.question_text1)
+                return render(request, "hod_template/question_paper_template.html", {'q_paper':q_paper, 'exam': q_paper.exam_detail})
             else:
                 messages.error(request, 'No Question Paper Found.')
                 
@@ -269,17 +259,11 @@ def exam_filter_page(request):
     return render(request, 'hod_template/exam_filter_page.html', {'form': form,'page_title':'Question Paper Details'})
 
 
-# @csrf_exempt
-# def check_email_availability(request):
-#     user = get_object_or_404(Admin, admin=request.user)
-#     email = request.POST.get("email")
-#     try:
-#         user = CustomUser.objects.filter(email=email).exists()
-#         if user:
-#             return HttpResponse(True)
-#         return HttpResponse(False)
-#     except Exception as e:
-#         return HttpResponse(False)
+def overall_timetable(request):
+    user = get_object_or_404(Admin, admin=request.user)
+    staff_form = StaffTimetableForHodForm()
+    student_form = StudentTimetableForHodForm()
+    return render(request, 'hod_template/overall_timetable.html')
 
 
 @csrf_exempt

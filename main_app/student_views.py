@@ -243,7 +243,7 @@ def student_view_note(request):
         Value(' - '),
         'subject__name',     # Assuming the Subject model has a 'name' field
         Value(' - '),
-        'unit',
+        'name',
         output_field=CharField()
     )
 ).order_by('str_representation')

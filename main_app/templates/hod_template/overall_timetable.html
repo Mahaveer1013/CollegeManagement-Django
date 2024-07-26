@@ -1,0 +1,26 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Get Timetable{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title" style="margin-right: auto;padding: 10px 20px;"><b>Timetable</b></h3>
+                        <a style="padding: 10px 20px; border-radius: 10px; background-color: #10af3d;position: absolute;right: 20px;cursor: pointer;"><b>Staff / Class</b></a>
+                    </div>
+                    <div class="form">
+                        
+                    </div>
+                    {% block hod_timetable %}
+
+                    {% endblock hod_timetable %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

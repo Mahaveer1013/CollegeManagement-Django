@@ -156,6 +156,7 @@ class Staff(models.Model):
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    # faculty_id = models.CharField(max_length=100, unique=True)
     resume = models.FileField(upload_to='staff/resume',null=True)
 
     def __str__(self):
@@ -381,7 +382,7 @@ class BloomKeyword(models.Model):
     bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
 
     def __str__(self):
-        return self.word+' - ' + self.bloom_level
+        return self.get_bloom_choices_display()
 
 
 class ExamDetail(models.Model):
@@ -579,9 +580,10 @@ class Question(models.Model):
 class AssignmentQuestion(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     class_name = models.ForeignKey(ClassList, on_delete=models.CASCADE)
+    name=models.CharField(max_length=40,default='Unit 1 Assignment')
     pdf = models.FileField(upload_to='assignments/questions')
     deadline_date = models.DateTimeField()
-    subject = models.ForeignKey(Period, on_delete=models.DO_NOTHING)
+    subject = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -605,18 +607,21 @@ class Note(models.Model):
         Department, on_delete=models.SET_NULL, null=True)
     pdf = models.FileField(upload_to='notes')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True)
-    unit = models.CharField(max_length=40)
+    name = models.CharField(max_length=40)
+    deadline_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     def __str__(self):
-        return f"{self.department} - {self.subject} - {self.unit}"
+        return f"{self.department} - {self.subject} - {self.name}"
 
 
 class LeaveReportStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     date = models.CharField(max_length=60)
     message = models.TextField()
+    related_documentz = models.FileField(upload_to='leave/student', default=None, null=True)
     status = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -626,6 +631,7 @@ class LeaveReportStaff(models.Model):
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
     date = models.CharField(max_length=60)
     message = models.TextField()
+    related_documents = models.FileField(upload_to='leave/staff', default=None, null=True)
     status = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -670,25 +676,14 @@ class StudentResult(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-# class CustomPermission(Permission):
-#     class Meta:
-#         proxy = True
-
-#     def get_permission_codename(self):
-#         """
-#         Override this method to change the label of the permission.
-#         """
-#         # Example: Changing the codename
-#         if self.codename == 'add_user':
-#             return _('Can add user')
-#         elif self.codename == 'change_user':
-#             return _('Can change user')
-#         elif self.codename == 'delete_user':
-#             return _('Can delete user')
-#         elif self.codename == 'view_user':
-#             return _('Can view user')
-#         else:
-#             return super().get_permission_codename()
+class AdminAccessLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    ip_address = models.GenericIPAddressField()
+    accessed_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user} - {self.ip_address} - {self.accessed_at}"
+    
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
