@@ -21,34 +21,44 @@
     <div class="card-header"><h3 class="card-title">Leave History</h3></div>
    <div class="table">
 
-       <table class="table table-bordered">
-           <tr>
-               <th>ID</th>
-               <th>Date</th>
-               <th>Message</th>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Message</th>
+                <th>Document</th>
                 <th>Status</th>
-        </tr>
+                <th>Reason</th>
+            </tr>
+        </thead>
         {% for leave in leave_history %}
         <tr>
             <td>{{forloop.counter}}</td>
             <td>{{leave.date}}</td>
-              <td>{{leave.message}}</td>
-              <td>
-                  
-                  {% if leave.status == 0 %}
-                  <span class="badge badge-warning">Pending</span>
-                  {% elif leave.status == 1 %}
-                  <span class="badge badge-success">Accepted</span>
-                  
-                    {% else %}
-                    <span class="badge badge-danger">Rejected</span>
-                    
-                    {% endif %}
-                    
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+            <td>{{leave.message}}</td>
+            <td><a href="{{leave.related_documents.url}}" class="btn btn-info" target="_blank">View</a></td>
+            <td>
+
+                {% if leave.status == 0 %}
+                <span class="badge badge-warning" style="padding: 10px 14px;">Pending</span>
+                {% elif leave.status == 1 %}
+                <span class="badge badge-success" style="padding: 10px 14px;">Accepted</span>
+
+                {% else %}
+                <span class="badge badge-danger" style="padding: 10px 14px;">Rejected</span>
+
+                {% endif %}
+
+            </td>
+            {% if leave.rejection_reason %}
+            <td>{{leave.rejection_reason}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
     </div>
     </div>
             </div>

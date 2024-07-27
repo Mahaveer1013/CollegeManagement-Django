@@ -8,7 +8,7 @@
     <title>E.R.P | Log In</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        .bodytag {
+        body {
             background-image: url("https://panimalar.ac.in/assets/images/AboutUs/about-us-banner-img.jpg");
             background-size: cover;
             background-repeat: no-repeat;
@@ -16,26 +16,41 @@
             padding: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .containerForLoginPage {
             background-color: white;
             width: 90%;
             max-width: 420px;
-            margin: 2% auto;
-            margin-top: 5%;
-            border-color: orangered;
+            margin: 5% auto;
+            border: 3px solid orangered;
             border-radius: 30px;
-            border-width: 3px;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .containerForLoginPage h1 {
-            font-size: 30px;
+            font-size: 24px;
             margin: 0;
             padding: 0;
             color: #2565AE;
+            text-align: center;
+        }
+
+        .containerForLoginPage img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .containerForLoginPage h2 {
+            color: #df0430;
+            font-size: 28px;
+            text-align: center;
+            margin: 15px 0;
         }
 
         .containerForLoginPage form {
@@ -48,29 +63,27 @@
         }
 
         .containerForLoginPage input[type="email"],
-        .containerForLoginPage input[type="password"],
-        .containerForLoginPage input[type="number"] {
-            width: calc(100% - 24px);
+        .containerForLoginPage input[type="password"] {
+            width: calc(100% - 22px);
             padding: 10px;
             font-size: 15px;
             border-radius: 5px;
-            border-width: 2px;
-            border-style: solid;
+            border: 2px solid #ccc;
             margin-bottom: 15px;
+            box-sizing: border-box;
         }
 
         .sign {
             background-color: green;
             color: white;
-            border: solid;
-            padding: 10px 20px;
-            font-size: 20px;
+            border: none;
+            padding: 10px;
+            font-size: 18px;
             margin-top: 15px;
             cursor: pointer;
             width: 100%;
-            font-family: Arial;
             font-weight: bold;
-            border-radius: 9px;
+            border-radius: 5px;
             transition: background-color 0.2s;
         }
 
@@ -80,11 +93,8 @@
 
         .containerForLoginPage #t1 {
             background-color: lightgray;
-            border-width: 2px;
-            border-color: black;
-            border-style: solid;
+            border: 2px solid black;
             text-align: center;
-            margin: 0px;
             padding: 5px;
             margin-bottom: 16px;
         }
@@ -98,20 +108,18 @@
         .captcha {
             height: auto;
             font-size: 15px;
-            border-radius: 5px;
-            border-width: 2px;
-            border-style: solid;
+            border: 2px solid #ccc;
             padding: 10px;
-            padding-right: 5%;
+            box-sizing: border-box;
         }
 
         .containerForLoginPage a {
             color: blue;
-            display: block;
             text-align: center;
-            margin-top: 10px;
             text-decoration: none;
             font-weight: 600;
+            display: block;
+            margin-top: 10px;
         }
 
         .error {
@@ -125,30 +133,80 @@
             padding: 10px;
             font-size: 15px;
             border-radius: 5px;
-            border-width: 2px;
-            border-style: solid;
+            border: 2px solid #d32535;
             margin-bottom: 10px;
             margin-left: auto;
             margin-right: auto;
             margin-top: 10px;
         }
 
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .remember-me label{
+            margin-bottom: 0;
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .containerForLoginPage {
+                padding: 15px;
+            }
+
+            .containerForLoginPage h1 {
+                font-size: 20px;
+            }
+
+            .containerForLoginPage h2 {
+                font-size: 24px;
+            }
+
+            .sign {
+                font-size: 16px;
+            }
+        }
+
         @media (max-width: 480px) {
             .containerForLoginPage {
-                margin-top: 1%;
-                margin-bottom: 1%;
+                margin: 2% auto;
+            }
+
+            #email, #password{
+                width: 100%;
+            }
+
+            .containerForLoginPage form{
+                margin: 10px;
+            }
+
+            .containerForLoginPage h1 {
+                font-size: 18px;
+            }
+
+            .containerForLoginPage h2 {
+                font-size: 20px;
+            }
+
+            .sign {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 
-<body class="bodytag">
+<body>
     <fieldset class="containerForLoginPage">
         <center>
             <h1>WELCOME TO <br>PANIMALAR ENGINEERING COLLEGE</h1>
             <a><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYpbqJhX3Z5NXX0oJW5K5hIMt6Xvu8JSwRmA&s"
-                    width="100px" height="100px"></a>
-            <h1 style="color:#df0430; font-size: 150%;">LOGIN PORTAL</h1>
+                    width="100" height="100" alt="Logo"></a>
+            <h2>LOGIN PORTAL</h2>
         </center>
         {% if messages %}
         <div class="error">
@@ -161,27 +219,20 @@
         {% endif %}
         <form action="doLogin/" method="post">
             {% csrf_token %}
-            <div class="input-group mb-3">
-                <input required type="email" name='email' class="form-control" placeholder="Email">
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <span class="fas fa-envelope"></span>
-                    </div>
-                </div>
+            <label for="email">Email</label>
+            <input required type="email" id="email" name='email' placeholder="Email">
+
+            <label for="password">Password</label>
+            <input required type="password" id="password" name='password' placeholder="Password">
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember Me</label>
             </div>
-            <div class="input-group mb-3">
-                <input required type="password" name='password' class="form-control" placeholder="Password">
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <span class="fas fa-lock"></span>
-                    </div>
-                </div>
-            </div>
-            <input type="checkbox" id="remember">
-            Remember Me
+
             <button type="submit" class="sign">Log In</button>
         </form>
-        <p class="mb-1">
+        <p>
             <a href="{% url 'password_reset' %}">Forgot Password?</a>
         </p>
     </fieldset>

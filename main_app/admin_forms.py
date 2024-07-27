@@ -12,6 +12,7 @@ class CustomUserForm(forms.ModelForm):
         model = CustomUser
         fields = ['email', 'first_name', 'last_name',
                   'user_type', 'gender', 'profile_pic', 'address']
+        
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -45,30 +46,30 @@ class StaffForm(forms.ModelForm):
         model = Staff
         fields = '__all__'
         labels = {
-            'admin': 'User',  # Setting the label for the admin field
+            'user': 'User',  # Setting the label for the user field
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         linked_student_users = Student.objects.values_list(
-            'admin_id', flat=True)
-        linked_staff_users = Staff.objects.values_list('admin_id', flat=True)
+            'user_id', flat=True)
+        linked_staff_users = Staff.objects.values_list('user_id', flat=True)
         # Combine both sets of linked users
         linked_users = set(linked_student_users).union(set(linked_staff_users))
-        # Exclude those users from the options in the admin field
-        self.fields['admin'].queryset = CustomUser.objects.exclude(
+        # Exclude those users from the options in the user field
+        self.fields['user'].queryset = CustomUser.objects.exclude(
             id__in=linked_users
         ).exclude(user_type='3').exclude(user_type='1')
-        self.fields['admin'].required = False
+        self.fields['user'].required = False
         if self.instance.pk:
             # Set the initial value and use ReadOnlyWidget
-            self.fields['admin'].initial = self.instance.admin.id
-            self.fields['admin'].widget = ReadOnlyWidget()
+            self.fields['user'].initial = self.instance.user.id
+            self.fields['user'].widget = ReadOnlyWidget()
 
-    def clean_admin(self):
+    def clean_user(self):
         if self.instance.pk:
-            return self.instance.admin
-        return self.cleaned_data.get('admin')
+            return self.instance.user
+        return self.cleaned_data.get('user')
 
 
 class StudentForm(forms.ModelForm):
@@ -79,29 +80,29 @@ class StudentForm(forms.ModelForm):
             'class_name': autocomplete.ModelSelect2(url='dep-to-class-autocomplete', forward=['department']),
         }
         labels = {
-            'admin': 'User',  # Setting the label for the admin field
+            'user': 'User',  # Setting the label for the user field
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         linked_student_users = Student.objects.values_list(
-            'admin_id', flat=True)
-        linked_staff_users = Staff.objects.values_list('admin_id', flat=True)
+            'user_id', flat=True)
+        linked_staff_users = Staff.objects.values_list('user_id', flat=True)
         # Combine both sets of linked users
         linked_users = set(linked_student_users).union(set(linked_staff_users))
-        # Exclude those users from the options in the admin field
-        self.fields['admin'].queryset = CustomUser.objects.exclude(
+        # Exclude those users from the options in the user field
+        self.fields['user'].queryset = CustomUser.objects.exclude(
             id__in=linked_users).exclude(user_type='2').exclude(user_type='1')
-        self.fields['admin'].required = False
+        self.fields['user'].required = False
         if self.instance.pk:
             # Set the initial value and use ReadOnlyWidget
-            self.fields['admin'].initial = self.instance.admin.id
-            self.fields['admin'].widget = ReadOnlyWidget()
+            self.fields['user'].initial = self.instance.user.id
+            self.fields['user'].widget = ReadOnlyWidget()
 
-    def clean_admin(self):
+    def clean_user(self):
         if self.instance.pk:
-            return self.instance.admin
-        return self.cleaned_data.get('admin')
+            return self.instance.user
+        return self.cleaned_data.get('user')
 
 
 class TimeTableForm(forms.ModelForm):

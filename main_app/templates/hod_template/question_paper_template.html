@@ -4,8 +4,8 @@
     <style>
         fieldset {
             display: inline-block;
-            width: 65%;
-            padding: 3%;
+            width: 90%;
+            padding: 2%;
         }
 
         a {
@@ -90,6 +90,19 @@
 
 <body>
 
+    <!-- subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    added_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=False)
+    semester = models.CharField(max_length=3, choices=SEM_CHOICES)
+    exam_date = models.DateField()
+    exam_type = models.CharField(max_length=1, choices=EXAM_TYPE)
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True, blank=False)
+    academic_year = models.ForeignKey(
+        AcademicYear, on_delete=models.SET_NULL, null=True, blank=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True) -->
+
 
     <fieldset>
 
@@ -101,10 +114,10 @@
         <p>Approved by All India Council of Technical Education</p>
         <p>Bangalore Trunk Road, Varadharajapuram, Poonamallee, chennai - 600123</p>
         <hr>
-        <h3 class='displayinline'>Information Technology</h3>
+        <h3 class='displayinline'>{{exam.department}}</h3>
         <hr>
-        <h3 class='displayinline'>INTERNAL ASSESMENT-I</h3>
-        <hr>";
+        <h3 class='displayinline'>{{exam.exam_type}}</h3>
+        <hr>
         <center>
             <table>
                 <tr>
@@ -116,20 +129,30 @@
                 </tr>
                 <tr>
                     <td>
-                        <h4 class='left'>Academic Year : 2023-2024 </h4>
+                        <h4 class='left'>Academic Year : {{exam.academic_year}} </h4>
                     </td>
 
                     <td>
-                        <h4 class='right'>Year/Semester:  2ND/4TH</h4>
+                        <h4 class='right'>Year/Semester: 
+                            {% if exam.semester == '1st' or exam.semester == '2nd' %}
+                            1st
+                            {% elif exam.semester == '3rd' or exam.semester == '4th' %}
+                            2nd
+                            {% elif exam.semester == '5th' or exam.semester == '6th' %}
+                            3rd
+                            {% elif exam.semester == '7th' or exam.semester == '8th' %}
+                            4ths
+                            {% endif %}
+                            /{{exam.semester}}</h4>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <h4 class='left'>Subject Code: 21IT1401</h4>
+                        <h4 class='left'>Subject Code: {{exam.subject.subject_code}}</h4>
                     </td>
 
                     <td>
-                        <h4 class='right'>Date:17/02/2024</h4>
+                        <h4 class='right'>Date:{{exam.exam_date}}</h4>
                     </td>
                 </tr>
                 <tr>
@@ -165,7 +188,7 @@
             <h3 class='displayinline'>Answer All the Question</h3>
             <hr>
             <h3 class='displayinline'>Part-A (10*2=20)</h3>
-            <table border='1'>
+            <table>
 
                 <tr>
                     <th><b>Q.NO</b></th>
@@ -178,70 +201,70 @@
                     <td>1</td>
                     <td class='left'>{{q_paper.question_text1}}</td>
                     <td>{{q_paper.bloom_level1}}</td>
-                    <td>CO1</td>
+                    <td>{{q_paper.course_outcome1}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>2</td>
                     <td class='left'>{{q_paper.question_text2}}</td>
-                    <td>{{q_paper.bloom_leve2}}</td>
-                    <td>CO1</td>
+                    <td>{{q_paper.bloom_level2}}</td>
+                    <td>{{q_paper.course_outcome2}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>3</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text3}}</td>
+                    <td>{{q_paper.bloom_level3}}</td>
+                    <td>{{q_paper.course_outcome3}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>4</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text4}}</td>
+                    <td>{{q_paper.bloom_level4}}</td>
+                    <td>{{q_paper.course_outcome4}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>5</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text5}}</td>
+                    <td>{{q_paper.bloom_level5}}</td>
+                    <td>{{q_paper.course_outcome5}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>6</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text6}}</td>
+                    <td>{{q_paper.bloom_level6}}</td>
+                    <td>{{q_paper.course_outcome6}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>7</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text7}}</td>
+                    <td>{{q_paper.bloom_level7}}</td>
+                    <td>{{q_paper.course_outcome7}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>8</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text8}}</td>
+                    <td>{{q_paper.bloom_level8}}</td>
+                    <td>{{q_paper.course_outcome8}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>9</td>
-                    <td class='left'>Define software engineering</td>
-                    <td>Remember</td>
-                    <td>CO1</td>
+                    <td class='left'>{{q_paper.question_text9}}</td>
+                    <td>{{q_paper.bloom_level9}}</td>
+                    <td>{{q_paper.course_outcome9}}</td>
                     <td>2</td>
                 </tr>
                 <tr>
                     <td>10</td>
-                    <td class='left'>Define software engineering"</td>
-                    <td>Remember"</td>
-                    <td>CO1"</td>
+                    <td class='left'>{{q_paper.question_text10}}</td>
+                    <td>{{q_paper.bloom_level10}}</td>
+                    <td>{{q_paper.course_outcome10}}</td>
                     <td>2</td>
                 </tr>
 
@@ -249,7 +272,7 @@
     </fieldset> <br><br><br>
     <fieldset>
         <h3>Part-B (5*13=65)</h3>
-        <table border='1' style='display:inline-block;'>
+        <table>
             <tr>
                 <th><b>Q.NO</b></th>
                 <th><b>option</b></th>
@@ -262,9 +285,9 @@
             <tr>
                 <td rowspan='3'>11</td>
                 <td>a</td>
-                <td class='left'>Organise and award the challenges of software development in detail.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text11}}</td>
+                <td>{{q_paper.bloom_level11}}</td>
+                <td>{{q_paper.course_outcome11}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -272,9 +295,9 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>Organise and award the challenges of software development in detail.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text12}}</td>
+                <td>{{q_paper.bloom_level12}}</td>
+                <td>{{q_paper.course_outcome12}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -283,9 +306,9 @@
             <tr class='up'>
                 <td rowspan='3'>12</td>
                 <td>a</td>
-                <td class='left'>Inference the waterfall model in detail with their advantages and disadvantage</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text13}}</td>
+                <td>{{q_paper.bloom_level13}}</td>
+                <td>{{q_paper.course_outcome13}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -293,21 +316,21 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>Inference the waterfall model in detail with their advantages and disadvantage</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text14}}</td>
+                <td>{{q_paper.bloom_level14}}</td>
+                <td>{{q_paper.course_outcome14}}</td>
                 <td>13</td>
             </tr>
-            </tr>echo
+            </tr>
             <tr>
                 <td colspan='7'></td>
             </tr>
             <tr class='up'>
                 <td rowspan='3'>13</td>
                 <td>a</td>
-                <td class='left'>Explain the process involved in the non-functional requirements with its techniques.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text15}}</td>
+                <td>{{q_paper.bloom_level15}}</td>
+                <td>{{q_paper.course_outcome15}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -315,9 +338,9 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>Explain the process involved in the non-functional requirements with its techniques.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text16}}</td>
+                <td>{{q_paper.bloom_level16}}</td>
+                <td>{{q_paper.course_outcome16}}</td>
                 <td>13</td>
             </tr>
             </tr>
@@ -327,9 +350,9 @@
             <tr>
                 <td rowspan='3'>14</td>
                 <td>a</td>
-                <td class='left'>What is a use-case? what are the notations used in use-cases? explain with an example.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text17}}</td>
+                <td>{{q_paper.bloom_level17}}</td>
+                <td>{{q_paper.course_outcome17}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -337,9 +360,9 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>What is a use-case? what are the notations used in use-cases? explain with an example.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text18}}</td>
+                <td>{{q_paper.bloom_level18}}</td>
+                <td>{{q_paper.course_outcome18}}</td>
                 <td>13</td>
             </tr>
             </tr>
@@ -349,9 +372,9 @@
             <tr>
                 <td rowspan='3'>15</td>
                 <td>a</td>
-                <td class='left'>Analyse the domain model in detail with an example.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text19}}</td>
+                <td>{{q_paper.bloom_level19}}</td>
+                <td>{{q_paper.course_outcome19}}</td>
                 <td>13</td>
             </tr>
             <tr>
@@ -359,9 +382,9 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>Analyse the domain model in detail with an example.</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text20}}</td>
+                <td>{{q_paper.bloom_level20}}</td>
+                <td>{{q_paper.course_outcome20}}</td>
                 <td>13</td>
             </tr>
 
@@ -370,7 +393,7 @@
         </table>
         <br><br>
         <h3>Part-C (1*15=15)</h3>
-        <table border='1'>
+        <table>
             <tr>
                 <th><b>Q.NO</b></th>
                 <th><b>option</b></th>
@@ -383,9 +406,9 @@
             <tr>
                 <td rowspan='3'>16</td>
                 <td>a</td>
-                <td class='left'>Design the use case diagram, class diagram and activity diagram for the following specification: coffee vending machine</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text21}}</td>
+                <td>{{q_paper.bloom_level21}}</td>
+                <td>{{q_paper.course_outcome21}}</td>
                 <td>15</td>
             </tr>
             <tr>
@@ -393,13 +416,12 @@
             </tr>
             <tr>
                 <td>b</td>
-                <td class='left'>Design the use case diagram, class diagram and activity diagram for the following specification: coffee vending machine</td>
-                <td>Evaluate</td>
-                <td>CO1</td>
+                <td class='left'>{{q_paper.question_text22}}</td>
+                <td>{{q_paper.bloom_level22}}</td>
+                <td>{{q_paper.course_outcome22}}</td>
                 <td>15</td>
             </tr>
 
 
         </table>
     </fieldset>
-    

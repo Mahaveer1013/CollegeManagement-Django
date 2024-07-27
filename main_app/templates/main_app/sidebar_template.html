@@ -404,6 +404,15 @@
                                             </a>
                                         </li> -->
 
+                                        <!-- <li class="nav-item">
+                                            {% url 'view_notice' as view_notice %}
+                                            <a href="{{view_notice}}"
+                                                class="nav-link {% if view_notice == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                                <p>View Attendance</p>
+                                            </a>
+                                        </li> -->
+
                                         <li class="nav-item">
                                             {% url 'student_view_timetable' as student_view_timetable %}
                                             <a href="{{student_view_timetable}}"

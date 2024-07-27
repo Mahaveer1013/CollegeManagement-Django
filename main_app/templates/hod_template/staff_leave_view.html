@@ -33,7 +33,7 @@
                                   <td>{{leave.staff}}</td>
                                   <td>{{leave.staff.department}}</td>
                                   <td>{{leave.message}}</td>
-                                  <td><a href="{{leave.related_document.url}" class="btn btn-info" target="_blank">View</a>}</td>
+                                  <td><a href="{{leave.related_documents.url}}" class="btn btn-info" target="_blank">View</a></td>
                                   <td>{{leave.date}}</td>
                                   <td>{{leave.created_at}}</td>
                                  
@@ -85,6 +85,10 @@
 <option value="1">Approve</option>
 <option value="-1">Reject</option>
            </select>
+           <div id="rejection_reason" style="display: none;">
+            <label for="reason">Reason for Rejection:</label>
+            <textarea id="reason" class="form-control" rows="4"></textarea>
+        </div>
         </div>
         
         <div class = "modal-footer">
@@ -103,43 +107,61 @@
 {% endblock content %}
 {% block custom_js %}
   <script>
-      $(document).ready(function(){
-          $(".reply_open_modal").click(function(){
-              var id = $(this).val()
-              var name = $(this).parents("tr").children("td:eq(1)").text()
-              $("#reply_name").text(name)
-              $("#id").val(id)
-              
-              
-            })
-            
-            $("#reply_btn").on("click", function(){
-                var id = $("#id").val()
-                var status = $("#reply_leave_status").val()
-                if (status == '1' || status == '-1'){
+document.addEventListener('DOMContentLoaded', function () {
+        // Handle opening of the modal
+        document.querySelectorAll('.reply_open_modal').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var id = this.value;
+                var name = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                document.getElementById('reply_name').textContent = name;
+                document.getElementById('id').value = id;
+                document.getElementById('reply_leave_status').value = ''; // Reset select input
+                document.getElementById('rejection_reason').style.display = 'none'; // Hide rejection reason initially
+            });
+        });
 
-    $.ajax({
-        url: "{% url 'view_staff_leave' %}",
-        type:'POST',
-        data:{
-              id:id,
-              status:status
-        }
-    }).done(function(response){
-        if (response == "True"){
-            alert("Leave Response Has Been Saved!")
-            location.reload()
-        }else{
-            alert("Reply Could Not Be Sent")
-        }
-    }).fail(function(response){
-        alert("Error Occured. ")
-    })
-}else{
-    alert("Choose valid response")
-}
+        // Handle change event for leave status select
+        document.getElementById('reply_leave_status').addEventListener('change', function () {
+            var status = this.value;
+            var rejectionReason = document.getElementById('rejection_reason');
+            if (status === '-1') {
+                rejectionReason.style.display = 'block'; // Show rejection reason if 'Reject' is selected
+            } else {
+                rejectionReason.style.display = 'none'; // Hide rejection reason otherwise
+            }
+        });
 
-          })
-      })
+        // Handle the submit button click
+        document.getElementById('reply_btn').addEventListener('click', function () {
+            var id = document.getElementById('id').value;
+            var status = document.getElementById('reply_leave_status').value;
+            var reason = document.getElementById('reason').value; // Get reason for rejection
+
+            if (status === '1' || status === '-1') {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', "{% url 'view_student_leave' %}", true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            if (xhr.responseText === 'True') {
+                                alert('Leave Response Has Been Saved!');
+                                location.reload();
+                            } else {
+                                alert('Reply Could Not Be Sent');
+                            }
+                        } else {
+                            alert('Error Occurred: ' + xhr.status);
+                        }
+                    }
+                };
+                
+                xhr.send('id=' + encodeURIComponent(id) + '&status=' + encodeURIComponent(status) + '&reason=' + encodeURIComponent(reason));
+            } else {
+                alert('Choose a valid response');
+            }
+        });
+    });
   </script>
 {% endblock custom_js %}

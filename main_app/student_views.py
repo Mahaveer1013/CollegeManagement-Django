@@ -15,7 +15,7 @@ from .models import *
 
 
 def student_home(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     total_subject = Subject.objects.count()
     total_attendance = Attendance.objects.filter(student=student).count()
     total_present = Attendance.objects.filter(
@@ -51,7 +51,7 @@ def student_home(request):
 
 
 def student_view_timetable(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     timetable = TimeTable.objects.filter(class_name=student.class_name).first()
 
     return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
@@ -59,7 +59,7 @@ def student_view_timetable(request):
 
 @ csrf_exempt
 def student_view_attendance(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     if request.method != 'POST':
         department = get_object_or_404(Department, id=student.department.id)
         context = {
@@ -92,8 +92,8 @@ def student_view_attendance(request):
 
 
 def student_apply_leave(request):
-    form = LeaveReportStudentForm(request.POST or None)
-    student = get_object_or_404(Student, admin_id=request.user.id)
+    form = LeaveReportStudentForm(request.POST or None, request.FILES or None)
+    student = get_object_or_404(Student, user_id=request.user.id)
     context = {
         'form': form,
         'leave_history': LeaveReportStudent.objects.filter(student=student),
@@ -102,7 +102,7 @@ def student_apply_leave(request):
     if request.method == 'POST':
         if form.is_valid():
             try:
-                obj = form.save(commit=False)
+                obj = form.instance
                 obj.student = student
                 obj.save()
                 messages.success(
@@ -111,13 +111,14 @@ def student_apply_leave(request):
             except Exception:
                 messages.error(request, "Could not submit")
         else:
+            print(form.errors, 'fbrt fng') 
             messages.error(request, "Form has errors!")
     return render(request, "student_template/student_apply_leave.html", context)
 
 
 def student_feedback(request):
     form = FeedbackStudentForm(request.POST or None)
-    student = get_object_or_404(Student, admin_id=request.user.id)
+    student = get_object_or_404(Student, user_id=request.user.id)
     context = {
         'form': form,
         'feedbacks': FeedbackStudent.objects.filter(student=student),
@@ -141,7 +142,7 @@ def student_feedback(request):
 
 
 def student_view_profile(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     form = StudentEditForm(request.POST or None, request.FILES or None,
                            instance=student)
     context = {'form': form,
@@ -156,19 +157,19 @@ def student_view_profile(request):
                 address = form.cleaned_data.get('address')
                 gender = form.cleaned_data.get('gender')
                 passport = request.FILES.get('profile_pic') or None
-                admin = student.admin
+                user = student.user
                 if password != None:
-                    admin.set_password(password)
+                    user.set_password(password)
                 if passport != None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
-                    admin.profile_pic = passport_url
-                admin.first_name = first_name
-                admin.last_name = last_name
-                admin.address = address
-                admin.gender = gender
-                admin.save()
+                    user.profile_pic = passport_url
+                user.first_name = first_name
+                user.last_name = last_name
+                user.address = address
+                user.gender = gender
+                user.save()
                 student.save()
                 messages.success(request, "Profile Updated!")
                 return redirect(reverse('student_view_profile'))
@@ -182,7 +183,7 @@ def student_view_profile(request):
 
 
 def student_view_assignment(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     
     if request.method == 'POST':
         try:
@@ -234,7 +235,7 @@ def student_view_assignment(request):
 
 
 def student_view_note(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     all_student_periods = Period.objects.filter(class_name=student.class_name).values_list('subject', flat=True)
     print(all_student_periods)
     notes = Note.objects.filter(department=student.department, subject__in=all_student_periods).annotate(
@@ -264,7 +265,7 @@ def student_fcmtoken(request):
 
 
 def student_view_notification(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     notifications = NotificationStudent.objects.filter(student=student)
     context = {
         'notifications': notifications,
@@ -274,7 +275,7 @@ def student_view_notification(request):
 
 
 def student_view_result(request):
-    student = get_object_or_404(Student, admin=request.user)
+    student = get_object_or_404(Student, user=request.user)
     results = StudentResult.objects.filter(student=student)
     context = {
         'results': results,

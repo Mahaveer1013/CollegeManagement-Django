@@ -1,0 +1,12 @@
+{% extends "registration/base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <h1>Admin Login</h1>
+    <form method="post" action="{% url 'admin:login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Log in</button>
+    </form>
+</div>
+{% endblock %}

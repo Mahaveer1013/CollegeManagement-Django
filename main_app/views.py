@@ -68,25 +68,18 @@ def logout_user(request):
     return redirect("/")
 
 
-# @csrf_exempt
-# def get_attendance(request):
-#     subject_id = request.POST.get('subject')
-#     session_id = request.POST.get('session')
-#     try:
-#         subject = get_object_or_404(Subject, id=subject_id)
-#         session = get_object_or_404(Session, id=session_id)
-#         attendance = Attendance.objects.filter(subject=subject, session=session)
-#         attendance_list = []
-#         for attd in attendance:
-#             data = {
-#                     "id": attd.id,
-#                     "attendance_date": str(attd.date),
-#                     "session": attd.session.id
-#                     }
-#             attendance_list.append(data)
-#         return JsonResponse(json.dumps(attendance_list), safe=False)
-#     except Exception as e:
-#         return None
+def get_classes_by_department(request):
+    department_id = request.GET.get('department_id')
+    classes = ClassList.objects.filter(department_id=department_id).order_by('semester', 'section')
+    class_list = [{'id': cls.id, 'name': str(cls)} for cls in classes]
+    print(class_list)
+    return JsonResponse({'classes': class_list})
+
+def get_students_by_class(request):
+    class_name_id = request.GET.get('class_id')
+    students = Student.objects.filter(class_name_id=class_name_id).order_by('roll_number')
+    student_list = [{'id': student.id, 'name': str(student.admin), 'roll_number':student.roll_number} for student in students]
+    return JsonResponse({'students': student_list})
 
 
 def showFirebaseJS(request):

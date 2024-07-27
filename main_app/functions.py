@@ -2,35 +2,44 @@ from twilio.rest import Client
 from email.mime.text import MIMEText
 import smtplib
 from twilio.base.exceptions import TwilioRestException
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-def send_mail(email, subject, body):
-    sender_email = "kklimited1013@gmail.com"
-    receiver_email = email
-    password = "hmupzeoeftrbzmkl"  # Use an App Password or enable Less Secure Apps
 
-    # Create the email message
-    message = MIMEText(body)
-    message['From'] = sender_email
-    message['To'] = receiver_email
-    message['Subject'] = subject
+
+# print(os.getenv('EMAIL_HOST_USER'))
+# print(type(os.getenv('EMAIL_HOST_USER')))
+# def send_mail(email, subject, body):
+#     sender_email = os.getenv('EMAIL_HOST_USER')
+#     receiver_email = email
+#     password = os.getenv('EMAIL_HOST_PASSWORD')  # Use an App Password or enable Less Secure Apps
+
+#     # Create the email message
+#     message = MIMEText(body)
+#     message['From'] = sender_email
+#     message['To'] = receiver_email
+#     message['Subject'] = subject
     
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.ehlo()
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
-        print('Email sent successfully!')
-        server.quit()
-    except Exception as e:
-        print(f'An error occurred: {str(e)}')
+#     try:
+#         server = smtplib.SMTP('smtp.gmail.com', 587)
+#         server.ehlo()
+#         server.starttls()
+#         server.login(sender_email, password)
+#         server.sendmail(sender_email, receiver_email, message.as_string())
+#         print('Email sent successfully!')
+#         server.quit()
+#     except Exception as e:
+#         print(f'An error occurred: {str(e)}')
+
+# send_mail('a.mahaveer5@gmail.com', 'test', 'test')
 
 def send_sms(numbers_to_message, message_body):
-    account_sid = 'AC13b38de2e450f5c5d26768602917af11'
-    auth_token = '9810a5ac80b6bc3083d309a0a34f60bc'
+    account_sid = os.getenv('SMS_SID')
+    auth_token = os.getenv('SMS_AUTH_TOKEN')
     client = Client(account_sid, auth_token)
 
-    from_phone_number = '+19295817981'
+    from_phone_number = os.getenv('+19295817981')
 
     # Ensure numbers_to_message is iterable
     if not isinstance(numbers_to_message, (list, tuple)):

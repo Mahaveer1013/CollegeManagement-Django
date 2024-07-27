@@ -1,4 +1,6 @@
-from .models import AdminAccessLog
+from django.utils.timezone import now
+import logging
+from .models import *
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 from django.urls import reverse
@@ -31,10 +33,8 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                 return redirect(reverse('login_page'))
 
 
-
 class AdminAccessLogMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        print(request.META)
         if request.path == reverse('user_login') and request.user.is_authenticated:
             user = request.user
             ip_address = request.META.get('REMOTE_ADDR')
@@ -45,4 +45,25 @@ class AdminAccessLogMiddleware(MiddlewareMixin):
                 ip_address=ip_address,
                 accessed_at=timezone.now()
             )
+        return response
+
+
+logger = logging.getLogger(__name__)
+
+
+class ActionLoggingMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if request.user.is_authenticated:
+            # Log the action (you can add more details as needed)
+            ActionLog.objects.create(
+                user=request.user,
+                action=f'Visited {request.path}',
+                timestamp=now()
+            )
+
         return response

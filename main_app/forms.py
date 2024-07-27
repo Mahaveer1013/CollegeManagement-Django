@@ -5,7 +5,6 @@ from dal import autocomplete
 from .models import *
 
 
-
 class FormSettings(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormSettings, self).__init__(*args, **kwargs)
@@ -30,7 +29,7 @@ class CustomUserForm(FormSettings):
         super(CustomUserForm, self).__init__(*args, **kwargs)
 
         if kwargs.get('instance'):
-            instance = kwargs.get('instance').admin.__dict__
+            instance = kwargs.get('instance').user.__dict__
             self.fields['password'].required = False
             for field in CustomUserForm.Meta.fields:
                 self.fields[field].initial = instance.get(field)
@@ -45,7 +44,7 @@ class CustomUserForm(FormSettings):
                     "The given email is already registered")
         else:  # Update
             dbEmail = self.Meta.model.objects.get(
-                id=self.instance.pk).admin.email.lower()
+                id=self.instance.pk).user.email.lower()
             if dbEmail != formEmail:  # There has been changes
                 if CustomUser.objects.filter(email=formEmail).exists():
                     raise forms.ValidationError(
@@ -61,41 +60,68 @@ class CustomUserForm(FormSettings):
 
 class DateSelectionForm(forms.Form):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    period = forms.ChoiceField(choices=[(i, f'Period {i}') for i in range(1, 9)], required=False)
+    period = forms.ChoiceField(
+        choices=[(i, f'Period {i}') for i in range(1, 9)], required=False)
 
 
 class AttendanceSelectionForm(forms.Form):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
-    class_name = forms.ModelChoiceField(    
-        queryset=ClassList.objects.all().order_by('department__name', 'semester', 'section'),
+    date = forms.DateField(widget=forms.DateInput(
+        attrs={'type': 'date', 'class': 'form-control'}))
+    class_name = forms.ModelChoiceField(
+        queryset=ClassList.objects.all().order_by(
+            'department__name', 'semester', 'section'),
         empty_label="Select a class",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
 
 class OverallAttendanceSelectionForm(forms.Form):
-    from_date = forms.DateField(label='From :',widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
-    to_date = forms.DateField(label='To :',widget=forms.DateInput(attrs={'type': 'date','class': 'form-control'}))
-    class_name = forms.ModelChoiceField(    
+    from_date = forms.DateField(
+        label='From :',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        required=False
+    )
+    to_date = forms.DateField(
+        label='To :',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        required=False
+    )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        empty_label="Select a Department",
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_department'}),
+        required=False
+    )
+    class_name = forms.ModelChoiceField(
         queryset=ClassList.objects.all().order_by('department__name', 'semester', 'section'),
         empty_label="Select a class",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_class_name'}),
+        required=False
     )
+    student = forms.ModelChoiceField(
+        queryset=Student.objects.all(),
+        empty_label="Select Student",
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_student'}),
+        required=False,
+        to_field_name='roll_number'
+    )
+
     def clean(self):
         cleaned_data = super().clean()
         from_date = cleaned_data.get('from_date')
         to_date = cleaned_data.get('to_date')
         if from_date and to_date:
-            if from_date >= to_date:
+            if from_date > to_date:
                 raise ValidationError('From date must be less than to date and they should not be equal.')
 
         return cleaned_data
-
+    
 
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(AdminForm, self).__init__(*args, **kwargs)
-        self.fields['password'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': False})
+        self.fields['password'].widget = forms.PasswordInput(
+            attrs={'class': 'form-control', 'autocomplete': False})
         self.fields['password'].initial = ''  # Ensure no initial value
         if 'email' in self.fields:
             del self.fields['email']
@@ -118,14 +144,6 @@ class AttendanceForm(FormSettings):
         }
 
 
-class StaffTimetableForHodForm(FormSettings):
-    faculty_id = forms.CharField(max_length=20)
-
-class StudentTimetableForHodForm(FormSettings):
-    register_number = forms.CharField(max_length=20, required=False)
-    roll_number = forms.CharField(max_length=20, required=False)
-
-
 class ExamDetailForm(FormSettings):
     semester_choices = (
         ('1st', '1st'),
@@ -144,7 +162,7 @@ class ExamDetailForm(FormSettings):
     )
 
     academic_year_choices = [
-        (year,year)
+        (year, year)
         for year in AcademicYear.objects.all()
     ]
 
@@ -158,39 +176,25 @@ class ExamDetailForm(FormSettings):
         choices=academic_year_choices,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
+
     subject = forms.ModelChoiceField(
         queryset=Subject.objects.all(),
         empty_label="Select Subject"
     )
-    
+
     semester = forms.ChoiceField(
         choices=semester_choices,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
+
     exam_type = forms.ChoiceField(
         choices=exam_type_choices,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
+
     class Meta:
         model = ExamDetail
         fields = ['department', 'subject', 'semester', 'exam_type']
-
-
-# class AssignmentQuestionsForm(forms.ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super(AssignmentQuestionsForm, self).__init__(*args, **kwargs)
-
-#     class Meta:
-#         model = AssignmentQuestions
-#         fields = ['class_name','deadline_date', 'pdf']
-#         widgets = {
-#             'class_name': forms.Select(attrs={'class': 'form-control'}),
-#             'deadline_date': forms.DateInput(attrs={'class': 'form-control'}),
-#             'pdf': forms.FileInput(attrs={'class': 'form-control'})
-#         }
 
 
 class AssignmentAnswersForm(forms.ModelForm):
@@ -211,9 +215,10 @@ class LeaveReportStaffForm(FormSettings):
 
     class Meta:
         model = LeaveReportStaff
-        fields = ['date', 'message']
+        fields = ['date', 'message', 'related_documents']
         widgets = {
             'date': DateInput(attrs={'type': 'date'}),
+            'related_documents': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 
@@ -233,9 +238,10 @@ class LeaveReportStudentForm(FormSettings):
 
     class Meta:
         model = LeaveReportStudent
-        fields = ['date', 'message']
+        fields = ['date', 'message', 'related_documents']
         widgets = {
             'date': DateInput(attrs={'type': 'date'}),
+            'related_documents': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 
@@ -271,5 +277,3 @@ class StaffEditForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Staff
         fields = [field for field in CustomUserForm.Meta.fields if field != 'email']
-
-

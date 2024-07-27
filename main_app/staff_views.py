@@ -13,10 +13,11 @@ from .models import *
 from django.db.models import Value, CharField
 from django.db.models.functions import Concat
 from datetime import datetime
+from .functions import *
 
 
 def staff_home(request):
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
     total_students = Student.objects.filter(
         department=staff.department).count()
     total_leave = LeaveReportStaff.objects.filter(staff=staff, status=1).count()
@@ -32,7 +33,7 @@ def staff_home(request):
         subject_list.append(subject.name)
         # attendance_list.append(attendance_count)
     context = {
-        'page_title': 'Staff Panel - ' + str(staff.admin) + ' (' + str(staff.department) + ')',
+        'page_title': 'Staff Panel - ' + str(staff.user) + ' (' + str(staff.department) + ')',
         'total_students': total_students,
         'total_attendance': 10,
         'total_leave': total_leave,
@@ -56,7 +57,7 @@ def staff_take_attendance(request):
 
 
 def staff_view_note(request):
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
     all_staff_periods = Period.objects.filter(department=staff.department).values_list('subject', flat=True)
     print(all_staff_periods)
     notes = Note.objects.filter(department=staff.department, subject__in=all_staff_periods).annotate(
@@ -71,13 +72,12 @@ def staff_view_note(request):
 ).order_by('str_representation')
     return render(request, 'student_template/student_notes.html', {'notes':notes})
 
-
 @csrf_exempt  # Temporarily exempt from CSRF validation for debugging
 def fetch_students(request):
     if request.method == 'POST':
         date = request.POST.get('date')
         period = request.POST.get('period')
-        staff = get_object_or_404(Staff, admin=request.user)
+        staff = get_object_or_404(Staff, user=request.user)
         print(staff)
 
         if not date or not period:
@@ -124,7 +124,7 @@ def fetch_students(request):
                     for student in students:
                         student_data.append({
                             'id': student.id,
-                            'name': student.admin.first_name + ' ' + student.admin.last_name,
+                            'name': student.user.first_name + ' ' + student.user.last_name,
                             'roll_number': student.roll_number,
                             'register_number': student.register_number
                         })
@@ -145,10 +145,12 @@ def submit_attendance(request):
     if request.method == 'POST':
         date_str = request.POST.get('date')
         period = request.POST.get('period')
-        staff = get_object_or_404(Staff, admin=request.user)
+        staff = get_object_or_404(Staff, user=request.user)
         checked = request.POST.get('checked_students')
         unchecked = request.POST.get('unchecked_students')
-        print('from js checked n unchecked ',checked,unchecked)
+        od_internal = request.POST.get('od_internal_students')
+        od_external = request.POST.get('od_external_students')
+        # print('from js checked n unchecked ',checked,unchecked)
 
         if not date_str or not period:
             return JsonResponse({'error': 'Date and period are required.'}, status=400)
@@ -189,7 +191,8 @@ def submit_attendance(request):
         # Convert checked and unchecked from comma-separated strings to lists of integers
         checked_ids = list(map(int, checked.split(','))) if checked else []
         unchecked_ids = list(map(int, unchecked.split(','))) if unchecked else []
-        print('\n\n\n\n\nid',checked_ids,unchecked_ids)
+        od_internal_ids = list(map(int, od_internal.split(','))) if od_internal else []
+        od_external_ids = list(map(int, od_external.split(','))) if od_external else []
         # Process the data to mark attendance
         for student_id in checked_ids:
             try:
@@ -224,6 +227,63 @@ def submit_attendance(request):
                 attendance_record.status = 0
                 attendance_record.subject = subject
                 attendance_record.save()
+            print(f'You ward Mr.{student} have taken a leave today')
+            print(f'You ward Mr.{student} have taken a leave today\n', student.parent_phone_number )
+            # send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
+            send_mail(student.user.email,f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today')
+
+
+        for student_id in od_internal_ids:
+            try:
+                student = Student.objects.get(id=student_id)
+            except Student.DoesNotExist:
+                continue  # Skip if the student does not exist
+
+            attendance_record, created = Attendance.objects.get_or_create(
+                student=student,
+                date=date,
+                period=period,
+                defaults={'status': 2, 'subject': subject}
+            )
+            if not created:
+                attendance_record.status = 0
+                attendance_record.subject = subject
+                attendance_record.save()
+            send_mail(student.user.email,f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today')
+
+        for student_id in od_external_ids:
+            try:
+                student = Student.objects.get(id=student_id)
+            except Student.DoesNotExist:
+                continue  # Skip if the student does not exist
+
+            attendance_record, created = Attendance.objects.get_or_create(
+                student=student,
+                date=date,
+                period=period,
+                defaults={'status': 3, 'subject': subject}
+            )
+            if not created:
+                attendance_record.status = 0
+                attendance_record.subject = subject
+                attendance_record.save()
+
+            message= f'''
+                    Dear {student},
+
+                    This email serves as an acknowledgement of your leave on official duty (OD) dated {date}.
+
+                    To complete the process, please ensure that you send the necessary proof of your official duty to your respective mentor at the earliest convenience. This will help us in maintaining accurate records and ensuring that your leave is duly accounted for.
+
+                    If you have any questions or need further assistance, feel free to reach out to your mentor.
+
+                    Thank you for your cooperation.
+
+                    Best regards,
+
+                    Panimalar Engineering College
+                    '''
+            send_mail(student.user.email,'Acknowledgement of Leave on Official Duty (OD)', message)
 
         return redirect('staff_take_attendance')  # Redirect to a success page or the same page
 
@@ -232,7 +292,7 @@ def submit_attendance(request):
 
 def staff_view_timetable(request):
     # Get the current logged-in user
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
 
     if not staff:
         return render(request, 'error.html', {'message': 'Staff not found'})
@@ -273,7 +333,7 @@ def staff_view_timetable(request):
 
 
 def add_assignment(request):
-    print('this is my data \n',get_object_or_404(Staff, admin=request.user))
+    print('this is my data \n',get_object_or_404(Staff, user=request.user))
     if request.method == 'POST':
         if student_form.is_valid():
             deadline_date = student_form.cleaned_data.get('deadline_date')
@@ -300,103 +360,9 @@ def add_assignment(request):
     return render(request, 'hod_template/add_student_template.html', context)
 
 
-@csrf_exempt
-def get_students(request):
-    subject_id = request.POST.get('subject')
-    session_id = request.POST.get('session')
-    try:
-        subject = get_object_or_404(Subject, id=subject_id)
-        session = get_object_or_404(Session, id=session_id)
-        students = Student.objects.filter(
-            department_id=subject.department.id, session=session)
-        student_data = []
-        for student in students:
-            data = {
-                    "id": student.id,
-                    "name": student.admin.last_name + " " + student.admin.first_name
-                    }
-            student_data.append(data)
-        return JsonResponse(json.dumps(student_data), content_type='application/json', safe=False)
-    except Exception as e:
-        return e
-
-
-@csrf_exempt
-def save_attendance(request):
-    student_data = request.POST.get('student_ids')
-    date = request.POST.get('date')
-    subject_id = request.POST.get('subject')
-    session_id = request.POST.get('session')
-    students = json.loads(student_data)
-    try:
-        session = get_object_or_404(Session, id=session_id)
-        subject = get_object_or_404(Subject, id=subject_id)
-        attendance = Attendance(session=session, subject=subject, date=date)
-        attendance.save()
-
-        for student_dict in students:
-            student = get_object_or_404(Student, id=student_dict.get('id'))
-            attendance_report = AttendanceReport(student=student, attendance=attendance, status=student_dict.get('status'))
-            attendance_report.save()
-    except Exception as e:
-        return None
-
-    return HttpResponse("OK")
-
-
-def staff_update_attendance(request):
-    staff = get_object_or_404(Staff, admin=request.user)
-    subjects = Subject.objects.filter(staff_id=staff)
-    sessions = Session.objects.all()
-    context = {
-        'subjects': subjects,
-        'sessions': sessions,
-        'page_title': 'Update Attendance'
-    }
-
-    return render(request, 'staff_template/staff_update_attendance.html', context)
-
-
-@csrf_exempt
-def get_student_attendance(request):
-    attendance_date_id = request.POST.get('attendance_date_id')
-    try:
-        date = get_object_or_404(Attendance, id=attendance_date_id)
-        attendance_data = AttendanceReport.objects.filter(attendance=date)
-        student_data = []
-        for attendance in attendance_data:
-            data = {"id": attendance.student.admin.id,
-                    "name": attendance.student.admin.last_name + " " + attendance.student.admin.first_name,
-                    "status": attendance.status}
-            student_data.append(data)
-        return JsonResponse(json.dumps(student_data), content_type='application/json', safe=False)
-    except Exception as e:
-        return e
-
-
-@csrf_exempt
-def update_attendance(request):
-    student_data = request.POST.get('student_ids')
-    date = request.POST.get('date')
-    students = json.loads(student_data)
-    try:
-        attendance = get_object_or_404(Attendance, id=date)
-
-        for student_dict in students:
-            student = get_object_or_404(
-                Student, admin_id=student_dict.get('id'))
-            attendance_report = get_object_or_404(AttendanceReport, student=student, attendance=attendance)
-            attendance_report.status = student_dict.get('status')
-            attendance_report.save()
-    except Exception as e:
-        return None
-
-    return HttpResponse("OK")
-
-
 def staff_apply_leave(request):
-    form = LeaveReportStaffForm(request.POST or None)
-    staff = get_object_or_404(Staff, admin_id=request.user.id)
+    form = LeaveReportStaffForm(request.POST or None, request.FILES or None)
+    staff = get_object_or_404(Staff, user_id=request.user.id)
     context = {
         'form': form,
         'leave_history': LeaveReportStaff.objects.filter(staff=staff),
@@ -438,7 +404,7 @@ def view_assignment(request):
 
 def staff_feedback(request):
     form = FeedbackStaffForm(request.POST or None)
-    staff = get_object_or_404(Staff, admin_id=request.user.id)
+    staff = get_object_or_404(Staff, user_id=request.user.id)
     context = {
         'form': form,
         'feedbacks': FeedbackStaff.objects.filter(staff=staff),
@@ -460,7 +426,7 @@ def staff_feedback(request):
 
 
 def staff_view_profile(request):
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
     form = StaffEditForm(request.POST or None, request.FILES or None,instance=staff)
     context = {'form': form, 'page_title': 'View/Update Profile'}
     if request.method == 'POST':
@@ -472,19 +438,19 @@ def staff_view_profile(request):
                 address = form.cleaned_data.get('address')
                 gender = form.cleaned_data.get('gender')
                 passport = request.FILES.get('profile_pic') or None
-                admin = staff.admin
+                user = staff.user
                 if password != None:
-                    admin.set_password(password)
+                    user.set_password(password)
                 if passport != None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
-                    admin.profile_pic = passport_url
-                admin.first_name = first_name
-                admin.last_name = last_name
-                admin.address = address
-                admin.gender = gender
-                admin.save()
+                    user.profile_pic = passport_url
+                user.first_name = first_name
+                user.last_name = last_name
+                user.address = address
+                user.gender = gender
+                user.save()
                 staff.save()
                 messages.success(request, "Profile Updated!")
                 return redirect(reverse('staff_view_profile'))
@@ -512,7 +478,7 @@ def staff_fcmtoken(request):
 
 
 def staff_view_notification(request):
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
     notifications = NotificationStaff.objects.filter(staff=staff)
     context = {
         'notifications': notifications,
@@ -522,7 +488,7 @@ def staff_view_notification(request):
 
 
 def staff_add_result(request):
-    staff = get_object_or_404(Staff, admin=request.user)
+    staff = get_object_or_404(Staff, user=request.user)
     subjects = Subject.objects.filter(staff=staff)
     sessions = Session.objects.all()
     context = {

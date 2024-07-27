@@ -71,7 +71,7 @@ def admin_home(request):
             student_id=student.id, status=1).count()
         student_attendance_present_list.append(attendance)
         student_attendance_leave_list.append(leave+absent)
-        student_name_list.append(student.admin.first_name)
+        student_name_list.append(student.user.first_name)
 
     context = {
         'page_title': "Administrative Dashboard",
@@ -81,9 +81,9 @@ def admin_home(request):
         'total_subject': total_subject,
         'subject_list': subject_list,
         'attendance_list': attendance_list,
-        'student_attendance_present_list': student_attendance_present_list,
-        'student_attendance_leave_list': student_attendance_leave_list,
-        "student_name_list": student_name_list,
+        'student_attendance_present_list': [10,8,7],
+        'student_attendance_leave_list': [10,8,7],
+        "student_name_list": ['mahaveer','fvrebrt','egtbv'],
         "student_count_list_in_subject": student_count_list_in_subject,
         "student_count_list_in_department": student_count_list_in_department,
         "department_name_list": department_name_list,
@@ -100,7 +100,7 @@ def get_classes_by_department(request):
 
 
 def admin_view_attendance(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     form = AttendanceSelectionForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -137,46 +137,117 @@ def admin_view_attendance(request):
     return render(request, "hod_template/admin_view_attendance.html", context)
 
 
+# def admin_view_overall_attendance(request):
+#     user = get_object_or_404(Admin, user=request.user)
+#     form = OverallAttendanceSelectionForm(request.POST or None, request.FILES or None)
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             from_date = form.cleaned_data.get('from_date')
+#             to_date = form.cleaned_data.get('to_date')
+#             class_id = form.cleaned_data.get('class_name')
+#             students_id = Student.objects.filter(class_name=class_id)
+#             current_date = from_date
+#             overall_attendance = {}
+#             while current_date <= to_date:
+#                 attendance_array = {}
+#                 if len(students_id) > 0:
+#                     for student in students_id:
+#                         if Attendance.objects.filter(date = current_date, student=student, status=1).first():
+#                             attendance_array[student.roll_number] = 'Present'
+#                         elif  Attendance.objects.filter(date = current_date, student=student, status=2).first():
+#                             attendance_array[student.roll_number] = 'OD Internal'
+#                         elif  Attendance.objects.filter(date = current_date, student=student, status=3).first():
+#                             attendance_array[student.roll_number] = 'OD External'
+#                         elif  Attendance.objects.filter(date = current_date, student=student, status=0).first():
+#                             attendance_array[student.roll_number] = 'Absent'
+#                         elif  Attendance.objects.filter(date = current_date, student=student, status=4).first():
+#                             attendance_array[student.roll_number] = 'Pending'
+#                 if len(attendance_array)>0:
+#                     overall_attendance[str(current_date)]=attendance_array
+#                 current_date += datetime.timedelta(days=1)  
+#             dates = list(overall_attendance.keys())
+#             roll_numbers = list(overall_attendance[dates[0]]) if dates else []
+#             return render(request, "hod_template/overall_attendance_view_page.html", {'overall_attendance': overall_attendance, 'class_name': str(class_id), 'dates': dates, 'roll_numbers':roll_numbers})
+#         else:
+#             messages.error(request, "Invalid Data Provided")
+#     context = {'form': form, 'page_title': 'Select Attendance Details'}
+
+#     return render(request, "hod_template/admin_view_overall_attendance.html", context)
+
 def admin_view_overall_attendance(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     form = OverallAttendanceSelectionForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
             from_date = form.cleaned_data.get('from_date')
+            print(from_date)
             to_date = form.cleaned_data.get('to_date')
+            print(to_date)
+            department = form.cleaned_data.get('department')
+            print(department)
             class_id = form.cleaned_data.get('class_name')
-            students_id = Student.objects.filter(class_name=class_id)
-            current_date = from_date
+            print(class_id)
+            student = form.cleaned_data.get('student')
+            print(student)
+            
+            # Validate date range
+            if from_date and to_date and from_date > to_date:
+                messages.error(request, "From date must be less than to date and they should not be equal.")
+                return render(request, "hod_template/admin_view_overall_attendance.html", {'form': form, 'page_title': 'Select Attendance Details'})
+            
             overall_attendance = {}
-            while current_date <= to_date:
-                attendance_array = {}
-                if len(students_id) > 0:
-                    for student in students_id:
-                        if Attendance.objects.filter(date = current_date, student=student, status=1).first():
-                            attendance_array[student.roll_number] = 'Present'
-                        elif  Attendance.objects.filter(date = current_date, student=student, status=2).first():
-                            attendance_array[student.roll_number] = 'OD Internal'
-                        elif  Attendance.objects.filter(date = current_date, student=student, status=3).first():
-                            attendance_array[student.roll_number] = 'OD External'
-                        elif  Attendance.objects.filter(date = current_date, student=student, status=0).first():
-                            attendance_array[student.roll_number] = 'Absent'
-                        elif  Attendance.objects.filter(date = current_date, student=student, status=4).first():
-                            attendance_array[student.roll_number] = 'Pending'
-                if len(attendance_array)>0:
-                    overall_attendance[str(current_date)]=attendance_array
-                current_date += datetime.timedelta(days=1)  
+
+            if class_id:
+                students = Student.objects.filter(class_name=class_id)
+            elif department:
+                students = Student.objects.filter(class_name__department=department)
+            elif student:
+                students = Student.objects.filter(user=student)
+            else:
+                students = Student.objects.all()
+            
+            
+            if from_date and to_date:
+                current_date = from_date
+                while current_date <= to_date:
+                    attendance_array = {}
+                    if students.exists():
+                        for student in students:
+                            status = Attendance.objects.filter(date=current_date, student=student).first()
+                            if status:
+                                attendance_array[student.roll_number] = {
+                                    1: 'Present',
+                                    2: 'OD Internal',
+                                    3: 'OD External',
+                                    0: 'Absent',
+                                    4: 'Pending'
+                                }.get(status.status, 'Unknown')
+                    if attendance_array:
+                        overall_attendance[str(current_date)] = attendance_array
+                    current_date += datetime.timedelta(days=1)
+            else:
+                messages.error(request, "Please provide a valid date range.")
+                return render(request, "hod_template/admin_view_overall_attendance.html", {'form': form, 'page_title': 'Select Attendance Details'})
+            
             dates = list(overall_attendance.keys())
-            roll_numbers = list(overall_attendance[dates[0]]) if dates else []
-            return render(request, "hod_template/overall_attendance_view_page.html", {'overall_attendance': overall_attendance, 'class_name': str(class_id), 'dates': dates, 'roll_numbers':roll_numbers})
+            roll_numbers = list(overall_attendance[dates[0]].keys()) if dates else []
+            data_to_send={
+                'overall_attendance': overall_attendance,
+                'class_name': str(class_id) if class_id else 'All Classes',
+                'dates': dates,
+                'roll_numbers': roll_numbers
+            }
+            print(data_to_send)
+            return render(request, "hod_template/overall_attendance_view_page.html",data_to_send )
         else:
             messages.error(request, "Invalid Data Provided")
+    
     context = {'form': form, 'page_title': 'Select Attendance Details'}
-
     return render(request, "hod_template/admin_view_overall_attendance.html", context)
 
 
 def admin_view_profile(request):
-    admin = get_object_or_404(Admin, admin=request.user)
+    admin = get_object_or_404(Admin, user=request.user)
     form = AdminForm(request.POST or None, request.FILES or None,
                      instance=admin)
     context = {'form': form,
@@ -189,7 +260,7 @@ def admin_view_profile(request):
                 last_name = form.cleaned_data.get('last_name')
                 password = form.cleaned_data.get('password') or None
                 passport = request.FILES.get('profile_pic') or None
-                custom_user = admin.admin
+                custom_user = admin.user
                 if password != None:
                     custom_user.set_password(password)
                 if passport != None:
@@ -211,7 +282,7 @@ def admin_view_profile(request):
 
 
 def admin_notify_staff(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     staff = CustomUser.objects.filter(user_type=2)
     context = {
         'page_title': "Send Notifications To Staff",
@@ -221,7 +292,7 @@ def admin_notify_staff(request):
 
 
 def admin_notify_student(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     student = CustomUser.objects.filter(user_type=3)
     context = {
         'page_title': "Send Notifications To Students",
@@ -247,8 +318,6 @@ def exam_filter_page(request):
             q_paper = Question.objects.filter(exam_detail=exam_detail).first()
 
             if q_paper:
-                print(q_paper)
-                print(q_paper.question_text1)
                 return render(request, "hod_template/question_paper_template.html", {'q_paper':q_paper, 'exam': q_paper.exam_detail})
             else:
                 messages.error(request, 'No Question Paper Found.')
@@ -259,16 +328,72 @@ def exam_filter_page(request):
     return render(request, 'hod_template/exam_filter_page.html', {'form': form,'page_title':'Question Paper Details'})
 
 
+def hod_class_timetable(request):
+    class_id = request.POST.get('class_id')
+    print(class_id)
+    timetable = TimeTable.objects.filter(class_name=class_id).first()
+    if not timetable:
+        messages.error(request,'No Timetable found for the class')
+        return redirect('overall_timetable')
+
+    return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
+
+
+def hod_staff_timetable(request):
+    faculty_id = request.POST.get('faculty_id')
+    staff = Staff.objects.filter(faculty_id=faculty_id).first()
+
+    if not staff:
+        messages.error(request, "No Staff Found")
+        return redirect('overall_timetable')
+
+    periods = Period.objects.filter(staff=staff)
+    staff_timetable = {}
+    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    period_count = ['1','2','3','4','5','6','7','8']
+
+    for day in days:
+        for count in period_count:
+            column = f"{day}_{count}"
+            print(column)
+
+            timetable_list = TimeTable.objects.filter(
+                department=staff.department,
+                class_name__in=[period.class_name for period in periods]
+            )
+            found = False
+            for timetable in timetable_list:
+                print(getattr(timetable,column).staff, '\n', type(getattr(timetable,column).staff))
+                print(staff, '\n', type(staff))
+                if getattr(timetable,column).staff == staff:
+                    staff_timetable[column] = timetable.class_name
+                    found = True
+                    break
+            if found == False:
+                staff_timetable[column] = 'Free Period'
+    print(staff_timetable)
+
+    if not timetable:
+        return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
+        
+
+    return render(request, 'staff_template/staff_timetable.html', {'staff_timetable': staff_timetable, 'staff_name': staff.user})
+
+
 def overall_timetable(request):
-    user = get_object_or_404(Admin, admin=request.user)
-    staff_form = StaffTimetableForHodForm()
-    student_form = StudentTimetableForHodForm()
-    return render(request, 'hod_template/overall_timetable.html')
+    user = get_object_or_404(Admin, user=request.user)
+    department=Department.objects.all()
+    class_names = ClassList.objects.all()
+    context={
+        'department':department,
+        'class_names':class_names
+    }
+    return render(request, 'hod_template/overall_timetable.html',context=context)
 
 
 @csrf_exempt
 def student_feedback_message(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     if request.method != 'POST':
         feedbacks = FeedbackStudent.objects.all()
         context = {
@@ -290,7 +415,7 @@ def student_feedback_message(request):
 
 @csrf_exempt
 def staff_feedback_message(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     if request.method != 'POST':
         feedbacks = FeedbackStaff.objects.all()
         context = {
@@ -312,7 +437,7 @@ def staff_feedback_message(request):
 
 @csrf_exempt
 def view_staff_leave(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     if request.method != 'POST':
         allLeave = LeaveReportStaff.objects.all()
         context = {
@@ -325,11 +450,14 @@ def view_staff_leave(request):
         status = request.POST.get('status')
         if (status == '1'):
             status = 1
+            rejection_reason=None
         else:
             status = -1
+            rejection_reason=request.POST.get('reason','')
         try:
             leave = get_object_or_404(LeaveReportStaff, id=id)
             leave.status = status
+            leave.rejection_reason=rejection_reason
             leave.save()
             return HttpResponse(True)
         except Exception as e:
@@ -338,7 +466,7 @@ def view_staff_leave(request):
 
 @csrf_exempt
 def view_student_leave(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     if request.method != 'POST':
         allLeave = LeaveReportStudent.objects.all()
         context = {
@@ -351,11 +479,15 @@ def view_student_leave(request):
         status = request.POST.get('status')
         if (status == '1'):
             status = 1
+            rejection_reason=None
         else:
             status = -1
+            rejection_reason=request.POST.get('reason','')
         try:
             leave = get_object_or_404(LeaveReportStudent, id=id)
             leave.status = status
+            leave.rejection_reason=rejection_reason
+            print(leave)
             leave.save()
             return HttpResponse(True)
         except Exception as e:
@@ -364,7 +496,7 @@ def view_student_leave(request):
 
 # @csrf_exempt
 # def get_admin_attendance(request):
-#     user = get_object_or_404(Admin, admin=request.user)
+#     user = get_object_or_404(Admin, user=request.user)
 #     subject_id = request.POST.get('subject')
 #     session_id = request.POST.get('session')
 #     attendance_date_id = request.POST.get('attendance_date_id')
@@ -389,10 +521,10 @@ def view_student_leave(request):
 
 @csrf_exempt
 def send_student_notification(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     id = request.POST.get('id')
     message = request.POST.get('message')
-    student = get_object_or_404(Student, admin_id=id)
+    student = get_object_or_404(Student, user_id=id)
     try:
         url = "https://fcm.googleapis.com/fcm/send"
         body = {
@@ -402,7 +534,7 @@ def send_student_notification(request):
                 'click_action': reverse('student_view_notification'),
                 'icon': static('dist/img/AdminLTELogo.png')
             },
-            'to': student.admin.fcm_token
+            'to': student.user.fcm_token
         }
         headers = {'Authorization':
                    'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
@@ -417,10 +549,10 @@ def send_student_notification(request):
 
 @csrf_exempt
 def send_staff_notification(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     id = request.POST.get('id')
     message = request.POST.get('message')
-    staff = get_object_or_404(Staff, admin_id=id)
+    staff = get_object_or_404(Staff, user_id=id)
     try:
         url = "https://fcm.googleapis.com/fcm/send"
         body = {
@@ -430,7 +562,7 @@ def send_staff_notification(request):
                 'click_action': reverse('staff_view_notification'),
                 'icon': static('dist/img/AdminLTELogo.png')
             },
-            'to': staff.admin.fcm_token
+            'to': staff.user.fcm_token
         }
         headers = {'Authorization':
                    'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
@@ -444,7 +576,7 @@ def send_staff_notification(request):
 
 
 def download_student_template(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     # Create the HTTP response object with CSV content type
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="student_template.csv"'
@@ -468,7 +600,7 @@ def download_student_template(request):
 
 
 def download_staff_template(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     # Create the HTTP response object with CSV content type
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="staff_template.csv"'
@@ -539,7 +671,7 @@ def download_staff_template(request):
 
 @require_GET
 def download_single_day_attendance(request):
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     attendance_list_str = request.GET.get('attendance_list')
     if attendance_list_str:
         try:
@@ -630,7 +762,7 @@ def check_atten_with_number(atten):
 @require_GET
 def download_overall_day_attendance(request):
     print('frbtdg\n\n\n')
-    user = get_object_or_404(Admin, admin=request.user)
+    user = get_object_or_404(Admin, user=request.user)
     overall_attendance = json.loads(request.GET.get('overall_attendance', '{}'))
 
     # Add headers

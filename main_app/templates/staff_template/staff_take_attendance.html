@@ -55,115 +55,172 @@
 {% endblock content %}
 
 {% block custom_js %}
-<script>document.getElementById('student_data').innerHTML = ''
-    function collectCheckboxes() {
-        const form = document.getElementById('attendance-form');
-        if(form){
-            const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked');
-            const uncheckedInputs = form.querySelectorAll('input[type="checkbox"]:not(:checked)');
+<script>
+document.getElementById('student_data').innerHTML = '';
 
-            const checkedValues = [];
-            const uncheckedValues = [];
-            checkedInputs.forEach(input => checkedValues.push(input.value));
-            uncheckedInputs.forEach(input => uncheckedValues.push(input.value));
+function collectCheckboxes() {
+    const form = document.getElementById('attendance-form');
+    if (form) {
+        const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked');
+        const uncheckedInputs = form.querySelectorAll('input[type="checkbox"]:not(:checked)');
 
-            document.getElementById('checked_students').value = checkedValues.join(',');
-            document.getElementById('unchecked_students').value = uncheckedValues.join(',');
-            console.log(document.getElementById('checked_students').value,' checked');
-            console.log(document.getElementById('unchecked_students').value,' unchecked');
-        }else{
-            console.log('No form detected');
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('fetch_students').addEventListener('click', function () {
-            var date = document.getElementById('date').value;
-            var period = document.getElementById('period').value;
-            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        const checkedValues = [];
+        const uncheckedValues = [];
+        const odInternalValues = [];
+        const odExternalValues = [];
 
-            if (!date || !period) {
-                alert("Please select both date and period.");
-                return;
+        checkedInputs.forEach(input => {
+            checkedValues.push(input.value);
+        });
+
+        uncheckedInputs.forEach(input => {
+            const studentId = input.value;
+            const odTypeSelect = document.getElementById(`od_type_${studentId}`);
+            if (odTypeSelect && odTypeSelect.value === 'OD_internal') {
+                odInternalValues.push(studentId);
+            } else if (odTypeSelect && odTypeSelect.value === 'OD_external') {
+                odExternalValues.push(studentId);
+            } else {
+                uncheckedValues.push(studentId);
             }
+        });
 
-            // Prepare the request data
-            var formData = new URLSearchParams();
-            formData.append('date', date);
-            formData.append('period', period);
+        document.getElementById('checked_students').value = checkedValues.join(',');
+        document.getElementById('unchecked_students').value = uncheckedValues.join(',');
+        document.getElementById('od_internal_students').value = odInternalValues.join(',');
+        document.getElementById('od_external_students').value = odExternalValues.join(',');
 
-            // Send the request using fetch
-            fetch("{% url 'fetch_students' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrfToken
-                },
-                body: formData.toString()
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok.");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.students) {
-                        var students = data.students;
-                        console.log(students);
-                        var studentDataHtml = `<h3>Students: (${data.class_name})</h3>`;
+        console.log('Checked:', checkedValues);
+        console.log('Unchecked:', uncheckedValues);
+        console.log('OD Internal:', odInternalValues);
+        console.log('OD External:', odExternalValues);
+    } else {
+        console.log('No form detected');
+    }
+}
 
-                        if (students.length > 0) {
-                            studentDataHtml += `<input type='hidden' value='${data.date}' name='date' id='date' />`;
-                            studentDataHtml += `<input type='hidden' value='${data.period}' name='period' id='period' />
-                                                <input type="hidden" id="checked_students" name="checked_students" value="">
-                                                <input type="hidden" id="unchecked_students" name="unchecked_students" value="">`;
-                            students.forEach(student => {
-                                studentDataHtml += `
-                                <div class='col-lg-5'>
-                                    <div class='form-check custom-control custom-checkbox' style="display: flex;align-items: center;justify-content: start;">
-                                        <input type='checkbox' class='custom-control-input' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}' onchange='collectCheckboxes()'>
-                                        <label for='checkbox${student.id}'  style="display:flex;text-wrap:nowrap;padding:10px" class='custom-control-label'>${student.name} - (${student.roll_number}) - (${student.register_number})</label>
-                                    </div>
-                                </div>
-                            `;
-                            });
-                            
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('fetch_students').addEventListener('click', function () {
+        var date = document.getElementById('date').value;
+        var period = document.getElementById('period').value;
+        var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
-                            studentDataHtml += `
-                        </div>
+        if (!date || !period) {
+            alert("Please select both date and period.");
+            return;
+        }
+
+        // Prepare the request data
+        var formData = new URLSearchParams();
+        formData.append('date', date);
+        formData.append('period', period);
+
+        // Send the request using fetch
+        fetch("{% url 'fetch_students' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: formData.toString()
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.students) {
+                var students = data.students;
+                console.log(students);
+                var studentDataHtml = `<h3>Students: (${data.class_name})</h3>`;
+                
+                if (students.length > 0) {
+                    studentDataHtml += `
+                        <input type='hidden' value='${data.date}' name='date' id='date' />
+                        <input type='hidden' value='${data.period}' name='period' id='period' />
+                        <input type="hidden" id="checked_students" name="checked_students" value="">
+                        <input type="hidden" id="unchecked_students" name="unchecked_students" value="">
+                        <input type="hidden" id="od_internal_students" name="od_internal_students" value="">
+                        <input type="hidden" id="od_external_students" name="od_external_students" value="">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Check</th>
+                                    <th>Roll Number</th>
+                                    <th>Name</th>
+                                    <th>Register Number</th>
+                                    <th>OD Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    
+                    students.forEach(student => {
+                        studentDataHtml += `
+                            <tr>
+                                <td style="position:relative;">
+                                    <input type='checkbox' class='form-check-input checkbos-atten' checked='checked' name='student_data' value='${student.id}' id='checkbox${student.id}' onchange='toggleOdType(this, ${student.id})'>
+                                </td>
+                                <td>${student.roll_number}</td>
+                                <td>${student.name}</td>
+                                <td>${student.register_number}</td>
+                                <td>
+                                    <select class='form-control' name='od_type_${student.id}' id='od_type_${student.id}' onchange='toggleOdType(this, ${student.id})' disabled>
+                                        <option value=''>Select OD Type</option>
+                                        <option value='OD_internal'>OD Internal</option>
+                                        <option value='OD_external'>OD External</option>
+                                    </select>
+                                </td>
+                            </tr>`;
+                    });
+
+                    studentDataHtml += `
+                            </tbody>
+                        </table>
                         <div class='form-group'>
                             <button id='save_attendance' class='btn btn-success' type='submit'>Save Attendance</button>
-                            </div>
-                            `;
-                            // Add event listeners to checkboxes
-                            // addCheckboxEventListeners();
-                        } else {
-                            studentDataHtml += "<h3>No students found.</h3>";
-                        }
+                        </div>`;
+                } else {
+                    studentDataHtml += "<h3>No students found.</h3>";
+                }
 
-                    } else if (data.message) {
-                        studentDataHtml += `<h3 style="width:100%; text-align:center;">${data.message}<h3>`;
-                    }
-                    document.getElementById('student_data').innerHTML = studentDataHtml;
-                })
-                .catch(error => {
-                    console.error("Error fetching student data:", error);
-                    alert("Error fetching student data.");
-                });
+                document.getElementById('student_data').innerHTML = studentDataHtml;
+            } else if (data.message) {
+                document.getElementById('student_data').innerHTML = `<h3 style="width:100%; text-align:center;">${data.message}<h3>`;
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching student data:", error);
+            alert("Error fetching student data.");
         });
     });
+});
+
+function toggleOdType(checkbox, studentId) {
+    const odSelect = document.getElementById(`od_type_${studentId}`);
+    if (checkbox.checked) {
+        odSelect.disabled = true;
+        odSelect.parentElement.parentElement.style.backgroundColor='#fff'
+        odSelect.value = '';
+    } else {
+        odSelect.parentElement.parentElement.style.backgroundColor='#ff9c9c'
+        odSelect.disabled = false;
+    }
+    collectCheckboxes();
+}
 </script>
 <style>
-    .custom-control-label::after{
-        top: 14px;
-        left: -12px;
-    }
-    .custom-control-label::before{
-        position: absolute;
-        top: 14px;
-        left: -12px;
-    }
+.checkbos-atten {
+    position: absolute;
+    top: 14px;
+    left: 58px;
+}
+.checkbos-atten::before {
+    position: absolute;
+    top: 14px;
+    left: -12px;
+}
 </style>
-
 
 {% endblock custom_js %}

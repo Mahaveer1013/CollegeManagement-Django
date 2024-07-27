@@ -17,6 +17,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from . import settings
+from django.core.mail import send_mail
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+send_mail(
+    'Test Email',
+    'This is a test email from Django.',
+    os.getenv('EMAIL_HOST_USER'),  # From address
+    ['a.mahaveer5@gmail.com'],  # To address
+    fail_silently=False,
+)
 
 urlpatterns = [
     path("", include('main_app.urls')),
