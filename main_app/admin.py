@@ -72,6 +72,8 @@ class StaffAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = StaffForm
     list_display = ('faculty_id', 'user', 'department',
                     'phone_number', 'resume_link')
+    list_per_page=50
+    list_filter = ('faculty_id','department')
 
     def resume_link(self, obj):
         if obj.resume:
@@ -86,7 +88,8 @@ class StudentAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = StudentForm
     list_display = ('user', 'class_name', 'roll_number',
                     'register_number', 'academic_year')
-    list_filter = ('class_name',)
+    list_filter = ('class_name','roll_number','department')
+    list_per_page=50
 
 
 @admin.register(AssignmentQuestion)
@@ -124,14 +127,6 @@ class AssignmentQuestionsAdmin(ActionLoggingMixin, admin.ModelAdmin):
 
     pdf_link.short_description = 'PDF'
 
-
-@admin.register(Notice)
-class NoticesAdmin(admin.ModelAdmin):
-    exclude = ('uploaded_by',)
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:  # If the object is being created (and not updated)
-            obj.uploaded_by = request.user
-        super().save_model(request, obj, form, change)
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):

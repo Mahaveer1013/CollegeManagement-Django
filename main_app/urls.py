@@ -77,7 +77,8 @@ urlpatterns = [
     # Staff
     path("staff/home/", staff_views.staff_home, name='staff_home'),
 #     path("notice/view", staff_views.view_notice, name='view_notice'),
-    path("staff/apply/leave/", views.staff_apply_leave,
+     path("staff/profile/", staff_views.staff_profile, name='staff_profile'),
+    path("staff/apply/leave/", staff_views.staff_apply_leave,
          name='staff_apply_leave'),
     path("staff/feedback/", staff_views.staff_feedback, name='staff_feedback'),
     path("staff/view/profile/", staff_views.staff_view_profile,
@@ -92,6 +93,7 @@ urlpatterns = [
     path("staff/add_assignment/", staff_views.add_assignment, name='add_assignment'),
     path("staff/view_assignment/",
          staff_views.view_assignment, name='view_assignment'),
+     path("staff/notice/", staff_views.staff_view_notice, name='staff_view_notice'),
 #     path("staff/get_students/", staff_views.get_students, name='get_students'),
 #     path("staff/attendance/fetch/", staff_views.get_student_attendance,
 #          name='get_student_attendance'),
@@ -113,6 +115,8 @@ urlpatterns = [
     # Student
     path("student/home/", student_views.student_home, name='student_home'),
     path("student/notes/", student_views.student_view_note, name='student_view_note'),
+    path("student/profile/", student_views.student_profile, name='student_profile'),
+    path("student/notice/", student_views.student_view_notice, name='student_view_notice'),
     path("student/view/attendance/", student_views.student_view_attendance,
          name='student_view_attendance'),
     path("student/apply/leave/", student_views.student_apply_leave,

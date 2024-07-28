@@ -16,7 +16,7 @@
                             <thead>
                                 <tr>
                                     <th style="text-align: center;">Subject</th>
-                                    <th style="text-align: center;">Name</th>
+                                    <th style="text-align: center;">Title</th>
                                     <th style="text-align: center;">View</th>
                                     <th style="text-align: center;">Download</th>
                                 </tr>
@@ -25,7 +25,7 @@
                                 {% for note in notes %}
                                     <tr>
                                         <td style="text-align: center;"><b>{{note.subject}}</b></td>
-                                        <td style="text-align: center;">{{note.name}}</td>
+                                        <td style="text-align: center;">{{note.title}}</td>
                                         <td style="text-align: center;"><a href="{{ note.pdf.url }}" class="btn btn-info" target="_blank">View</a></td>
                                         <td style="text-align: center;"><a href="{{ note.pdf.url }}" class="btn btn-success" download>Download</a></td>
                                     </tr>

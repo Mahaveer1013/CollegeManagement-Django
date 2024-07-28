@@ -7,7 +7,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-# from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 
 
@@ -105,6 +104,29 @@ class Department(models.Model):
         return self.name
 
 
+class Subject(models.Model):
+    name = models.CharField(max_length=120)
+    # department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, default='fb ')
+    subject_code = models.CharField(max_length=10, unique=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    
+
+class Staff(models.Model):
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True, blank=False)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    faculty_id = models.CharField(max_length=100, unique=True)
+    phone_number = models.IntegerField(max_length=10, default=9962526764)
+    resume = models.FileField(upload_to='staff/resume', null=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+
 class ClassList(models.Model):
     SEM_CHOICES = (
         ('1', '1st'),
@@ -121,24 +143,16 @@ class ClassList(models.Model):
         Department, on_delete=models.SET_NULL, null=True)
     semester = models.CharField(max_length=1, choices=SEM_CHOICES)
     section = models.CharField(max_length=100)
+    incharge = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, default=None)
 
     def __str__(self):
         return f"{self.department} - {self.get_semester_display()} sem - {self.section} Section"
-
-
-class Subject(models.Model):
-    name = models.CharField(max_length=120)
-    # department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, default='fb ')
-    subject_code = models.CharField(max_length=10, unique=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
+   
 
 class Student(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    roll_number = models.CharField(max_length=100, unique=True)
+    register_number = models.CharField(max_length=100, unique=True)
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True)
     phone_number = models.IntegerField(max_length=10, default=9962526764)
@@ -146,27 +160,14 @@ class Student(models.Model):
         max_length=10, default=9962526764)
     class_name = models.ForeignKey(
         ClassList, on_delete=models.SET_NULL, null=True)
-    register_number = models.CharField(max_length=100, unique=True)
-    roll_number = models.CharField(max_length=100, unique=True)
     dob = models.DateField(null=True, default=None)
+    mentor = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, default=None)
     academic_year = models.ForeignKey(
         AcademicYear, on_delete=models.SET_NULL, null=True, blank=False)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
-
-
-class Staff(models.Model):
-    department = models.ForeignKey(
-        Department, on_delete=models.SET_NULL, null=True, blank=False)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    faculty_id = models.CharField(max_length=100, unique=True)
-    phone_number = models.IntegerField(max_length=10, default=9962526764)
-    resume = models.FileField(upload_to='staff/resume', null=True)
-
-    def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
-
+  
 
 class Period(models.Model):
     department = models.ForeignKey(
@@ -666,7 +667,7 @@ class Note(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.department} - {self.subject} - {self.name}"
+        return f"{self.department} - {self.subject} - {self.title}"
 
 
 class Notice(models.Model):

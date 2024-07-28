@@ -50,12 +50,26 @@ def student_home(request):
     return render(request, 'student_template/home_content.html', context)
 
 
+def student_profile(request):
+    student=get_object_or_404(Student,user=request.user)
+    return render(request, 'student_template/student_profile.html',{'student':student})
+
 def student_view_timetable(request):
     student = get_object_or_404(Student, user=request.user)
     timetable = TimeTable.objects.filter(class_name=student.class_name).first()
 
     return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
-            
+
+
+def student_view_notice(request):
+    user = get_object_or_404(Student, user=request.user)
+    notices = Notice.objects.filter(department=user.department) | Notice.objects.filter(department__isnull=True)
+    context = {
+        'page_title': 'Notice List',
+        'notices': notices
+    }
+    return render(request, 'student_template/view_notices.html', context)
+
 
 @ csrf_exempt
 def student_view_attendance(request):
@@ -244,7 +258,7 @@ def student_view_note(request):
         Value(' - '),
         'subject__name',     # Assuming the Subject model has a 'name' field
         Value(' - '),
-        'name',
+        'title',
         output_field=CharField()
     )
 ).order_by('str_representation')

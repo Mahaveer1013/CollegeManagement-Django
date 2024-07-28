@@ -360,6 +360,21 @@ def add_assignment(request):
     return render(request, 'hod_template/add_student_template.html', context)
 
 
+
+def staff_profile(request):
+    staff=get_object_or_404(Staff,user=request.user)
+    return render(request, 'staff_template/staff_profile.html',{'staff':staff})
+
+
+def staff_view_notice(request):
+    user = get_object_or_404(Staff, user=request.user)
+    notices = Notice.objects.filter(department=user.department) | Notice.objects.filter(department__isnull=True)
+    context = {
+        'page_title': 'Notice List',
+        'notices': notices
+    }
+    return render(request, 'student_template/view_notices.html', context)
+
 def staff_apply_leave(request):
     form = LeaveReportStaffForm(request.POST or None, request.FILES or None)
     staff = get_object_or_404(Staff, user_id=request.user.id)
