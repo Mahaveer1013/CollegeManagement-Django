@@ -12,7 +12,11 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                {% if request.user.profile_pic %}
+                <img src="{{request.user.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
+                {% else %}
+                <h1>Logo</h1>
+                {% endif %}
             </div>
             <div class="info">
                 <a href="#" class="d-block">{{user}}</a>
@@ -73,11 +77,11 @@
                 </li>
 
                 <li class="nav-item">
-                    {% url 'add_result' as add_result %}
-                    <a href="{{ add_result }}"
-                        class="nav-link {% if add_result == request.path %}active{% endif %}">
+                    {% url 'upload_result' as upload_result %}
+                    <a href="{{ upload_result }}"
+                        class="nav-link {% if upload_result == request.path %}active{% endif %}">
                         <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Add Result</p>
+                        <p>Upload Result</p>
                     </a>
                 </li>
 
@@ -182,6 +186,19 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    {% url 'admin_view_certificate' as admin_view_certificate %}
+
+                    <a href="{% url 'admin_view_certificate' %}"
+                        class="nav-link  {% if admin_view_certificate == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-check-double"></i>
+                        <p>
+                            Student Certificates
+
+                        </p>
+                    </a>
+                </li>
+
                 {% elif request.user.user_type == '2' %}
                 <!-- Brand Logo -->
                 <a href="#" class="brand-link">
@@ -195,7 +212,7 @@
                     <!-- Sidebar user panel (optional) -->
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div class="image">
-                            <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                            <img src="{{ request.user.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
                         </div>
                         <div class="info">
                             <a href="#" class="d-block">{{ user}}</a>
@@ -327,6 +344,28 @@
                                     </p>
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                {% url 'show_my_class' as show_my_class %}
+                                <a href="{{show_my_class}}"
+                                    class="nav-link {% if show_my_class == request.path %} active {% endif %}">
+                                    <i class="nav-icon fas fa-th"></i>
+                                    <p>
+                                        View My Class
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                {% url 'show_mentees' as show_mentees %}
+                                <a href="{{show_mentees}}"
+                                    class="nav-link {% if show_mentees == request.path %} active {% endif %}">
+                                    <i class="nav-icon fas fa-th"></i>
+                                    <p>
+                                        View Mentees
+                                    </p>
+                                </a>
+                            </li>
                             
                             <li class="nav-item">
                                 {% url 'staff_view_notice' as staff_view_notice %}
@@ -387,7 +426,7 @@
                                 <!-- Sidebar user panel (optional) -->
                                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                                     <div class="image">
-                                        <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2"
+                                        <img src="{{ request.user.profile_pic.url}}" class="img-circle elevation-2"
                                             alt="User Image">
                                     </div>
                                     <div class="info">

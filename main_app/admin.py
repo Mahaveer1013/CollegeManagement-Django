@@ -246,6 +246,7 @@ class NotesAdmin(ActionLoggingMixin, admin.ModelAdmin):
     exclude = ('uploaded_by',)
     list_display = ('subject', 'department',
                     'pdf_link', 'title')
+    list_filter = ('department', 'subject')
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:  # If the object is being created (and not updated)

@@ -77,6 +77,7 @@ def staff_view_note(request):
 
     return render(request, 'student_template/student_notes.html', {'notes': notes})
 
+
 @csrf_exempt  # Temporarily exempt from CSRF validation for debugging
 def fetch_students(request):
     if request.method == 'POST':
@@ -294,6 +295,67 @@ def submit_attendance(request):
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
+def show_mentees(request):
+    staff = get_object_or_404(Staff, user=request.user)
+    mentees = Student.objects.filter(mentor=staff)
+    mentee_data = []
+
+    for mentee in mentees:
+        present_count = Attendance.objects.filter(student=mentee, status=1).count()
+        total_attendance = Attendance.objects.filter(student=mentee).count()
+        attendance_percentage = (present_count / total_attendance * 100) if total_attendance > 0 else 0
+        mentee_data.append({
+            'mentee': mentee,
+            'attendance_percentage': attendance_percentage
+        })
+
+    return render(request, 'staff_template/staff_mentees.html', {'mentee_data': mentee_data})
+
+
+def show_mentee_profile(request, student_id):
+    staff = get_object_or_404(Staff,user=request.user)
+    student = get_object_or_404(Student,id=student_id)
+    present_count = Attendance.objects.filter(student=student, status=1).count()
+    total_attendance = Attendance.objects.filter(student=student).count()
+    attendance_percentage = (present_count / total_attendance * 100) if total_attendance > 0 else 0
+    if student.mentor==staff:
+        return render(request, 'student_template/student_profile.html',{'student':student, 'attendance_percentage':attendance_percentage})
+    else:
+        messages.error(request, 'The Staff is not the Mentor For the Student')
+        return redirect('show_mentees')
+    
+
+def show_my_class(request):
+    staff = get_object_or_404(Staff, user=request.user)
+    students = Student.objects.filter(class_name__incharge=staff)
+    student_data = []
+
+    for student in students:
+        present_count = Attendance.objects.filter(student=student, status=1).count()
+        total_attendance = Attendance.objects.filter(student=student).count()
+        attendance_percentage = (present_count / total_attendance * 100) if total_attendance > 0 else 0
+        print(attendance_percentage)
+        student_data.append({
+            'student': student,
+            'attendance_percentage': attendance_percentage
+        })
+
+    return render(request, 'staff_template/staff_incharge.html', {'student_data': student_data, 'class_name':student.class_name})
+
+
+def show_my_class_student_profile(request, student_id):
+    staff = get_object_or_404(Staff,user=request.user)
+    student = get_object_or_404(Student,id=student_id)
+    present_count = Attendance.objects.filter(student=student, status=1).count()
+    total_attendance = Attendance.objects.filter(student=student).count()
+    attendance_percentage = (present_count / total_attendance * 100) if total_attendance > 0 else 0
+    if student.class_name.incharge==staff:
+        return render(request, 'student_template/student_profile.html',{'student':student, 'attendance_percentage':attendance_percentage})
+    else:
+        messages.error(request, 'The Staff is not the Class Incharge For the Student')
+        return redirect('show_mentees')
+
+
 def staff_view_timetable(request):
     # Get the current logged-in user
     staff = get_object_or_404(Staff, user=request.user)
@@ -461,8 +523,8 @@ def staff_view_profile(request):
                 if passport != None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    user.profile_pic = passport_url
+                    # passport_url = fs.url(filename)
+                    user.profile_pic = filename
                 user.first_name = first_name
                 user.last_name = last_name
                 user.address = address
@@ -502,39 +564,6 @@ def staff_view_notification(request):
         'page_title': "View Notifications"
     }
     return render(request, "staff_template/staff_view_notification.html", context)
-
-
-def staff_add_result(request):
-    staff = get_object_or_404(Staff, user=request.user)
-    subjects = Subject.objects.filter(staff=staff)
-    sessions = Session.objects.all()
-    context = {
-        'page_title': 'Result Upload',
-        'subjects': subjects,
-        'sessions': sessions
-    }
-    if request.method == 'POST':
-        try:
-            student_id = request.POST.get('student_list')
-            subject_id = request.POST.get('subject')
-            test = request.POST.get('test')
-            exam = request.POST.get('exam')
-            student = get_object_or_404(Student, id=student_id)
-            subject = get_object_or_404(Subject, id=subject_id)
-            try:
-                data = StudentResult.objects.get(
-                    student=student, subject=subject)
-                data.exam = exam
-                data.test = test
-                data.save()
-                messages.success(request, "Scores Updated")
-            except:
-                result = StudentResult(student=student, subject=subject, test=test, exam=exam)
-                result.save()
-                messages.success(request, "Scores Saved")
-        except Exception as e:
-            messages.warning(request, "Error Occured While Processing Form")
-    return render(request, "staff_template/staff_add_result.html", context)
 
 
 @csrf_exempt

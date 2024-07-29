@@ -327,7 +327,12 @@ def upload_result(request):
         messages.success(request, 'Marks uploaded successfully')
         return redirect('add_result')
     else:
-        return HttpResponse('Invalid request method', status=405)
+        exam_type = ExamDetail.objects.all()
+        class_lists = ClassList.objects.all()
+        if exam_type and class_lists:
+            return render(request,'hod_template/add_result.html',{'exam_type':exam_type, 'class_lists':class_lists})
+        else:
+            return HttpResponse('Invalid request method', status=405)
 
 
 def view_result(request):
@@ -412,6 +417,12 @@ def download_result_template(request):
         return HttpResponse('Invalid request method', status=405)
     
 
+def admin_view_certificate(request):
+    user = get_object_or_404(Admin, user=request.user)
+    certificates = Certificate.objects.all()
+    return render(request,'hod_template/admin_view_certificate.html',{'page_title': 'Student Certificates','certificates':certificates})
+
+
 def admin_view_profile(request):
     admin = get_object_or_404(Admin, user=request.user)
     form = AdminForm(request.POST or None, request.FILES or None,
@@ -432,8 +443,8 @@ def admin_view_profile(request):
                 if passport != None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    custom_user.profile_pic = passport_url
+                    # passport_url = fs.url(filename)
+                    custom_user.profile_pic = filename
                 custom_user.first_name = first_name
                 custom_user.last_name = last_name
                 custom_user.save()

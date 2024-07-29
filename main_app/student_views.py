@@ -222,8 +222,8 @@ def student_view_profile(request):
                 if passport != None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    user.profile_pic = passport_url
+                    # passport_url = fs.url(filename)
+                    user.profile_pic = filename
                 user.first_name = first_name
                 user.last_name = last_name
                 user.address = address

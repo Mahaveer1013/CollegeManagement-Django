@@ -1,0 +1,60 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title" style="padding: 9px;">{{page_title}}</h3>
+                        <a href="{% url 'student_upload_certificate' %}" class="btn btn-success" style="position: absolute; right: 10px;">
+                            <i class="fas fa-plus"></i> Add New Certificate
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Student</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Uploaded at</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for certificate in certificates %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ certificate.student }}</td>
+                                        <td>{{ certificate.title }}</td>
+                                        <td>{{ certificate.description }}</td>
+                                        <td>{{ certificate.uploaded_at|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            <a href="{{ certificate.certificate.url }}" target="_blank" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <form action="{% url 'delete_certificate' certificate.id %}" method="post" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
