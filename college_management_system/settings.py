@@ -93,18 +93,18 @@ WSGI_APPLICATION = 'college_management_system.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'django',
-    #     'USER': os.getenv('DB_USER'),
-    #     'PASSWORD': os.getenv('DB_PASS'),
-    #     'HOST': '127.0.0.1',
-    #     'PORT': '3306'
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'erp_panimalar',
+        'USER': os.getenv('DB_USER','root'),
+        'PASSWORD': os.getenv('DB_PASS', '1013'),
+        'HOST': 'localhost',
+        'PORT': '3306'
+    }
 }
 
 
