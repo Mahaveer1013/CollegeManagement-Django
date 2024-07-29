@@ -91,6 +91,8 @@ urlpatterns = [
      path("staff/profile/<int:student_id>/", staff_views.show_mentee_profile, name='show_mentee_profile'),
      path("staff/my_class/", staff_views.show_my_class, name='show_my_class'),
      path("staff/my_class/<int:student_id>/", staff_views.show_my_class_student_profile, name='show_my_class_student_profile'),
+     path("staff/mentee/leave", staff_views.view_mentee_leave, name='view_mentee_leave'),
+     path("staff/mentee/disciplinary_action", staff_views.show_mentee_disciplinary_action, name='show_mentee_disciplinary_action'),
     path("staff/apply/leave/", staff_views.staff_apply_leave,
          name='staff_apply_leave'),
     path("staff/feedback/", staff_views.staff_feedback, name='staff_feedback'),

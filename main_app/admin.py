@@ -92,8 +92,7 @@ class DisciplinaryAction(admin.ModelAdmin):
         if not obj.pk:  # If the object is being created (and not updated)
             try:
                 ph_number = obj.student.parent_phone_number
-                print('\n\n\n\n\n\n\nph_number',ph_number)
-                # send_sms(ph_number,'Test Sent')
+                send_sms(ph_number,'Your Ward has Violated the College Disciplinary Rules')
             except Exception as e:
                 print(e)
         super().save_model(request, obj, form, change)

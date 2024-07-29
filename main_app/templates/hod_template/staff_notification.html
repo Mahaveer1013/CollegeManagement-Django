@@ -39,7 +39,7 @@
                                         No Image
                                         {% else %}
                                         <img class="img img-fluid mb-2" height="56" width="56"
-                                            src="{{staff.profile_pic}}" alt="">
+                                            src="{{staff.profile_pic.url}}" alt="">
                                         {% endif %}
                                     </td>
                                     <td><button data-toggle = "modal" data-target = "#myModal"class="btn btn-primary show_notification" value="{{staff.id}}">Send Notification</button> 

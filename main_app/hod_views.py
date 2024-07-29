@@ -7,8 +7,7 @@ import requests
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponse, HttpResponseRedirect,
-                              get_object_or_404, redirect, render)
+from django.shortcuts import (HttpResponse, get_object_or_404, redirect, render)
 from django.templatetags.static import static
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -391,7 +390,8 @@ def download_result_template(request):
         print(f"Class ID: {class_name}, Exam Type ID: {exam_detail}")
         # Validate that the class matches the exam's department and semester
         if class_name.department != exam_detail.department or class_name.semester != exam_detail.semester:
-            return HttpResponse('The Exam is Not For This Class', status=400)  # Return a bad request response
+            messages.error(request, 'The Exam is Not For This Class')
+            return redirect('upload_result')
 
         # Fetch the students in the specified class
         students = Student.objects.filter(class_name=class_name)
@@ -414,7 +414,8 @@ def download_result_template(request):
 
         return response
     else:
-        return HttpResponse('Invalid request method', status=405)
+        messages.error(request, 'Invalid Request')
+        return redirect('upload_result')
     
 
 def admin_view_certificate(request):

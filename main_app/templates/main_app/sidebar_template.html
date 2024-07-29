@@ -366,6 +366,28 @@
                                     </p>
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                {% url 'view_mentee_leave' as view_mentee_leave %}
+                                <a href="{{view_mentee_leave}}"
+                                    class="nav-link {% if view_mentee_leave == request.path %} active {% endif %}">
+                                    <i class="nav-icon fas fa-th"></i>
+                                    <p>
+                                        View Mentee Leave
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                {% url 'show_mentee_disciplinary_action' as show_mentee_disciplinary_action %}
+                                <a href="{{show_mentee_disciplinary_action}}"
+                                    class="nav-link {% if show_mentee_disciplinary_action == request.path %} active {% endif %}">
+                                    <i class="nav-icon fas fa-th"></i>
+                                    <p>
+                                        Mentee Disciplinary Action
+                                    </p>
+                                </a>
+                            </li>
                             
                             <li class="nav-item">
                                 {% url 'staff_view_notice' as staff_view_notice %}

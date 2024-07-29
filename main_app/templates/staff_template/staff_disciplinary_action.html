@@ -1,0 +1,54 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}Disciplinary Actions{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+
+                <!-- /.card -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Disciplinary Actions</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-bordered" style="overflow-x: auto;">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Name</th>
+                                    <th>action_type</th>
+                                    <th>Roll Number</th>
+                                    <th>Register Number</th>
+                                    <th>date</th>
+                                    <th>details</th>
+                                    <th>comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mentee in mentees %}
+                                <tr>
+                                    <td>{{forloop.counter}}</td>
+                                    <td>{{mentee.student.user}}</td>
+                                    <td>{{ mentee.action_type }}</td>
+                                    <td>{{mentee.student.roll_number}}</td>
+                                    <td>{{mentee.student.register_number}}</td>
+                                    <td>{{mentee.date}}</td>
+                                    <td>{{mentee.details}}</td>
+                                    <td>{{mentee.comments}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

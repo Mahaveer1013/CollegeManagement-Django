@@ -235,7 +235,7 @@ def submit_attendance(request):
                 attendance_record.save()
             print(f'You ward Mr.{student} have taken a leave today')
             print(f'You ward Mr.{student} have taken a leave today\n', student.parent_phone_number )
-            # send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
+            send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
             send_mail(f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today','panimalar1013@gmail.com' , [student.user.email])
 
 
@@ -272,6 +272,8 @@ def submit_attendance(request):
                 attendance_record.status = 0
                 attendance_record.subject = subject
                 attendance_record.save()
+            
+            send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a External OD')
 
             message= f'''
                     Dear {student},
@@ -324,6 +326,46 @@ def show_mentee_profile(request, student_id):
         messages.error(request, 'The Staff is not the Mentor For the Student')
         return redirect('show_mentees')
     
+
+def show_mentee_disciplinary_action(request):
+    staff = get_object_or_404(Staff, user=request.user)
+    mentees = DisciplinaryAction.objects.filter(student__mentor=staff)
+
+    return render(request, 'staff_template/staff_disciplinary_action.html', {'mentees': mentees})
+
+
+@csrf_exempt
+def view_mentee_leave(request):
+    staff = get_object_or_404(Staff, user=request.user)
+    if request.method != 'POST':
+        allLeave = LeaveReportStudent.objects.filter(student__mentor=staff)
+        context = {
+            'allLeave': allLeave,
+            'page_title': 'Leave Applications From Mentees'
+        }
+        return render(request, "hod_template/student_leave_view.html", context)
+    else:
+        id = request.POST.get('id')
+        status = request.POST.get('status')
+        if (status == '1'):
+            status = 1
+            rejection_reason=None
+        else:
+            status = -1
+            rejection_reason=request.POST.get('reason','')
+        try:
+            leave = get_object_or_404(LeaveReportStudent, id=id)
+            if leave.student.mentor ==staff:
+                leave.status = status
+                leave.rejection_reason=rejection_reason
+                print(leave)
+                leave.save()
+                return HttpResponse(True)
+            else:
+                return HttpResponse(False)
+        except Exception as e:
+            return False
+ 
 
 def show_my_class(request):
     staff = get_object_or_404(Staff, user=request.user)
