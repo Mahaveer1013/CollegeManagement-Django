@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from .models import *
 from .forms import *
 from .admin_forms import *
+from .functions import *
 
 
 class NonEmptyDetailsFilter(admin.SimpleListFilter):
@@ -22,7 +23,7 @@ class NonEmptyDetailsFilter(admin.SimpleListFilter):
         if self.value() == 'NonEmpty':
             return queryset.exclude(details='-').exclude(details=None)
         return queryset
-    
+
 
 class ActionLoggingMixin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
@@ -56,6 +57,48 @@ class ActionLoggingMixin(admin.ModelAdmin):
         super().delete_model(request, obj)
 
 
+@admin.register(DisciplinaryAction)
+class DisciplinaryAction(admin.ModelAdmin):
+    list_filter = ('student','action_type', 'details')
+    list_display = ('student', 'department', 'roll_number' , 'register_number', 'action_type', 'date')
+    form = DisciplinaryActionForm
+
+    def get_student_register_number(self, obj):
+        return f"{obj.student.roll_number} - {obj.student.register_number} - {obj.student.user}"
+    get_student_register_number.short_description = 'Student'
+
+    def roll_number(self, obj):
+        if obj.student:
+            return obj.student.roll_number
+        return "No Roll Number"
+
+    roll_number.short_description = 'Roll Number'
+
+    def register_number(self, obj):
+        if obj.student:
+            return obj.student.register_number
+        return "No Register Number"
+
+    register_number.short_description = 'Register Number'
+
+    def department(self, obj):
+        if obj.student:
+            return obj.student.department
+        return "No Department"
+
+    department.short_description = 'Department'
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # If the object is being created (and not updated)
+            try:
+                ph_number = obj.student.parent_phone_number
+                print('\n\n\n\n\n\n\nph_number',ph_number)
+                # send_sms(ph_number,'Test Sent')
+            except Exception as e:
+                print(e)
+        super().save_model(request, obj, form, change)
+
+
 @admin.register(TimeTable)
 class TimeTableAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = TimeTableForm
@@ -72,8 +115,8 @@ class StaffAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = StaffForm
     list_display = ('faculty_id', 'user', 'department',
                     'phone_number', 'resume_link')
-    list_per_page=50
-    list_filter = ('faculty_id','department')
+    list_per_page = 50
+    list_filter = ('faculty_id', 'department')
 
     def resume_link(self, obj):
         if obj.resume:
@@ -88,8 +131,8 @@ class StudentAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = StudentForm
     list_display = ('user', 'class_name', 'roll_number',
                     'register_number', 'academic_year')
-    list_filter = ('class_name','roll_number','department')
-    list_per_page=50
+    list_filter = ('class_name', 'roll_number', 'department')
+    list_per_page = 50
 
 
 @admin.register(AssignmentQuestion)
@@ -159,7 +202,7 @@ class CustomUserAdmin(UserAdmin):
 class QuestionAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = QuestionForm
 
-    list_display = ('exam_detail', )
+    list_display = ('exam_detail', 'subject')
 
     exclude = [
         'bloom_level1', 'bloom_level2', 'bloom_level3', 'bloom_level4',
@@ -182,27 +225,15 @@ class QuestionAdmin(ActionLoggingMixin, admin.ModelAdmin):
                     for word in words:
                         word = word.strip()
                         if word:
+                            print(word)
                             bloom_keyword = BloomKeyword.objects.filter(
                                 word__iexact=word).first()
                             print(bloom_keyword)
-                            if bloom_keyword.bloom_level == 1:
-                                bloom_level = 'Creating'
-                                break
-                            if bloom_keyword.bloom_level == 2:
-                                bloom_level = 'Evaluate'
-                                break
-                            if bloom_keyword.bloom_level == 3:
-                                bloom_level = 'Analyzing'
-                                break
-                            if bloom_keyword.bloom_level == 4:
-                                bloom_level = 'Applying'
-                                break
-                            if bloom_keyword.bloom_level == 5:
-                                bloom_level = 'Understanding'
-                                break
-                            if bloom_keyword.bloom_level == 6:
-                                bloom_level = 'Remember'
-                                break
+                            if bloom_keyword==None:
+                                bloom_level = 7
+                            else:
+                                bloom_level = bloom_keyword.bloom_level
+                            
 
                     setattr(obj, f'bloom_level{i}', bloom_level)
 
@@ -213,7 +244,8 @@ class QuestionAdmin(ActionLoggingMixin, admin.ModelAdmin):
 class NotesAdmin(ActionLoggingMixin, admin.ModelAdmin):
     # Hide the 'uploaded_by' field in the admin form
     exclude = ('uploaded_by',)
-    list_display = ('subject', 'department', 'pdf_link', 'title', 'uploaded_by')
+    list_display = ('subject', 'department',
+                    'pdf_link', 'title')
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:  # If the object is being created (and not updated)
@@ -238,22 +270,22 @@ class AdminAccessLogAdmin(ActionLoggingMixin, admin.ModelAdmin):
 
 @admin.register(ExamDetail)
 class ExamDetailAdmin(ActionLoggingMixin, admin.ModelAdmin):
-    exclude = ('uploaded_by',)
+    exclude = ('added_by',)
 
-
-    list_display = ('subject', 'department', 'exam_type',
+    list_display = ('department', 'exam_type',
                     'semester', 'academic_year')
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:  # If the object is being created (and not updated)
-            obj.uploaded_by = request.user
+            obj.added_by = request.user
         super().save_model(request, obj, form, change)
+
 
 @admin.register(Notice)
 class NoticeAdmin(ActionLoggingMixin, admin.ModelAdmin):
     exclude = ('uploaded_by',)
 
-    list_display = ('title', 'poster_link', 'uploaded_by')
+    list_display = ('title', 'poster_link')
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:  # If the object is being created (and not updated)
@@ -273,6 +305,8 @@ class ClassListAdmin(ActionLoggingMixin, admin.ModelAdmin):
     list_display = ('department', 'semester', 'section')
     list_filter = ['department', 'semester']
     ordering = ('department',)
+    form = ClassListForm
+
 
 
 @admin.register(ActionLog)

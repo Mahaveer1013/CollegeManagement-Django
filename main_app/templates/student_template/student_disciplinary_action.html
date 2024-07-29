@@ -1,0 +1,52 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}Disciplinary Actions - {{student}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+
+                <!-- /.card -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Disciplinary Actions - {{student}}</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-bordered" style="overflow-x: auto;">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>action_type</th>
+                                    <th>Roll Number</th>
+                                    <th>Register Number</th>
+                                    <th>date</th>
+                                    <th>details</th>
+                                    <th>comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for action in actions %}
+                                <tr>
+                                    <td>{{forloop.counter}}</td>
+                                    <td>{{ action.action_type }}</td>
+                                    <td>{{student.roll_number}}</td>
+                                    <td>{{student.register_number}}</td>
+                                    <td>{{action.date}}</td>
+                                    <td>{{action.details}}</td>
+                                    <td>{{action.comments}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

@@ -46,29 +46,6 @@
                 </li>
 
                 <li class="nav-item">
-                    {% url 'admin_notify_staff' as admin_notify_staff %}
-                    <a href="{{admin_notify_staff}}"
-                        class="nav-link {% if admin_notify_staff == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-bullhorn"></i>
-                        <p>
-                            Notify Staff
-
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    {% url 'admin_notify_student' as admin_notify_student %}
-                    <a href="{{admin_notify_student}}"
-                        class="nav-link {% if admin_notify_student == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-bullhorn"></i>
-                        <p>
-                            Notify Student
-
-                        </p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
                     {% url 'admin_view_attendance' as admin_view_attendance %}
                     <a href="{{ admin_view_attendance }}"
                         class="nav-link {% if admin_view_attendance == request.path %}active{% endif %}">
@@ -95,6 +72,35 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    {% url 'add_result' as add_result %}
+                    <a href="{{ add_result }}"
+                        class="nav-link {% if add_result == request.path %}active{% endif %}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>Add Result</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'view_result' as view_result %}
+                    <a href="{{ view_result }}"
+                        class="nav-link {% if view_result == request.path %}active{% endif %}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>View Result</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'overall_profile' as overall_profile %}
+                    <a href="{{ overall_profile }}"
+                        class="nav-link {% if overall_profile == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            View Profile
+                        </p>
+                    </a>
+                </li>
+
                 <!-- <li class="nav-item">
                     {% url 'staff_view_note' as staff_view_note %}
                     <a href="{{ staff_view_note }}"
@@ -110,6 +116,29 @@
                         class="nav-link {% if exam_filter_page == request.path %}active{% endif %}">
                         <i class="nav-icon fas fa-calendar-alt"></i>
                         <p>Download Question Paper</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'admin_notify_staff' as admin_notify_staff %}
+                    <a href="{{admin_notify_staff}}"
+                        class="nav-link {% if admin_notify_staff == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-bullhorn"></i>
+                        <p>
+                            Notify Staff
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {% url 'admin_notify_student' as admin_notify_student %}
+                    <a href="{{admin_notify_student}}"
+                        class="nav-link {% if admin_notify_student == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-bullhorn"></i>
+                        <p>
+                            Notify Student
+
+                        </p>
                     </a>
                 </li>
 
@@ -276,6 +305,7 @@
                                     </p>
                                 </a>
                             </li> -->
+
                             <li class="nav-item">
                                 {% url 'staff_view_note' as staff_view_note %}
                                 <a href="{{ staff_view_note }}"
@@ -477,6 +507,17 @@
                                         </li>
 
                                         <li class="nav-item">
+                                            {% url 'student_view_certificate' as student_view_certificate %}
+                                            <a href="{{student_view_certificate}}"
+                                                class="nav-link {% if student_view_certificate == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-bell"></i>
+                                                <p>
+                                                   View Certificates
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
                                             {% url 'student_apply_leave' as student_apply_leave %}
                                             <a href="{{student_apply_leave}}"
                                                 class="nav-link {% if student_apply_leave == request.path %} active {% endif %}">
@@ -496,6 +537,17 @@
                                                 <p>
                                                     Feedback
 
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            {% url 'student_disciplinary_action' as student_disciplinary_action %}
+                                            <a href="{{student_disciplinary_action}}"
+                                                class="nav-link {% if student_disciplinary_action == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-comment-alt"></i>
+                                                <p>
+                                                    Disiplinary Action
                                                 </p>
                                             </a>
                                         </li>

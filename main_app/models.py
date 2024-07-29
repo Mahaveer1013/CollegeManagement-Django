@@ -120,8 +120,11 @@ class Staff(models.Model):
         Department, on_delete=models.SET_NULL, null=True, blank=False)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     faculty_id = models.CharField(max_length=100, unique=True)
-    phone_number = models.IntegerField(max_length=10, default=9962526764)
+    phone_number = models.IntegerField(default=9962526764)
     resume = models.FileField(upload_to='staff/resume', null=True)
+    qualification = models.CharField(max_length=40, default=None, null=True)
+    experience = models.TextField(default=None, null=True)
+
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
@@ -155,9 +158,8 @@ class Student(models.Model):
     register_number = models.CharField(max_length=100, unique=True)
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True)
-    phone_number = models.IntegerField(max_length=10, default=9962526764)
-    parent_phone_number = models.IntegerField(
-        max_length=10, default=9962526764)
+    phone_number = models.IntegerField(default=9962526764)
+    parent_phone_number = models.IntegerField(default=9962526764)
     class_name = models.ForeignKey(
         ClassList, on_delete=models.SET_NULL, null=True)
     dob = models.DateField(null=True, default=None)
@@ -167,7 +169,7 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
-  
+
 
 class Period(models.Model):
     department = models.ForeignKey(
@@ -391,19 +393,19 @@ class BloomKeyword(models.Model):
     bloom_level = models.CharField(max_length=1, choices=BLOOM_CHOICES)
 
     def __str__(self):
-        return self.get_bloom_level_display()
+        return self.bloom_level
 
 
 class ExamDetail(models.Model):
     SEM_CHOICES = (
-        ('1st', '1st'),
-        ('2nd', '2nd'),
-        ('3rd', '3rd'),
-        ('4th', '4th'),
-        ('5th', '5th'),
-        ('6th', '6th'),
-        ('7th', '7th'),
-        ('8th', '8th'),
+        ('1', '1st'),
+        ('2', '2nd'),
+        ('3', '3rd'),
+        ('4', '4th'),
+        ('5', '5th'),
+        ('6', '6th'),
+        ('7', '7th'),
+        ('8', '8th'),
     )
 
     EXAM_TYPE = (
@@ -412,7 +414,8 @@ class ExamDetail(models.Model):
         ('3', 'Semester Examination')
     )
 
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    
+    maximum_mark = models.IntegerField(default=100)
     added_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=False)
     semester = models.CharField(max_length=3, choices=SEM_CHOICES)
@@ -426,7 +429,14 @@ class ExamDetail(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.semester} sem - {self.get_exam_type_display()} - {self.subject} - ({self.academic_year})"
+        return f"{self.get_semester_display()} sem - {self.get_exam_type_display()} - {self.department} - ({self.academic_year})"
+
+
+class ExamResult(models.Model):
+    exam_detail = models.ForeignKey(
+        ExamDetail, on_delete=models.CASCADE, verbose_name="Exam Detail")
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, default=None, null=True)
+    marks= models.JSONField()
 
 
 class Question(models.Model):
@@ -448,6 +458,7 @@ class Question(models.Model):
         ('4', 'CO4'),
         ('5', 'CO5'),
     )
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, default=None, null=True)
     exam_detail = models.ForeignKey(
         ExamDetail, on_delete=models.CASCADE, verbose_name="Exam Detail")
     question_text1 = models.TextField(
@@ -685,6 +696,17 @@ class Notice(models.Model):
         return f"{self.title}"
 
 
+class Certificate(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    certificate = models.FileField(upload_to='certificates/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
 class LeaveReportStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     date = models.CharField(max_length=60)
@@ -746,6 +768,17 @@ class StudentResult(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class DisciplinaryAction(models.Model):
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    action_type = models.CharField(max_length=20, choices=[('Warning', 'Warning'), ('Detention', 'Detention'), ('Suspension', 'Suspension'), ('Expulsion', 'Expulsion')])
+    date = models.DateField()
+    details = models.TextField()
+    comments = models.TextField(blank=True, null=True)
+
+    def _str_(self):
+        return f"{self.student} - {self.action_type} - {self.date}"
+    
+
 class AdminAccessLog(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     ip_address = models.GenericIPAddressField()
@@ -779,7 +812,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CustomUser)
 def save_user_profile(sender, instance, **kwargs):
     if instance.user_type == 1:
-        instance.user.save()
+        instance.admin.save()
     if instance.user_type == 2:
         instance.staff.save()
     if instance.user_type == 3:

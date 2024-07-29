@@ -75,35 +75,57 @@ class AttendanceSelectionForm(forms.Form):
     )
 
 
+class ResultViewForm(forms.Form):
+    exam_type = forms.ModelChoiceField(
+        queryset=ExamDetail.objects.filter(
+            examresult__isnull=False).distinct(),
+        empty_label="Select an Exam Type",
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'id': 'id_exam_type'}),
+        required=True
+    )
+    class_name = forms.ModelChoiceField(
+        queryset=ClassList.objects.all().order_by(
+            'department__name', 'semester', 'section'),
+        empty_label="Select a class",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
 class OverallAttendanceSelectionForm(forms.Form):
     from_date = forms.DateField(
         label='From :',
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        widget=forms.DateInput(
+            attrs={'type': 'date', 'class': 'form-control'}),
         required=False
     )
     to_date = forms.DateField(
         label='To :',
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        widget=forms.DateInput(
+            attrs={'type': 'date', 'class': 'form-control'}),
         required=False
     )
     department = forms.ModelChoiceField(
         queryset=Department.objects.all(),
         empty_label="Select a Department",
-        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_department'}),
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'id': 'id_department'}),
         required=False
     )
     class_name = forms.ModelChoiceField(
-        queryset=ClassList.objects.all().order_by('department__name', 'semester', 'section'),
+        queryset=ClassList.objects.all().order_by(
+            'department__name', 'semester', 'section'),
         empty_label="Select a class",
-        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_class_name'}),
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'id': 'id_class_name'}),
         required=False
     )
     student = forms.ModelChoiceField(
         queryset=Student.objects.all(),
         empty_label="Select Student",
-        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_student'}),
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'id': 'id_student'}),
         required=False,
-        to_field_name='roll_number'
     )
 
     def clean(self):
@@ -112,10 +134,17 @@ class OverallAttendanceSelectionForm(forms.Form):
         to_date = cleaned_data.get('to_date')
         if from_date and to_date:
             if from_date > to_date:
-                raise ValidationError('From date must be less than to date and they should not be equal.')
+                raise ValidationError(
+                    'From date must be less than to date and they should not be equal.')
 
         return cleaned_data
-    
+
+    def get_roll_number(self):
+        student = self.cleaned_data.get('student')
+        if student:
+            return student.roll_number
+        return None
+
 
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
@@ -144,16 +173,17 @@ class AttendanceForm(FormSettings):
         }
 
 
+# class ExamDetailForm(FormSettings):
 class ExamDetailForm(FormSettings):
     semester_choices = (
-        ('1st', '1st'),
-        ('2nd', '2nd'),
-        ('3rd', '3rd'),
-        ('4th', '4th'),
-        ('5th', '5th'),
-        ('6th', '6th'),
-        ('7th', '7th'),
-        ('8th', '8th'),
+        ('1', '1st'),
+        ('2', '2nd'),
+        ('3', '3rd'),
+        ('4', '4th'),
+        ('5', '5th'),
+        ('6', '6th'),
+        ('7', '7th'),
+        ('8', '8th'),
     )
     exam_type_choices = (
         ('1', 'Internal Assesment 1'),
@@ -161,24 +191,18 @@ class ExamDetailForm(FormSettings):
         ('3', 'Semester Examination')
     )
 
-    academic_year_choices = [
-        (year, year)
-        for year in AcademicYear.objects.all()
-    ]
-
     department = forms.ModelChoiceField(
-        queryset=Department.objects.all(),
+        queryset=Department.objects.none(),
         empty_label="Select Department",
         widget=forms.Select(attrs={'onchange': 'updateSubjects()'})
     )
 
     academic_year = forms.ChoiceField(
-        choices=academic_year_choices,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     subject = forms.ModelChoiceField(
-        queryset=Subject.objects.all(),
+        queryset=Subject.objects.none(),
         empty_label="Select Subject"
     )
 
@@ -196,6 +220,15 @@ class ExamDetailForm(FormSettings):
         model = ExamDetail
         fields = ['department', 'subject', 'semester', 'exam_type']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['academic_year'].choices = [
+            (year.id, year)
+            for year in AcademicYear.objects.all()
+        ]
+        self.fields['department'].queryset = Department.objects.all()
+        self.fields['subject'].queryset = Subject.objects.all()
+
 
 class AssignmentAnswersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -206,6 +239,20 @@ class AssignmentAnswersForm(forms.ModelForm):
         fields = ['pdf']
         widgets = {
             'pdf': forms.FileInput(attrs={'class': 'form-control'})
+        }
+
+
+class CertificateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CertificateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Certificate
+        fields = ['title', 'description', 'certificate']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'certificate': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 

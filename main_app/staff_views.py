@@ -14,6 +14,7 @@ from django.db.models import Value, CharField
 from django.db.models.functions import Concat
 from datetime import datetime
 from .functions import *
+from django.core.mail import send_mail
 
 
 def staff_home(request):
@@ -58,19 +59,23 @@ def staff_take_attendance(request):
 
 def staff_view_note(request):
     staff = get_object_or_404(Staff, user=request.user)
-    all_staff_periods = Period.objects.filter(department=staff.department).values_list('subject', flat=True)
-    print(all_staff_periods)
-    notes = Note.objects.filter(department=staff.department, subject__in=all_staff_periods).annotate(
-    str_representation=Concat(
-        'department__name',  # Assuming the Department model has a 'name' field
-        Value(' - '),
-        'subject__name',     # Assuming the Subject model has a 'name' field
-        Value(' - '),
-        'unit',
-        output_field=CharField()
-    )
-).order_by('str_representation')
-    return render(request, 'student_template/student_notes.html', {'notes':notes})
+    
+    # Get all subjects taught by the staff
+    staff_subjects = Period.objects.filter(staff=staff).values_list('subject', flat=True)
+    
+    # Filter notes based on these subjects
+    notes = Note.objects.filter(subject__in=staff_subjects).annotate(
+        str_representation=Concat(
+            'department__name',  # Assuming the Department model has a 'name' field
+            Value(' - '),
+            'subject__name',     # Assuming the Subject model has a 'name' field
+            Value(' - '),
+            'title',
+            output_field=CharField()
+        )
+    ).order_by('str_representation')
+
+    return render(request, 'student_template/student_notes.html', {'notes': notes})
 
 @csrf_exempt  # Temporarily exempt from CSRF validation for debugging
 def fetch_students(request):
@@ -230,7 +235,7 @@ def submit_attendance(request):
             print(f'You ward Mr.{student} have taken a leave today')
             print(f'You ward Mr.{student} have taken a leave today\n', student.parent_phone_number )
             # send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
-            send_mail(student.user.email,f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today')
+            send_mail(f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today','panimalar1013@gmail.com' , [student.user.email])
 
 
         for student_id in od_internal_ids:
@@ -249,7 +254,6 @@ def submit_attendance(request):
                 attendance_record.status = 0
                 attendance_record.subject = subject
                 attendance_record.save()
-            send_mail(student.user.email,f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today')
 
         for student_id in od_external_ids:
             try:
@@ -282,8 +286,8 @@ def submit_attendance(request):
                     Best regards,
 
                     Panimalar Engineering College
-                    '''
-            send_mail(student.user.email,'Acknowledgement of Leave on Official Duty (OD)', message)
+                    ''' 
+            send_mail('Acknowledgement of Leave on Official Duty (OD)', message, 'panimalar1013@gmail.com' , [student.user.email])
 
         return redirect('staff_take_attendance')  # Redirect to a success page or the same page
 
@@ -305,7 +309,6 @@ def staff_view_timetable(request):
     for day in days:
         for count in period_count:
             column = f"{day}_{count}"
-            print(column)
 
             timetable_list = TimeTable.objects.filter(
                 department=staff.department,
@@ -313,8 +316,6 @@ def staff_view_timetable(request):
             )
             found = False
             for timetable in timetable_list:
-                print(getattr(timetable,column).staff, '\n', type(getattr(timetable,column).staff))
-                print(staff, '\n', type(staff))
                 if getattr(timetable,column).staff == staff:
                     staff_timetable[column] = timetable.class_name
                     found = True
@@ -323,7 +324,7 @@ def staff_view_timetable(request):
                 staff_timetable[column] = 'Free Period'
     print(staff_timetable)
 
-    if not timetable:
+    if not staff_timetable:
         return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
         
 
@@ -360,9 +361,9 @@ def add_assignment(request):
     return render(request, 'hod_template/add_student_template.html', context)
 
 
-
 def staff_profile(request):
     staff=get_object_or_404(Staff,user=request.user)
+    print(staff)
     return render(request, 'staff_template/staff_profile.html',{'staff':staff})
 
 
@@ -374,6 +375,7 @@ def staff_view_notice(request):
         'notices': notices
     }
     return render(request, 'student_template/view_notices.html', context)
+
 
 def staff_apply_leave(request):
     form = LeaveReportStaffForm(request.POST or None, request.FILES or None)

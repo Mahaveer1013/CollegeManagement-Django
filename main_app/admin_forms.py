@@ -24,6 +24,17 @@ class CustomUserForm(forms.ModelForm):
         return user
 
 
+class DisciplinaryActionForm(forms.ModelForm):
+    class Meta:
+        model = DisciplinaryAction
+        fields = '__all__'
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['student'].queryset = Student.objects.all()
+        self.fields['student'].label_from_instance = lambda obj: f"{obj.roll_number} - {obj.register_number} - {obj.user}"
+
+
 class PeriodForm(forms.ModelForm):
     class Meta:
         model = Period
@@ -72,6 +83,16 @@ class StaffForm(forms.ModelForm):
         return self.cleaned_data.get('user')
 
 
+class ClassListForm(forms.ModelForm):
+    class Meta:
+        model = ClassList
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['incharge'].required = False
+
+
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
@@ -88,14 +109,13 @@ class StudentForm(forms.ModelForm):
         linked_student_users = Student.objects.values_list(
             'user_id', flat=True)
         linked_staff_users = Staff.objects.values_list('user_id', flat=True)
-        # Combine both sets of linked users
         linked_users = set(linked_student_users).union(set(linked_staff_users))
-        # Exclude those users from the options in the user field
         self.fields['user'].queryset = CustomUser.objects.exclude(
             id__in=linked_users).exclude(user_type='2').exclude(user_type='1')
         self.fields['user'].required = False
+        self.fields['mentor'].required = False
         if self.instance.pk:
-            # Set the initial value and use ReadOnlyWidget
+
             self.fields['user'].initial = self.instance.user.id
             self.fields['user'].widget = ReadOnlyWidget()
 

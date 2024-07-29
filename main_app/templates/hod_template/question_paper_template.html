@@ -116,13 +116,21 @@
         <hr>
         <h3 class='displayinline'>{{exam.department}}</h3>
         <hr>
-        <h3 class='displayinline'>{{exam.exam_type}}</h3>
+        <h3 class='displayinline'>
+            {% if exam.exam_type == '1' %}
+            Internal Assesment 1
+            {% elif exam.exam_type == '2' %}
+            Internal Assesment 2
+            {% elif exam.exam_type == '3' %}
+            Semester Examination
+            {% endif %}
+        </h3>
         <hr>
         <center>
             <table>
                 <tr>
                     <td colspan='2'>
-                        <h3 class='left'>Subject Name: {{exam.subject}} </h3>
+                        <h3 class='left'>Subject Name: {{q_paper.subject}} </h3>
                     </td>
 
 
@@ -134,13 +142,13 @@
 
                     <td>
                         <h4 class='right'>Year/Semester: 
-                            {% if exam.semester == '1st' or exam.semester == '2nd' %}
+                            {% if exam.semester == '1' or exam.semester == '2' %}
                             1st
-                            {% elif exam.semester == '3rd' or exam.semester == '4th' %}
+                            {% elif exam.semester == '3' or exam.semester == '4' %}
                             2nd
-                            {% elif exam.semester == '5th' or exam.semester == '6th' %}
+                            {% elif exam.semester == '5' or exam.semester == '6' %}
                             3rd
-                            {% elif exam.semester == '7th' or exam.semester == '8th' %}
+                            {% elif exam.semester == '7' or exam.semester == '8' %}
                             4ths
                             {% endif %}
                             /{{exam.semester}}</h4>
@@ -148,7 +156,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <h4 class='left'>Subject Code: {{exam.subject.subject_code}}</h4>
+                        <h4 class='left'>Subject Code: {{q_paper.subject.subject_code}}</h4>
                     </td>
 
                     <td>
@@ -193,79 +201,79 @@
                 <tr>
                     <th><b>Q.NO</b></th>
                     <th><b>Question</b></th>
-                    <th><b>Bloom Level</b></th>
-                    <th><b>course<br>Outcome</b></th>
-                    <th><b>Max Mark</b></th>
+                    <th><small>Bloom Level</small></th>
+                <th><small>course<br>Outcome</small></th>
+                <th><small>Max Mark</small></th>
                 </tr>
                 <tr>
                     <td>1</td>
                     <td class='left'>{{q_paper.question_text1}}</td>
-                    <td>{{q_paper.bloom_level1}}</td>
-                    <td>{{q_paper.course_outcome1}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level1}}]</td>
+                    <td>[CO{{q_paper.course_outcome1}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>2</td>
                     <td class='left'>{{q_paper.question_text2}}</td>
-                    <td>{{q_paper.bloom_level2}}</td>
-                    <td>{{q_paper.course_outcome2}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level2}}]</td>
+                    <td>[CO{{q_paper.course_outcome2}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>3</td>
                     <td class='left'>{{q_paper.question_text3}}</td>
-                    <td>{{q_paper.bloom_level3}}</td>
-                    <td>{{q_paper.course_outcome3}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level3}}]</td>
+                    <td>[CO{{q_paper.course_outcome3}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>4</td>
                     <td class='left'>{{q_paper.question_text4}}</td>
-                    <td>{{q_paper.bloom_level4}}</td>
-                    <td>{{q_paper.course_outcome4}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level4}}]</td>
+                    <td>[CO{{q_paper.course_outcome4}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>5</td>
                     <td class='left'>{{q_paper.question_text5}}</td>
-                    <td>{{q_paper.bloom_level5}}</td>
-                    <td>{{q_paper.course_outcome5}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level5}}]</td>
+                    <td>[CO{{q_paper.course_outcome5}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>6</td>
                     <td class='left'>{{q_paper.question_text6}}</td>
-                    <td>{{q_paper.bloom_level6}}</td>
-                    <td>{{q_paper.course_outcome6}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level6}}]</td>
+                    <td>[CO{{q_paper.course_outcome6}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>7</td>
                     <td class='left'>{{q_paper.question_text7}}</td>
-                    <td>{{q_paper.bloom_level7}}</td>
-                    <td>{{q_paper.course_outcome7}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level7}}]</td>
+                    <td>[CO{{q_paper.course_outcome7}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>8</td>
                     <td class='left'>{{q_paper.question_text8}}</td>
-                    <td>{{q_paper.bloom_level8}}</td>
-                    <td>{{q_paper.course_outcome8}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level8}}]</td>
+                    <td>[CO{{q_paper.course_outcome8}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>9</td>
                     <td class='left'>{{q_paper.question_text9}}</td>
-                    <td>{{q_paper.bloom_level9}}</td>
-                    <td>{{q_paper.course_outcome9}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level9}}]</td>
+                    <td>[CO{{q_paper.course_outcome9}}]</td>
+                    <td>[2]</td>
                 </tr>
                 <tr>
                     <td>10</td>
                     <td class='left'>{{q_paper.question_text10}}</td>
-                    <td>{{q_paper.bloom_level10}}</td>
-                    <td>{{q_paper.course_outcome10}}</td>
-                    <td>2</td>
+                    <td>[{{q_paper.bloom_level10}}]</td>
+                    <td>[CO{{q_paper.course_outcome10}}]</td>
+                    <td>[2]</td>
                 </tr>
 
             </table>
@@ -275,117 +283,111 @@
         <table>
             <tr>
                 <th><b>Q.NO</b></th>
-                <th><b>option</b></th>
                 <th><b>Question</b></th>
-                <th><b>Bloom Level</b></th>
-                <th><b>course<br>Outcome</b></th>
-                <th><b>Max Mark</b></th>
+                <th><small>Bloom Level</small></th>
+                <th><small>course<br>Outcome</small></th>
+                <th><small>Max Mark</small></th>
             </tr>
 
             <tr>
-                <td rowspan='3'>11</td>
-                <td>a</td>
+                <td>11 a)</td>
                 <td class='left'>{{q_paper.question_text11}}</td>
-                <td>{{q_paper.bloom_level11}}</td>
-                <td>{{q_paper.course_outcome11}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level11}}]</td>
+                <td>[CO{{q_paper.course_outcome11}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>11 b)</td>
                 <td class='left'>{{q_paper.question_text12}}</td>
-                <td>{{q_paper.bloom_level12}}</td>
-                <td>{{q_paper.course_outcome12}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level12}}]</td>
+                <td>[CO{{q_paper.course_outcome12}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='7'></td>
             </tr>
             <tr class='up'>
-                <td rowspan='3'>12</td>
-                <td>a</td>
+                <td>12 a)</td>
                 <td class='left'>{{q_paper.question_text13}}</td>
-                <td>{{q_paper.bloom_level13}}</td>
-                <td>{{q_paper.course_outcome13}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level13}}]</td>
+                <td>[CO{{q_paper.course_outcome13}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>12 b)</td>
                 <td class='left'>{{q_paper.question_text14}}</td>
-                <td>{{q_paper.bloom_level14}}</td>
-                <td>{{q_paper.course_outcome14}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level14}}]</td>
+                <td>[CO{{q_paper.course_outcome14}}]</td>
+                <td>[13]</td>
             </tr>
             </tr>
             <tr>
                 <td colspan='7'></td>
             </tr>
             <tr class='up'>
-                <td rowspan='3'>13</td>
-                <td>a</td>
+                <td>13 a)</td>
                 <td class='left'>{{q_paper.question_text15}}</td>
-                <td>{{q_paper.bloom_level15}}</td>
-                <td>{{q_paper.course_outcome15}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level15}}]</td>
+                <td>[CO{{q_paper.course_outcome15}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>13 b)</td>
                 <td class='left'>{{q_paper.question_text16}}</td>
-                <td>{{q_paper.bloom_level16}}</td>
-                <td>{{q_paper.course_outcome16}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level16}}]</td>
+                <td>[CO{{q_paper.course_outcome16}}]</td>
+                <td>[13]</td>
             </tr>
             </tr>
             <tr>
                 <td colspan='7'></td>
             </tr>
             <tr>
-                <td rowspan='3'>14</td>
-                <td>a</td>
+                <td>14 a)</td>
                 <td class='left'>{{q_paper.question_text17}}</td>
-                <td>{{q_paper.bloom_level17}}</td>
-                <td>{{q_paper.course_outcome17}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level17}}]</td>
+                <td>[CO{{q_paper.course_outcome17}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>14 b)b</td>
                 <td class='left'>{{q_paper.question_text18}}</td>
-                <td>{{q_paper.bloom_level18}}</td>
-                <td>{{q_paper.course_outcome18}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level18}}]</td>
+                <td>[CO{{q_paper.course_outcome18}}]</td>
+                <td>[13]</td>
             </tr>
             </tr>
             <tr>
                 <td colspan='7'></td>
             </tr>
             <tr>
-                <td rowspan='3'>15</td>
-                <td>a</td>
+                <td>15 a)</td>
                 <td class='left'>{{q_paper.question_text19}}</td>
-                <td>{{q_paper.bloom_level19}}</td>
-                <td>{{q_paper.course_outcome19}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level19}}]</td>
+                <td>[CO{{q_paper.course_outcome19}}]</td>
+                <td>[13]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>15 b)</td>
                 <td class='left'>{{q_paper.question_text20}}</td>
-                <td>{{q_paper.bloom_level20}}</td>
-                <td>{{q_paper.course_outcome20}}</td>
-                <td>13</td>
+                <td>[{{q_paper.bloom_level20}}]</td>
+                <td>[CO{{q_paper.course_outcome20}}]</td>
+                <td>[13]</td>
             </tr>
 
 
@@ -396,30 +398,28 @@
         <table>
             <tr>
                 <th><b>Q.NO</b></th>
-                <th><b>option</b></th>
                 <th><b>Question</b></th>
-                <th><b>Bloom Level</b></th>
-                <th><b>course<br>Outcome</b></th>
-                <th><b>Max Mark</b></th>
+                <th><small>Bloom Level</small></th>
+                <th><small>course<br>Outcome</small></th>
+                <th><small>Max Mark</small></th>
             </tr>
 
             <tr>
-                <td rowspan='3'>16</td>
-                <td>a</td>
+                <td>16 a)</td>
                 <td class='left'>{{q_paper.question_text21}}</td>
-                <td>{{q_paper.bloom_level21}}</td>
-                <td>{{q_paper.course_outcome21}}</td>
-                <td>15</td>
+                <td>[{{q_paper.bloom_level21}}]</td>
+                <td>[CO{{q_paper.course_outcome21}}]</td>
+                <td>[15]</td>
             </tr>
             <tr>
                 <td colspan='6' class='pad2'>OR</td>
             </tr>
             <tr>
-                <td>b</td>
+                <td>16 b)</td>
                 <td class='left'>{{q_paper.question_text22}}</td>
-                <td>{{q_paper.bloom_level22}}</td>
-                <td>{{q_paper.course_outcome22}}</td>
-                <td>15</td>
+                <td>[{{q_paper.bloom_level22}}]</td>
+                <td>[CO{{q_paper.course_outcome22}}]</td>
+                <td>[15]</td>
             </tr>
 
 

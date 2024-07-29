@@ -19,6 +19,7 @@ from .forms import *
 from .models import *
 import datetime
 from django.utils import timezone
+from django.db.models import Count
 
 
 def admin_home(request):
@@ -99,6 +100,13 @@ def get_classes_by_department(request):
     return JsonResponse(list(classes), safe=False)
 
 
+def get_classes_by_exam(request):
+    exam_type = request.GET.get('exam_type')
+    exam_detail = ExamDetail.objects.filter(id=exam_type).first()
+    classes = ClassList.objects.filter(department=exam_detail.department, semester=exam_detail.semester).values('id','department__name' ,'semester', 'section')
+    return JsonResponse(list(classes), safe=False)
+
+
 def admin_view_attendance(request):
     user = get_object_or_404(Admin, user=request.user)
     form = AttendanceSelectionForm(request.POST or None, request.FILES or None)
@@ -137,42 +145,32 @@ def admin_view_attendance(request):
     return render(request, "hod_template/admin_view_attendance.html", context)
 
 
-# def admin_view_overall_attendance(request):
-#     user = get_object_or_404(Admin, user=request.user)
-#     form = OverallAttendanceSelectionForm(request.POST or None, request.FILES or None)
-#     if request.method == 'POST':
-#         if form.is_valid():
-#             from_date = form.cleaned_data.get('from_date')
-#             to_date = form.cleaned_data.get('to_date')
-#             class_id = form.cleaned_data.get('class_name')
-#             students_id = Student.objects.filter(class_name=class_id)
-#             current_date = from_date
-#             overall_attendance = {}
-#             while current_date <= to_date:
-#                 attendance_array = {}
-#                 if len(students_id) > 0:
-#                     for student in students_id:
-#                         if Attendance.objects.filter(date = current_date, student=student, status=1).first():
-#                             attendance_array[student.roll_number] = 'Present'
-#                         elif  Attendance.objects.filter(date = current_date, student=student, status=2).first():
-#                             attendance_array[student.roll_number] = 'OD Internal'
-#                         elif  Attendance.objects.filter(date = current_date, student=student, status=3).first():
-#                             attendance_array[student.roll_number] = 'OD External'
-#                         elif  Attendance.objects.filter(date = current_date, student=student, status=0).first():
-#                             attendance_array[student.roll_number] = 'Absent'
-#                         elif  Attendance.objects.filter(date = current_date, student=student, status=4).first():
-#                             attendance_array[student.roll_number] = 'Pending'
-#                 if len(attendance_array)>0:
-#                     overall_attendance[str(current_date)]=attendance_array
-#                 current_date += datetime.timedelta(days=1)  
-#             dates = list(overall_attendance.keys())
-#             roll_numbers = list(overall_attendance[dates[0]]) if dates else []
-#             return render(request, "hod_template/overall_attendance_view_page.html", {'overall_attendance': overall_attendance, 'class_name': str(class_id), 'dates': dates, 'roll_numbers':roll_numbers})
-#         else:
-#             messages.error(request, "Invalid Data Provided")
-#     context = {'form': form, 'page_title': 'Select Attendance Details'}
+def get_staff_profile(request):
+    staff_id = request.POST.get('faculty_id')
+    print(staff_id)
+    staff = Staff.objects.filter(faculty_id = staff_id).first()
+    if staff:
+        print(staff)
+        return render(request, 'staff_template/staff_profile.html',{'staff':staff})
+    else:
+        messages.error(request,'No Staff Found')
+        return redirect('overall_profile')
+    
 
-#     return render(request, "hod_template/admin_view_overall_attendance.html", context)
+def overall_profile(request):
+    return render(request, 'hod_template/user_profile.html')
+
+
+def get_student_profile(request):
+    student_id = request.POST.get('student_id')
+    print(student_id)
+    student = Student.objects.filter(register_number = student_id).first() or Student.objects.filter(roll_number=student_id).first()
+    if student:
+        return render(request, 'student_template/student_profile.html',{'student':student})
+    else:
+        messages.error(request,'No Student Found')
+        return redirect('overall_profile')
+
 
 def admin_view_overall_attendance(request):
     user = get_object_or_404(Admin, user=request.user)
@@ -187,8 +185,8 @@ def admin_view_overall_attendance(request):
             print(department)
             class_id = form.cleaned_data.get('class_name')
             print(class_id)
-            student = form.cleaned_data.get('student')
-            print(student)
+            roll_number = form.get_roll_number()
+            print(roll_number)
             
             # Validate date range
             if from_date and to_date and from_date > to_date:
@@ -201,18 +199,20 @@ def admin_view_overall_attendance(request):
                 students = Student.objects.filter(class_name=class_id)
             elif department:
                 students = Student.objects.filter(class_name__department=department)
-            elif student:
-                students = Student.objects.filter(user=student)
+            elif roll_number:
+                students = Student.objects.filter(roll_number=roll_number)
             else:
                 students = Student.objects.all()
-            
+            print(students)
             
             if from_date and to_date:
                 current_date = from_date
                 while current_date <= to_date:
                     attendance_array = {}
                     if students.exists():
+                        print(students)
                         for student in students:
+                            print(student)
                             status = Attendance.objects.filter(date=current_date, student=student).first()
                             if status:
                                 attendance_array[student.roll_number] = {
@@ -228,7 +228,7 @@ def admin_view_overall_attendance(request):
             else:
                 messages.error(request, "Please provide a valid date range.")
                 return render(request, "hod_template/admin_view_overall_attendance.html", {'form': form, 'page_title': 'Select Attendance Details'})
-            
+            print(overall_attendance)
             dates = list(overall_attendance.keys())
             roll_numbers = list(overall_attendance[dates[0]].keys()) if dates else []
             data_to_send={
@@ -245,6 +245,172 @@ def admin_view_overall_attendance(request):
     context = {'form': form, 'page_title': 'Select Attendance Details'}
     return render(request, "hod_template/admin_view_overall_attendance.html", context)
 
+
+def add_result(request):
+    exam_type = ExamDetail.objects.annotate(result_count=Count('examresult')).filter(result_count=0)
+    class_lists = ClassList.objects.all()
+    if exam_type and class_lists:
+        return render(request,'hod_template/add_result.html',{'exam_type':exam_type, 'class_lists':class_lists})
+    messages.error(request, 'Exam or Class Not Found')
+    return redirect('admin_home')
+
+
+def upload_result(request):
+    if request.method == 'POST':
+        exam_type_id = request.POST.get('exam_type')
+        class_id = request.POST.get('class_id')
+
+        # Fetch the ExamDetail and ClassList instances
+        exam_detail = get_object_or_404(ExamDetail, id=exam_type_id)
+        class_name = get_object_or_404(ClassList, id=class_id)
+        periods = Period.objects.filter(class_name=class_name)
+        subjects = [period.subject for period in periods]
+        expected_headers = ['roll_number'] + [subject.name for subject in subjects]
+
+        # Check if a file was uploaded
+        if 'result_file' not in request.FILES:
+            messages.error(request, 'No file uploaded')
+            return redirect('add_result')
+
+        result_file = request.FILES['result_file']
+
+        # Read the uploaded CSV file
+        data = []
+        try:
+            csv_file = csv.reader(result_file.read().decode('utf-8').splitlines())
+            headers = next(csv_file)
+            
+            # Validate headers
+            if headers != expected_headers:
+                messages.error(request, 'Invalid CSV structure')
+                return redirect('add_result')
+
+            for row in csv_file:
+                data.append(row)
+        except Exception as e:
+            messages.error(request, f'Error reading CSV file: {e}')
+            return redirect('add_result')
+
+        # Validate the data rows
+        for row in data:
+            if len(row) != len(expected_headers):
+                messages.error(request, 'Invalid row length in CSV file')
+                return redirect('add_result')
+            roll_number = row[0]
+            marks = row[1:]
+            # Validate roll number
+            student = Student.objects.filter(roll_number=roll_number, class_name=class_name).first()
+            if not student:
+                messages.error(request, f'Invalid roll number: {roll_number}')
+                return redirect('add_result')
+            # Validate marks
+            for mark in marks:
+                if not mark.isdigit() or not (0 <= int(mark) <= 100):
+                    messages.error(request, f'Invalid mark for roll number {roll_number}: {mark}')
+                    return redirect('add_result')
+
+        # Insert validated data into the ExamResult model
+        for row in data:
+            roll_number = row[0]
+            student = Student.objects.get(roll_number=roll_number, class_name=class_name)
+            marks_dict = {}
+            for index, subject in enumerate(subjects):
+                marks_dict[subject.name] = int(row[index + 1])
+            
+            # Create or update the ExamResult entry
+            ExamResult.objects.update_or_create(
+                exam_detail=exam_detail,
+                student=student,
+                defaults={'marks': marks_dict}
+            )
+
+        messages.success(request, 'Marks uploaded successfully')
+        return redirect('add_result')
+    else:
+        return HttpResponse('Invalid request method', status=405)
+
+
+def view_result(request):
+    form = ResultViewForm(request.POST or None)
+    student = get_object_or_404(Admin, user_id=request.user.id)
+    context = {
+        'form': form,
+        'page_title': 'View Result'
+    }
+    
+    if request.method == 'POST' and form.is_valid():
+        try:
+            exam_type = form.cleaned_data['exam_type']
+            class_name = form.cleaned_data['class_name']        
+            students = Student.objects.filter(class_name=class_name)
+            marks_data = {}
+            subjects = set()  # To collect all subject names
+            
+            for student in students:
+                exam_result = ExamResult.objects.filter(exam_detail=exam_type, student=student).first()
+                if exam_result and exam_result.marks:
+                    marks_data[student.roll_number] = exam_result.marks
+                    subjects.update(exam_result.marks.keys())
+            
+            subjects = sorted(subjects)  # Sort the subjects for consistent ordering
+            
+            context['marks_data'] = marks_data
+            context['students'] = students
+            context['subjects'] = subjects
+            context['exam_type'] = exam_type
+            context['class_name'] = class_name
+            if len(marks_data)==0 :
+                messages.error(request, 'No Data Found')
+                return redirect('view_result')
+            return render(request, "hod_template/view_result.html", context)
+        except Exception as e:
+            print(e)
+            messages.error(request, "Could not retrieve results!")
+    elif request.method == 'POST':
+        messages.error(request, "Form has errors!")
+        
+    return render(request, "hod_template/view_result_form.html", context)
+
+
+def download_result_template(request):
+    if request.method == 'POST':
+        exam_type_id = request.POST.get('exam_type')
+        class_id = request.POST.get('class_id')
+
+        # Fetch the ExamDetail and ClassList instances
+        exam_detail = get_object_or_404(ExamDetail, id=exam_type_id)
+        class_name = get_object_or_404(ClassList, id=class_id)
+
+        periods = Period.objects.filter(class_name=class_name)
+        print(periods)
+        print(f"Class ID: {class_name}, Exam Type ID: {exam_detail}")
+        # Validate that the class matches the exam's department and semester
+        if class_name.department != exam_detail.department or class_name.semester != exam_detail.semester:
+            return HttpResponse('The Exam is Not For This Class', status=400)  # Return a bad request response
+
+        # Fetch the students in the specified class
+        students = Student.objects.filter(class_name=class_name)
+
+        # Prepare the HTTP response
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{class_name.department.name}_{class_name.semester}-semester_result.csv"'
+
+        # Create a CSV writer object
+        writer = csv.writer(response)
+        header = ['roll_number']
+        for period in periods:
+            header.append(period.subject.name)
+        # Write the header row
+        writer.writerow(header)
+
+        # Write the student data rows
+        for student in students:
+            writer.writerow([str(student.roll_number), ''])
+
+        return response
+    else:
+        return HttpResponse('Invalid request method', status=405)
+    
 
 def admin_view_profile(request):
     admin = get_object_or_404(Admin, user=request.user)
@@ -314,8 +480,8 @@ def exam_filter_page(request):
             subject = form.cleaned_data['subject']
             semester = form.cleaned_data['semester']
             exam_type = form.cleaned_data['exam_type']
-            exam_detail = ExamDetail.objects.filter(subject=subject, department=department, semester=semester, exam_type=exam_type).first()
-            q_paper = Question.objects.filter(exam_detail=exam_detail).first()
+            exam_detail = ExamDetail.objects.filter(department=department, semester=semester, exam_type=exam_type).first()
+            q_paper = Question.objects.filter(exam_detail=exam_detail, subject=subject).first()
 
             if q_paper:
                 return render(request, "hod_template/question_paper_template.html", {'q_paper':q_paper, 'exam': q_paper.exam_detail})
@@ -494,31 +660,6 @@ def view_student_leave(request):
             return False
 
 
-# @csrf_exempt
-# def get_admin_attendance(request):
-#     user = get_object_or_404(Admin, user=request.user)
-#     subject_id = request.POST.get('subject')
-#     session_id = request.POST.get('session')
-#     attendance_date_id = request.POST.get('attendance_date_id')
-#     try:
-#         subject = get_object_or_404(Subject, id=subject_id)
-#         session = get_object_or_404(Session, id=session_id)
-#         attendance = get_object_or_404(
-#             Attendance, id=attendance_date_id, session=session)
-#         attendance_reports = AttendanceReport.objects.filter(
-#             attendance=attendance)
-#         json_data = []
-#         for report in attendance_reports:
-#             data = {
-#                 "status":  str(report.status),
-#                 "name": str(report.student)
-#             }
-#             json_data.append(data)
-#         return JsonResponse(json.dumps(json_data), safe=False)
-#     except Exception as e:
-#         return None
-
-
 @csrf_exempt
 def send_student_notification(request):
     user = get_object_or_404(Admin, user=request.user)
@@ -618,55 +759,6 @@ def download_staff_template(request):
     ])
 
     return response
-
-
-# @require_GET
-# def download_single_day_attendance(request):
-#     attendance_list_str = request.GET.get('attendance_list')
-#     if attendance_list_str:
-#         try:
-#             attendance_list = json.loads(attendance_list_str)
-#         except json.JSONDecodeError:
-#             attendance_list = []
-#     else:
-#         attendance_list = []
-
-#     # Create the HTTP response object with CSV content type
-#     response = HttpResponse(content_type='text/csv')
-#     response['Content-Disposition'] = 'attachment; filename="attendance.csv"'
-
-#     # Create a CSV writer object
-#     writer = csv.writer(response)
-
-#     # Write the header row
-#     writer.writerow([
-#         'Student',
-#         'Period 1',
-#         'Period 2',
-#         'Period 3',
-#         'Period 4',
-#         'Period 5',
-#         'Period 6',
-#         'Period 7',
-#         'Period 8'
-#     ])
-
-#     if len(attendance_list) > 0:
-#         for atten in attendance_list:
-#             if atten:
-#                     print(atten)
-#                     writer.writerow([
-#                         check_atten_with_number(atten[0]),
-#                         check_atten_with_number(atten[1]),
-#                         check_atten_with_number(atten[2]),
-#                         check_atten_with_number(atten[3]),
-#                         check_atten_with_number(atten[4]),
-#                         check_atten_with_number(atten[5]),
-#                         check_atten_with_number(atten[6]),
-#                         check_atten_with_number(atten[7]),
-#                         check_atten_with_number(atten[8]),
-#                     ])
-#     return response
 
 
 @require_GET

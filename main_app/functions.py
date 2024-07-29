@@ -39,7 +39,7 @@ def send_sms(numbers_to_message, message_body):
     auth_token = os.getenv('SMS_AUTH_TOKEN')
     client = Client(account_sid, auth_token)
 
-    from_phone_number = os.getenv('+19295817981')
+    from_phone_number = os.getenv('SMS_FROM_PH')
 
     # Ensure numbers_to_message is iterable
     if not isinstance(numbers_to_message, (list, tuple)):

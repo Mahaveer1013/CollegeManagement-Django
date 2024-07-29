@@ -78,7 +78,7 @@ def get_classes_by_department(request):
 def get_students_by_class(request):
     class_name_id = request.GET.get('class_id')
     students = Student.objects.filter(class_name_id=class_name_id).order_by('roll_number')
-    student_list = [{'id': student.id, 'name': str(student.admin), 'roll_number':student.roll_number} for student in students]
+    student_list = [{'id': student.id, 'name': str(student.user), 'roll_number':student.roll_number} for student in students]
     return JsonResponse({'students': student_list})
 
 

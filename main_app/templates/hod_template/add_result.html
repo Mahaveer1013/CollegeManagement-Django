@@ -1,0 +1,134 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Add Result{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title" style="margin-right: auto;padding: 10px 20px;"><b>Result</b></h3>
+                        <!-- <div onclick="changeform()" style="padding: 10px 20px; border-radius: 10px; background-color: #10af3d;position: absolute;right: 20px;cursor: pointer;"><b>Result / Template</b></div> -->
+                    </div>
+                    <div class="form result-section">
+                        <form role="form" action="{% url 'download_result_template' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="exam_type">Exam Type:</label>
+                                    <select id="exam_type" class="form-control" name="exam_type">
+                                        {% for exam in exam_type %}
+                                            <option value='{{exam.id}}'>{{exam}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="class_id">Class Name:</label>
+                                    <select id="class_id" class="form-control" name="class_id">
+                                        {% for class in class_lists %}
+                                            <option value='{{class.id}}'>{{class}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Download Result Template
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="form result-section active">
+                        <form role="form" action="{% url 'upload_result' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="exam_type">Exam Type:</label>
+                                    <select id="exam_type" class="form-control" name="exam_type">
+                                        {% for exam in exam_type %}
+                                            <option value='{{exam.id}}'>{{exam}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="class_id">Class Name:</label>
+                                    <select id="class_id" class="form-control" name="class_id">
+                                        {% for class in class_lists %}
+                                            <option value='{{class.id}}'>{{class}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="exam_type">Exam Type:</label>
+                                    <input type="file" class="form-control" name="result_file" id="result_file">
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Upload Result
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+
+<script>
+    // var result_section = document.querySelectorAll('.result-section')
+    // function changeform(){
+    //     console.log('vgbh');
+    //     result_section.forEach(section=>{
+    //         section.classList.toggle('active')
+    //     })
+    // }
+
+    var exam_type = document.getElementById('exam_type');
+    var classSelect = document.getElementById('class_id');
+
+    exam_type.addEventListener('change', function() {
+        var exam = exam_type.value;
+        if (exam) {
+            fetch(`{% url "get_classes_by_exam" %}?exam_type=` + exam)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    classSelect.innerHTML = '<option value="">Select a class</option>';
+                    data.forEach(cls => {
+                        var option = document.createElement('option');
+                        option.value = cls.id;
+                        option.text = (cls.department__name)+ '-' + cls.section+ 'Sec';
+                        classSelect.add(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching classes:', error));
+        } else {
+            classSelect.innerHTML = '<option value="">Select a class</option>';
+        }
+    });
+
+</script>
+<!-- 
+<style>
+    .result-section{
+        display: none;
+    }
+    .result-section.active{
+        display: block;
+    }
+
+</style> -->
+{% endblock custom_js %}

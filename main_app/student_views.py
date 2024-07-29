@@ -71,6 +71,46 @@ def student_view_notice(request):
     return render(request, 'student_template/view_notices.html', context)
 
 
+def student_view_certificate(request):
+    user = get_object_or_404(Student, user=request.user)
+    certificates = Certificate.objects.filter(student=user)
+    return render(request,'student_template/student_view_certificate.html',{'page_title': 'My Certificates','certificates':certificates})
+
+
+
+def student_upload_certificate(request):
+    user = get_object_or_404(Student, user=request.user)
+    form = CertificateForm(request.POST or None, request.FILES or None)
+    context={
+        'form':form,
+        'page_title': 'Upload Certificate'
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            description = form.cleaned_data['description']
+            certificate = form.cleaned_data['certificate']
+            certificate_data = Certificate()
+            certificate_data.title = title 
+            certificate_data.student=user
+            certificate_data.description = description 
+            certificate_data.certificate = certificate 
+            certificate_data.save()
+            return redirect('student_view_certificate')
+        else:
+            messages.error(request, 'There was an error with your form submission.')
+    
+    return render(request, 'student_template/student_upload_certificate.html', context)
+
+def delete_certificate(request, certificate_id):
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    if request.method == "POST":
+        certificate.delete()
+        messages.success(request, "Certificate deleted successfully.")
+        return redirect(reverse('student_view_certificate'))
+    return render(request, 'certificates.html', {'certificates': Certificate.objects.all()})
+
+
 @ csrf_exempt
 def student_view_attendance(request):
     student = get_object_or_404(Student, user=request.user)
@@ -137,7 +177,6 @@ def student_feedback(request):
         'form': form,
         'feedbacks': FeedbackStudent.objects.filter(student=student),
         'page_title': 'Student Feedback'
-
     }
     if request.method == 'POST':
         if form.is_valid():
@@ -153,6 +192,12 @@ def student_feedback(request):
         else:
             messages.error(request, "Form has errors!")
     return render(request, "student_template/student_feedback.html", context)
+
+
+def student_disciplinary_action(request):
+    student= get_object_or_404(Student,user=request.user)
+    actions = DisciplinaryAction.objects.filter(student=student)
+    return render(request,'student_template/student_disciplinary_action.html',{'actions':actions,'student':student})
 
 
 def student_view_profile(request):
@@ -263,7 +308,6 @@ def student_view_note(request):
     )
 ).order_by('str_representation')
     return render(request, 'student_template/student_notes.html', {'notes':notes})
-
 
 
 @csrf_exempt

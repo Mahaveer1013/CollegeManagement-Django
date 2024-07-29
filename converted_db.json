@@ -1,0 +1,119 @@
+[
+    {
+        "model": "main_app.staff",
+        "pk": 3,
+        "fields": {
+            "department": 1,
+            "user": 7,
+            "faculty_id": "7",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter7_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "15 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 5,
+        "fields": {
+            "department": 1,
+            "user": 9,
+            "faculty_id": "9",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter9_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "19 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 6,
+        "fields": {
+            "department": 1,
+            "user": 10,
+            "faculty_id": "10",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter10_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "21 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 8,
+        "fields": {
+            "department": 1,
+            "user": 12,
+            "faculty_id": "12",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter12_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "25 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 9,
+        "fields": {
+            "department": 1,
+            "user": 13,
+            "faculty_id": "13",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter13_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "27 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 10,
+        "fields": {
+            "department": 1,
+            "user": 14,
+            "faculty_id": "14",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter14_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "29 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 11,
+        "fields": {
+            "department": 1,
+            "user": 15,
+            "faculty_id": "15",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter15_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "31 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 12,
+        "fields": {
+            "department": 1,
+            "user": 16,
+            "faculty_id": "16",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter16_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "33 years as a Cyber crime analyst."
+        }
+    },
+{
+        "model": "main_app.staff",
+        "pk": 13,
+        "fields": {
+            "department": 1,
+            "user": 17,
+            "faculty_id": "17",
+            "phone_number": 9962526764,
+            "resume": "staff/resume/filter17_resume.pdf",
+            "qualification": "ME , PhD",
+            "experience": "35 years as a Cyber crime analyst."
+        }
+    }
+]
