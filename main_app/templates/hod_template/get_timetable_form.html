@@ -1,0 +1,59 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Get Timetable{% endblock page_title %}
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title" style="margin-right: auto;padding: 10px 20px;"><b>Timetable</b></h3>
+                    </div>
+                    <div class="form">
+                        {% if type == 'staff' %}
+                        <form role="form" action="/hod_staff_timetable" method="POST" enctype="multipart/form-data" class="staff_timetable_form">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="staff">Faculty Id</label>
+                                    <input type="text" class="form-control" name="faculty_id">
+                                </div>
+                            </div>
+                        
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Get Student Timetable
+                                </button>
+                            </div>
+                        </form>
+                        {% endif %}
+                        {% if type == 'class' %}
+                        <form role="form" action="/hod_class_timetable" method="POST" enctype="multipart/form-data" class="class_timetable_form active">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="staff">Class Name:</label>
+                                    <select id="staff" class="form-control" name="class_id">
+                                        {% for class in class_names %}
+                                            <option value='{{class.id}}'>{{class}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Get Class Timetable
+                                </button>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

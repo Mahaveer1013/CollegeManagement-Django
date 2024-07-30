@@ -308,7 +308,6 @@ class ClassListAdmin(ActionLoggingMixin, admin.ModelAdmin):
     form = ClassListForm
 
 
-
 @admin.register(ActionLog)
 class ActionLogAdmin(admin.ModelAdmin):
     list_display = ('user', 'action', 'timestamp', 'details')
@@ -318,5 +317,6 @@ class ActionLogAdmin(admin.ModelAdmin):
 
 admin.site.register(Department)
 admin.site.register(Subject)
+admin.site.register(Admin)
 admin.site.register(AcademicYear)
 # admin.site.register(ClassList)

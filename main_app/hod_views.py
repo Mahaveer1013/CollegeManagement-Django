@@ -145,30 +145,32 @@ def admin_view_attendance(request):
 
 
 def get_staff_profile(request):
-    staff_id = request.POST.get('faculty_id')
-    print(staff_id)
-    staff = Staff.objects.filter(faculty_id = staff_id).first()
-    if staff:
-        print(staff)
-        return render(request, 'staff_template/staff_profile.html',{'staff':staff})
+    if request.method!='POST':
+        return render(request, 'hod_template/get_profile.html',{'type':'staff'})
     else:
-        messages.error(request,'No Staff Found')
-        return redirect('overall_profile')
-    
-
-def overall_profile(request):
-    return render(request, 'hod_template/user_profile.html')
-
+        staff_id = request.POST.get('faculty_id')
+        print(staff_id)
+        staff = Staff.objects.filter(faculty_id = staff_id).first()
+        if staff:
+            print(staff)
+            return render(request, 'staff_template/staff_profile.html',{'staff':staff})
+        else:
+            messages.error(request,'No Staff Found')
+            return redirect('overall_profile')
+ 
 
 def get_student_profile(request):
-    student_id = request.POST.get('student_id')
-    print(student_id)
-    student = Student.objects.filter(register_number = student_id).first() or Student.objects.filter(roll_number=student_id).first()
-    if student:
-        return render(request, 'student_template/student_profile.html',{'student':student})
+    if request.method!='POST':
+        return render(request, 'hod_template/get_profile.html',{'type':'student'})
     else:
-        messages.error(request,'No Student Found')
-        return redirect('overall_profile')
+        student_id = request.POST.get('student_id')
+        print(student_id)
+        student = Student.objects.filter(register_number = student_id).first() or Student.objects.filter(roll_number=student_id).first()
+        if student:
+            return render(request, 'student_template/student_profile.html',{'student':student})
+        else:
+            messages.error(request,'No Student Found')
+            return redirect('overall_profile')
 
 
 def admin_view_overall_attendance(request):
@@ -507,66 +509,69 @@ def exam_filter_page(request):
 
 
 def hod_class_timetable(request):
-    class_id = request.POST.get('class_id')
-    print(class_id)
-    timetable = TimeTable.objects.filter(class_name=class_id).first()
-    if not timetable:
-        messages.error(request,'No Timetable found for the class')
-        return redirect('overall_timetable')
+    if request.method!='POST':
+        department=Department.objects.all()
+        class_names = ClassList.objects.all()
+        context={
+            'department':department,
+            'class_names':class_names,
+            'type':'class'
+        }
+        return render(request, 'hod_template/get_timetable_form.html',context)
+    else:
+        class_id = request.POST.get('class_id')
+        print(class_id)
+        timetable = TimeTable.objects.filter(class_name=class_id).first()
+        if not timetable:
+            messages.error(request,'No Timetable found for the class')
+            return redirect('overall_timetable')
 
-    return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
+        return render(request, 'student_template/student_timetable.html', {'timetable':timetable, 'class_name':str(timetable.class_name)})
 
 
 def hod_staff_timetable(request):
-    faculty_id = request.POST.get('faculty_id')
-    staff = Staff.objects.filter(faculty_id=faculty_id).first()
-
-    if not staff:
-        messages.error(request, "No Staff Found")
-        return redirect('overall_timetable')
-
-    periods = Period.objects.filter(staff=staff)
-    staff_timetable = {}
-    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-    period_count = ['1','2','3','4','5','6','7','8']
-
-    for day in days:
-        for count in period_count:
-            column = f"{day}_{count}"
-            print(column)
-
-            timetable_list = TimeTable.objects.filter(
-                department=staff.department,
-                class_name__in=[period.class_name for period in periods]
-            )
-            found = False
-            for timetable in timetable_list:
-                print(getattr(timetable,column).staff, '\n', type(getattr(timetable,column).staff))
-                print(staff, '\n', type(staff))
-                if getattr(timetable,column).staff == staff:
-                    staff_timetable[column] = timetable.class_name
-                    found = True
-                    break
-            if found == False:
-                staff_timetable[column] = 'Free Period'
-    print(staff_timetable)
-
-    if not timetable:
-        return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
-        
-
-    return render(request, 'staff_template/staff_timetable.html', {'staff_timetable': staff_timetable, 'staff_name': staff.user})
-
-
-def overall_timetable(request):
     user = get_object_or_404(Admin, user=request.user)
-    department=Department.objects.all()
-    class_names = ClassList.objects.all()
-    context={
-        'department':department,
-        'class_names':class_names
-    }
-    return render(request, 'hod_template/overall_timetable.html',context=context)
+    if request.method!='POST':
+        return render(request, 'hod_template/get_timetable_form.html', {'type':'staff'})
+    else:
+        faculty_id = request.POST.get('faculty_id')
+        staff = Staff.objects.filter(faculty_id=faculty_id).first()
+
+        if not staff:
+            messages.error(request, "No Staff Found")
+            return redirect('overall_timetable')
+
+        periods = Period.objects.filter(staff=staff)
+        staff_timetable = {}
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+        period_count = ['1','2','3','4','5','6','7','8']
+
+        for day in days:
+            for count in period_count:
+                column = f"{day}_{count}"
+                print(column)
+
+                timetable_list = TimeTable.objects.filter(
+                    department=staff.department,
+                    class_name__in=[period.class_name for period in periods]
+                )
+                found = False
+                for timetable in timetable_list:
+                    print(getattr(timetable,column).staff, '\n', type(getattr(timetable,column).staff))
+                    print(staff, '\n', type(staff))
+                    if getattr(timetable,column).staff == staff:
+                        staff_timetable[column] = timetable.class_name
+                        found = True
+                        break
+                if found == False:
+                    staff_timetable[column] = 'Free Period'
+        print(staff_timetable)
+
+        if not timetable:
+            return render(request, 'error.html', {'message': 'Timetable not found for this staff member'})
+            
+
+        return render(request, 'staff_template/staff_timetable.html', {'staff_timetable': staff_timetable, 'staff_name': staff.user})
 
 
 @csrf_exempt

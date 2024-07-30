@@ -51,19 +51,19 @@ class AdminAccessLogMiddleware(MiddlewareMixin):
 logger = logging.getLogger(__name__)
 
 
-class ActionLoggingMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+# class ActionLoggingMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
 
-    def __call__(self, request):
-        response = self.get_response(request)
+#     def __call__(self, request):
+#         response = self.get_response(request)
 
-        if request.user.is_authenticated:
-            # Log the action (you can add more details as needed)
-            ActionLog.objects.create(
-                user=request.user,
-                action=f'Visited {request.path}',
-                timestamp=now()
-            )
+#         if request.user.is_authenticated:
+#             # Log the action (you can add more details as needed)
+#             ActionLog.objects.create(
+#                 user=request.user,
+#                 action=f'Visited {request.path}',
+#                 timestamp=now()
+#             )
 
-        return response
+#         return response

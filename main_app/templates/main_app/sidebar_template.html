@@ -49,142 +49,226 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    {% url 'admin_view_attendance' as admin_view_attendance %}
-                    <a href="{{ admin_view_attendance }}"
-                        class="nav-link {% if admin_view_attendance == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Periodic Attendance</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'admin_view_overall_attendance' as admin_view_overall_attendance %}
-                    <a href="{{ admin_view_overall_attendance }}"
-                        class="nav-link {% if admin_view_overall_attendance == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Overall Attendance</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'overall_timetable' as overall_timetable %}
-                    <a href="{{ overall_timetable }}"
-                        class="nav-link {% if overall_timetable == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Timetable</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'upload_result' as upload_result %}
-                    <a href="{{ upload_result }}"
-                        class="nav-link {% if upload_result == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Upload Result</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'view_result' as view_result %}
-                    <a href="{{ view_result }}"
-                        class="nav-link {% if view_result == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>View Result</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'overall_profile' as overall_profile %}
-                    <a href="{{ overall_profile }}"
-                        class="nav-link {% if overall_profile == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-th"></i>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-address-book"></i>
                         <p>
-                            View Profile
+                            Attendance
+                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'admin_view_attendance' as admin_view_attendance %}
+                            <a href="{{ admin_view_attendance }}"
+                                class="nav-link {% if admin_view_attendance == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Periodic Attendance</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            {% url 'admin_view_overall_attendance' as admin_view_overall_attendance %}
+                            <a href="{{ admin_view_overall_attendance }}"
+                                class="nav-link {% if admin_view_overall_attendance == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Overall Attendance</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>
+                            Timetable
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'hod_class_timetable' as hod_class_timetable %}
+                            <a href="{{ hod_class_timetable }}"
+                                class="nav-link {% if hod_class_timetable == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Class Timetable</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            {% url 'hod_staff_timetable' as hod_staff_timetable %}
+                            <a href="{{ hod_staff_timetable }}"
+                                class="nav-link {% if hod_staff_timetable == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Staff Timetable</p>
+                            </a>
+                        </li>
+        
+                    </ul>
                 </li>
 
-                <!-- <li class="nav-item">
-                    {% url 'staff_view_note' as staff_view_note %}
-                    <a href="{{ staff_view_note }}"
-                        class="nav-link {% if staff_view_note == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>View Notes</p>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-graduation-cap" aria-hidden="true"></i>
+                        <p>
+                            Result
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
                     </a>
-                </li> -->
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'upload_result' as upload_result %}
+                            <a href="{{ upload_result }}"
+                                class="nav-link {% if upload_result == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Upload Result</p>
+                            </a>
+                        </li>
+        
+                        <li class="nav-item">
+                            {% url 'view_result' as view_result %}
+                            <a href="{{ view_result }}"
+                                class="nav-link {% if view_result == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>View Result</p>
+                            </a>
+                        </li>
+        
+                    </ul>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-eye" aria-hidden="true"></i>
+
+                        <p>
+                            Profile
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'get_student_profile' as get_student_profile %}
+                            <a href="{{ get_student_profile }}"
+                                class="nav-link {% if get_student_profile == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Student Profile</p>
+                            </a>
+                        </li>
+        
+                        <li class="nav-item">
+                            {% url 'get_staff_profile' as get_staff_profile %}
+                            <a href="{{ get_staff_profile }}"
+                                class="nav-link {% if get_staff_profile == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Staff Profile</p>
+                            </a>
+                        </li>
+        
+                    </ul>
+                </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>
+                            Notify
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'admin_notify_staff' as admin_notify_staff %}
+                            <a href="{{admin_notify_staff}}"
+                                class="nav-link {% if admin_notify_staff == request.path %} active {% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Notify Staff
+        
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            {% url 'admin_notify_student' as admin_notify_student %}
+                            <a href="{{admin_notify_student}}"
+                                class="nav-link {% if admin_notify_student == request.path %} active {% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Notify Student
+        
+                                </p>
+                            </a>
+                        </li>
+        
+                    </ul>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>
+                            Feedback
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'student_feedback_message' as student_feedback_message %}
+                            <a href="{{ student_feedback_message }}"
+                                class="nav-link {% if student_feedback_message == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Student Feedback</p>
+                            </a>
+                        </li>
+        
+                        <li class="nav-item">
+                            {% url 'staff_feedback_message' as staff_feedback_message %}
+                            <a href="{{ staff_feedback_message }}"
+                                class="nav-link {% if staff_feedback_message == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Staff Feedback</p>
+                            </a>
+                        </li>
+        
+                    </ul>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-user-times" aria-hidden="true"></i>
+                        <p>
+                            Leave Requests
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            {% url 'view_staff_leave' as view_staff_leave %}
+                            <a href="{{ view_staff_leave }}"
+                                class="nav-link {% if view_staff_leave == request.path %}active{% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Staff Leave</p>
+                            </a>
+                        </li>
+        
+                        <li class="nav-item">
+                            {% url 'view_student_leave' as view_student_leave %}
+        
+                            <a href="{% url 'view_student_leave' %}"
+                                class="nav-link  {% if view_student_leave == request.path %} active {% endif %}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Student Leave
+                                </p>
+                            </a>
+                        </li>
+        
+                    </ul>
+                </li>
 
                 <li class="nav-item">
                     {% url 'exam_filter_page' as exam_filter_page %}
                     <a href="{{ exam_filter_page }}"
                         class="nav-link {% if exam_filter_page == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <i class="nav-icon fa fa-book" aria-hidden="true"></i>
                         <p>Download Question Paper</p>
                     </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'admin_notify_staff' as admin_notify_staff %}
-                    <a href="{{admin_notify_staff}}"
-                        class="nav-link {% if admin_notify_staff == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-bullhorn"></i>
-                        <p>
-                            Notify Staff
-
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    {% url 'admin_notify_student' as admin_notify_student %}
-                    <a href="{{admin_notify_student}}"
-                        class="nav-link {% if admin_notify_student == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-bullhorn"></i>
-                        <p>
-                            Notify Student
-
-                        </p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'student_feedback_message' as student_feedback_message %}
-                    <a href="{{ student_feedback_message }}"
-                        class="nav-link {% if student_feedback_message == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-comment-alt"></i>
-                        <p>Student Feedback</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'staff_feedback_message' as staff_feedback_message %}
-                    <a href="{{ staff_feedback_message }}"
-                        class="nav-link {% if staff_feedback_message == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-comment"></i>
-                        <p>Staff Feedback</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'view_staff_leave' as view_staff_leave %}
-                    <a href="{{ view_staff_leave }}"
-                        class="nav-link {% if view_staff_leave == request.path %}active{% endif %}">
-                        <i class="nav-icon fas fa-check-double"></i>
-                        <p>Staff Leave</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'view_student_leave' as view_student_leave %}
-
-                    <a href="{% url 'view_student_leave' %}"
-                        class="nav-link  {% if view_student_leave == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-check-double"></i>
-                        <p>
-                            Student Leave
-
-                        </p>
-                    </a>
-                </li>
+                </li>             
 
                 <li class="nav-item">
                     {% url 'admin_view_certificate' as admin_view_certificate %}
@@ -294,7 +378,7 @@
                                 {% url 'staff_take_attendance' as staff_take_attendance %}
                                 <a href="{{staff_take_attendance}}"
                                     class="nav-link {% if staff_take_attendance == request.path %} active {% endif %}">
-                                    <i class="nav-icon fas fa-calendar-alt"></i>
+                                    <i class="fa fa-address-book-o" aria-hidden="true"></i>
                                     <p>
                                         Take Attendance
 
@@ -327,7 +411,7 @@
                                 {% url 'staff_view_note' as staff_view_note %}
                                 <a href="{{ staff_view_note }}"
                                     class="nav-link {% if staff_view_note == request.path %} active {% endif %}">
-                                    <i class="nav-icon fas fa-th"></i>
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                     <p>
                                         View Notes
                                     </p>
@@ -512,7 +596,7 @@
                                             {% url 'student_view_note' as student_view_note %}
                                             <a href="{{student_view_note}}"
                                                 class="nav-link {% if student_view_note == request.path %} active {% endif %}">
-                                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                                 <p>
                                                     View Notes
                                                 </p>

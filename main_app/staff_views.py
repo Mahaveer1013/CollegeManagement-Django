@@ -199,7 +199,8 @@ def submit_attendance(request):
         unchecked_ids = list(map(int, unchecked.split(','))) if unchecked else []
         od_internal_ids = list(map(int, od_internal.split(','))) if od_internal else []
         od_external_ids = list(map(int, od_external.split(','))) if od_external else []
-        # Process the data to mark attendance
+        
+        
         for student_id in checked_ids:
             try:
                 student = Student.objects.get(id=student_id)
@@ -216,7 +217,8 @@ def submit_attendance(request):
                 attendance_record.status = 1
                 attendance_record.subject = subject
                 attendance_record.save()
-        
+                
+
         for student_id in unchecked_ids:
             try:
                 student = Student.objects.get(id=student_id)
@@ -235,7 +237,7 @@ def submit_attendance(request):
                 attendance_record.save()
             print(f'You ward Mr.{student} have taken a leave today')
             print(f'You ward Mr.{student} have taken a leave today\n', student.parent_phone_number )
-            send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
+            # send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a leave today')
             send_mail(f'You ward Mr.{student} have taken a leave today', f'You ward Mr.{student} have taken a leave today','panimalar1013@gmail.com' , [student.user.email])
 
 
@@ -256,6 +258,7 @@ def submit_attendance(request):
                 attendance_record.subject = subject
                 attendance_record.save()
 
+
         for student_id in od_external_ids:
             try:
                 student = Student.objects.get(id=student_id)
@@ -273,7 +276,7 @@ def submit_attendance(request):
                 attendance_record.subject = subject
                 attendance_record.save()
             
-            send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a External OD')
+            # send_sms(student.parent_phone_number,f'You ward Mr.{student} have taken a External OD')
 
             message= f'''
                     Dear {student},
@@ -291,6 +294,7 @@ def submit_attendance(request):
                     Panimalar Engineering College
                     ''' 
             send_mail('Acknowledgement of Leave on Official Duty (OD)', message, 'panimalar1013@gmail.com' , [student.user.email])
+
 
         return redirect('staff_take_attendance')  # Redirect to a success page or the same page
 

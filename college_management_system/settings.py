@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'main_app.middleware.AdminAccessLogMiddleware',
-    'main_app.middleware.ActionLoggingMiddleware',
+    # 'main_app.middleware.ActionLoggingMiddleware',
     # Third Part Middleware
     
     # My Middleware
@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'college_management_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
+ 
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',

@@ -23,25 +23,3 @@
     </div>
 </section>
 {% endblock content %}
-
-{% block custom_js %}
-<!-- <script>
-    function updateSubjects() {
-        const departmentId = document.querySelector('[name="department"]').value;
-        const subjectField = document.querySelector('[name="subject"]');
-        
-        fetch(`/api/subjects?department=${departmentId}`)
-            .then(response => response.json())
-            .then(data => {
-                subjectField.innerHTML = '<option value="">Select Subject</option>';
-                data.forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject.id;
-                    option.textContent = subject.name;
-                    subjectField.appendChild(option);
-                });
-            });
-    }
-</script> -->
-
-{% endblock custom_js %}

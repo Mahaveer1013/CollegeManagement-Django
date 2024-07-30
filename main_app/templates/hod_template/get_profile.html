@@ -10,24 +10,9 @@
                 <div class="card card-dark">
                     <div class="card-header">
                         <h3 class="card-title" style="margin-right: auto;padding: 10px 20px;"><b>Profile</b></h3>
-                        <!-- <div onclick="changeform()" style="padding: 10px 20px; border-radius: 10px; background-color: #10af3d;position: absolute;right: 20px;cursor: pointer;"><b>Faculty / Staff</b></div> -->
                     </div>
                     <div class="form">
-                        <form role="form" action="/get_student_profile" method="POST" enctype="multipart/form-data" class="class_timetable_form">
-                            {% csrf_token %}
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="staff">Student Register Number or Roll Number:</label>
-                                    <input type="text" class="form-control" name="student_id">
-                                </div>
-                            </div>
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-success btn-block">
-                                    Get Student Profile
-                                </button>
-                            </div>
-                        </form>
+                        {% if type == 'staff' %}
                         <form role="form" action="/get_staff_profile" method="POST" enctype="multipart/form-data" class="staff_timetable_form">
                             {% csrf_token %}
                             <div class="card-body">
@@ -43,6 +28,24 @@
                                 </button>
                             </div>
                         </form>
+                        {% endif %}
+                        {% if type == 'student' %}
+                        <form role="form" action="/get_student_profile" method="POST" enctype="multipart/form-data" class="class_timetable_form">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="staff">Student Register Number or Roll Number:</label>
+                                    <input type="text" class="form-control" name="student_id">
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Get Student Profile
+                                </button>
+                            </div>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -50,24 +53,3 @@
     </div>
 </section>
 {% endblock content %}
-
-
-{% block custom_js %}
-    <!-- <script>
-        function changeform(){
-            const class_form = document.querySelector('.class_timetable_form');
-            const staff_form = document.querySelector('.staff_timetable_form');
-            class_form.classList.toggle('active')
-            staff_form.classList.toggle('active')
-        }
-        
-    </script>
-    <style>
-        form{
-            display: none;
-        }
-        form.active{
-            display: block;
-        }
-    </style> -->
-{% endblock custom_js %}
